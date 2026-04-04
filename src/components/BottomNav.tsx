@@ -1,6 +1,5 @@
 import { Box, Flex, Text } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
-import { useAutoAnimate } from "@formkit/auto-animate/react";
 import {
   LayoutDashboard,
   Package,
@@ -42,71 +41,74 @@ export const BottomNav = () => (
       {navItems.map((item) => (
         <NavLink key={item.to} to={item.to} end={item.to === "/"}>
           {({ isActive }) => (
-            <NavItem item={item} isActive={isActive} />
+            <Flex direction="column" align="center" position="relative">
+              {/* Orange top indicator */}
+              <Box
+                position="absolute"
+                top="-1px"
+                w={12}
+                h="4px"
+                borderBottomRadius="full"
+                bg="sunburst.400"
+                css={{
+                  opacity: isActive ? 1 : 0,
+                  transform: isActive ? "scaleX(1)" : "scaleX(0)",
+                  transition: "opacity 0.25s ease, transform 0.25s ease",
+                }}
+              />
+              {/* Pill */}
+              <Flex
+                align="center"
+                justify="center"
+                gap="2"
+                borderRadius="xl"
+                py="2"
+                css={{
+                  background: isActive
+                    ? "var(--chakra-colors-sage-600)"
+                    : "transparent",
+                  paddingInline: isActive ? "14px" : "0",
+                  transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                }}
+              >
+                <Box
+                  css={{
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <item.icon
+                    size={isActive ? 18 : 20}
+                    strokeWidth={isActive ? 2 : 1.5}
+                    color={isActive ? "white" : "#8db1a8"}
+                  />
+                </Box>
+                {/* Label — always rendered, animated via width + opacity */}
+                <Box
+                  overflow="hidden"
+                  css={{
+                    maxWidth: isActive ? "80px" : "0",
+                    opacity: isActive ? 1 : 0,
+                    transition:
+                      "max-width 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease",
+                  }}
+                >
+                  <Text
+                    textStyle="xs"
+                    fontWeight="500"
+                    color="white"
+                    lineHeight="1"
+                    whiteSpace="nowrap"
+                  >
+                    {item.label}
+                  </Text>
+                </Box>
+              </Flex>
+            </Flex>
           )}
         </NavLink>
       ))}
     </Flex>
   </Box>
 );
-
-const NavItem = ({ item, isActive }: NavItemProps) => {
-  const [animateRef] = useAutoAnimate({ duration: 200 });
-
-  return (
-    <Flex
-      ref={animateRef}
-      direction="column"
-      align="center"
-      position="relative"
-    >
-      {isActive ? (
-        <Box
-          key="indicator"
-          position="absolute"
-          top="-1px"
-          w={12}
-          h="4px"
-          borderBottomRadius="full"
-          bg="sunburst.400"
-        />
-      ) : null}
-      <Flex
-        align="center"
-        justify="center"
-        gap="2"
-        bg={isActive ? "sage.600" : "transparent"}
-        borderRadius="xl"
-        px={isActive ? "3.5" : "0"}
-        py="2"
-        minW="10"
-        css={{
-          transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-        }}
-      >
-        <item.icon
-          size={isActive ? 18 : 20}
-          strokeWidth={isActive ? 2 : 1.5}
-          color={isActive ? "white" : "#8db1a8"}
-          style={{ transition: "all 0.2s ease" }}
-        />
-        {isActive ? (
-          <Text
-            key="label"
-            textStyle="xs"
-            fontWeight="500"
-            color="white"
-            lineHeight="1"
-          >
-            {item.label}
-          </Text>
-        ) : null}
-      </Flex>
-    </Flex>
-  );
-};
-
-type NavItemProps = {
-  item: (typeof navItems)[number]
-  isActive: boolean
-}
