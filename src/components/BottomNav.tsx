@@ -12,20 +12,27 @@ const navItems = [
 ]
 
 export const BottomNav = () => (
-  <Flex
-    as="nav"
-    display={{ base: "flex", md: "none" }}
+  <Box
+    display={{ base: "block", md: "none" }}
     position="fixed"
     bottom="0"
     insetInline="0"
     zIndex="sticky"
+    px="3"
+    pb="env(safe-area-inset-bottom, 6px)"
+  >
+  <Flex
+    as="nav"
     bg="bg.card"
-    borderTopWidth="1px"
+    borderWidth="1px"
     borderColor="border"
+    borderRadius="2xl"
     justify="space-around"
     alignItems="center"
     h="16"
-    pb="env(safe-area-inset-bottom, 0px)"
+    mx="auto"
+    maxW="md"
+    shadow="md"
   >
     {navItems.map((item) => (
       <NavLink key={item.to} to={item.to} end={item.to === "/"}>
@@ -44,7 +51,7 @@ export const BottomNav = () => (
                 w="10"
                 h="3px"
                 borderBottomRadius="full"
-                bg="sage.400"
+                bg="#E8942A"
               />
             ) : null}
             <Flex
@@ -77,4 +84,5 @@ export const BottomNav = () => (
       </NavLink>
     ))}
   </Flex>
+  </Box>
 )
