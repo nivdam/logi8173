@@ -1,4 +1,4 @@
-import { Flex, Text } from "@chakra-ui/react"
+import { Box, Flex, Text } from "@chakra-ui/react"
 import { NavLink } from "react-router-dom"
 import { LayoutDashboard, Package, CalendarCheck, Users, Settings } from "lucide-react"
 import { t } from "../lib/i18n"
@@ -38,8 +38,23 @@ export const AppNav = () => (
             fontWeight={isActive ? "600" : "400"}
             _hover={{ bg: isActive ? "sage.100" : "bg.muted" }}
             cursor="pointer"
+            position="relative"
             css={{ transition: "all 0.2s ease" }}
           >
+            <Box
+              position="absolute"
+              insetInlineStart="-2px"
+              top="50%"
+              w="4px"
+              h="5"
+              borderRadius="full"
+              bg="sunburst.400"
+              css={{
+                transform: isActive ? "translateY(-50%) scaleY(1)" : "translateY(-50%) scaleY(0)",
+                opacity: isActive ? 1 : 0,
+                transition: "all 0.25s ease",
+              }}
+            />
             <item.icon
               size={18}
               strokeWidth={isActive ? 2.2 : 1.8}
