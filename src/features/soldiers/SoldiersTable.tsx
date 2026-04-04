@@ -1,6 +1,7 @@
 import { Box, Flex, Grid, Text } from "@chakra-ui/react"
 import { SortableHeader, type SortConfig } from "../../components/SortableHeader"
 import { t } from "../../lib/i18n"
+import { animations } from "../../theme/animations"
 import type { Soldier } from "../../types"
 
 export const SoldiersTable = ({ soldiers, sort, onSort }: Props) => (
@@ -22,7 +23,7 @@ export const SoldiersTable = ({ soldiers, sort, onSort }: Props) => (
         <SortableHeader label={t("soldiers.platoon")} sortKey="platoon" currentSort={sort} onSort={onSort} />
         <SortableHeader label={t("soldiers.phone")} sortKey="phone" currentSort={sort} onSort={onSort} />
       </Grid>
-      {soldiers.map((soldier) => (
+      {soldiers.map((soldier, index) => (
         <Grid
           key={soldier.personalId}
           templateColumns="2fr 1fr 1fr 1fr 1fr"
@@ -32,9 +33,13 @@ export const SoldiersTable = ({ soldiers, sort, onSort }: Props) => (
           borderBottomWidth="1px"
           borderColor="border"
           role="row"
-          _hover={{ bg: "bg.muted" }}
           cursor="pointer"
-          css={{ transition: "background 0.15s ease" }}
+          css={{
+            ...animations.listItem(index),
+            "@keyframes fadeInUp": animations.fadeInUp["@keyframes fadeInUp"],
+            transition: "background 0.15s ease, transform 0.15s ease",
+            "&:hover": { background: "var(--chakra-colors-bg-muted)", transform: "scale(1.005)" },
+          }}
         >
           <Text textStyle="sm" fontWeight="500" role="cell">{soldier.fullName}</Text>
           <Text textStyle="sm" color="fg.muted" role="cell">{soldier.personalId}</Text>
@@ -47,7 +52,7 @@ export const SoldiersTable = ({ soldiers, sort, onSort }: Props) => (
 
     {/* Mobile: card list */}
     <Flex direction="column" gap="3" display={{ base: "flex", md: "none" }}>
-      {soldiers.map((soldier) => (
+      {soldiers.map((soldier, index) => (
         <Box
           key={soldier.personalId}
           p="4"
@@ -56,7 +61,11 @@ export const SoldiersTable = ({ soldiers, sort, onSort }: Props) => (
           borderWidth="1px"
           borderColor="border"
           cursor="pointer"
-          _hover={{ shadow: "sm" }}
+          css={{
+            ...animations.cardHover,
+            ...animations.listItem(index),
+            "@keyframes fadeInUp": animations.fadeInUp["@keyframes fadeInUp"],
+          }}
         >
           <Flex justify="space-between" align="center" mb="2">
             <Text textStyle="sm" fontWeight="600">{soldier.fullName}</Text>

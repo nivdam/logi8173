@@ -1,5 +1,6 @@
 import { Flex, Text } from "@chakra-ui/react"
 import { CircleCheck, AlertTriangle, CircleX } from "lucide-react"
+import { animations } from "../theme/animations"
 import type { ItemStatus } from "../types"
 
 const statusConfig = {
@@ -20,6 +21,10 @@ export const StatusBadge = ({ status, label }: Props) => {
       py="1"
       borderRadius="full"
       bg={config.bg}
+      css={status === "gap" ? {
+        ...animations.pulse,
+        "@keyframes pulse": animations.pulse["@keyframes pulse"],
+      } : undefined}
     >
       <config.icon size={13} color={`var(--chakra-colors-${config.color.replace(".", "-")})`} />
       <Text textStyle="xs" fontWeight="500" color={config.color}>

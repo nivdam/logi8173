@@ -1,7 +1,8 @@
 import { Flex, Heading, Text } from "@chakra-ui/react"
 import type { LucideIcon } from "lucide-react"
+import { animations } from "../theme/animations"
 
-export const StatCard = ({ icon: Icon, value, label, color = "sage.600", bgTint = "sage.50" }: Props) => (
+export const StatCard = ({ icon: Icon, value, label, color = "sage.600", bgTint = "sage.50", index = 0 }: Props) => (
   <Flex
     direction="column"
     gap={{ base: "2", md: "3" }}
@@ -11,6 +12,11 @@ export const StatCard = ({ icon: Icon, value, label, color = "sage.600", bgTint 
     borderWidth="1px"
     borderColor="border"
     shadow="sm"
+    css={{
+      ...animations.cardHover,
+      ...animations.listItem(index),
+      "@keyframes fadeInUp": animations.fadeInUp["@keyframes fadeInUp"],
+    }}
   >
     <Flex align="center" gap="3">
       <Flex
@@ -21,6 +27,10 @@ export const StatCard = ({ icon: Icon, value, label, color = "sage.600", bgTint 
         borderRadius="lg"
         bg={bgTint}
         color={color}
+        css={{
+          transition: "transform 0.2s ease",
+          "&:hover": { transform: "scale(1.1) rotate(-5deg)" },
+        }}
       >
         <Icon size={20} />
       </Flex>
@@ -38,4 +48,5 @@ type Props = {
   label: string
   color?: string
   bgTint?: string
+  index?: number
 }

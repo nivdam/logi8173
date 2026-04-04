@@ -1,6 +1,7 @@
 import { Box, Flex, Grid, Heading, Text } from "@chakra-ui/react"
 import { t } from "../../lib/i18n"
 import { formatDateTime, getTransactionTypeLabel } from "../../lib/formatters"
+import { animations } from "../../theme/animations"
 import type { Transaction } from "../../types"
 
 const formatItemsSummary = (transaction: Transaction): string => {
@@ -16,6 +17,11 @@ export const RecentTransactions = ({ transactions }: Props) => (
     borderWidth="1px"
     borderColor="border"
     p={{ base: "4", md: "5" }}
+    css={{
+      ...animations.fadeInUp,
+      animationDelay: "0.2s",
+      opacity: 0,
+    }}
   >
     <Heading size="md" fontWeight="600" mb="4">
       {t("dashboard.recentTransactions")}

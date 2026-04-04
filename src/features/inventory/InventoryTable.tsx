@@ -3,6 +3,7 @@ import { StatusBadge } from "../../components/StatusBadge"
 import { SortableHeader, type SortConfig } from "../../components/SortableHeader"
 import { getItemStatusLabel } from "../../lib/formatters"
 import { t } from "../../lib/i18n"
+import { animations } from "../../theme/animations"
 import type { InventoryItem } from "../../types"
 
 export const InventoryTable = ({ items, sort, onSort }: Props) => (
@@ -24,7 +25,7 @@ export const InventoryTable = ({ items, sort, onSort }: Props) => (
         <SortableHeader label={t("inventory.qty")} sortKey="currentQty" currentSort={sort} onSort={onSort} />
         <SortableHeader label={t("inventory.status")} sortKey="status" currentSort={sort} onSort={onSort} />
       </Grid>
-      {items.map((item) => (
+      {items.map((item, index) => (
         <Grid
           key={item.itemId}
           templateColumns="2fr 1fr 1fr 1fr 1fr"
@@ -34,9 +35,13 @@ export const InventoryTable = ({ items, sort, onSort }: Props) => (
           borderBottomWidth="1px"
           borderColor="border"
           role="row"
-          _hover={{ bg: "bg.muted" }}
           cursor="pointer"
-          css={{ transition: "background 0.15s ease" }}
+          css={{
+            ...animations.listItem(index),
+            "@keyframes fadeInUp": animations.fadeInUp["@keyframes fadeInUp"],
+            transition: "background 0.15s ease, transform 0.15s ease",
+            "&:hover": { background: "var(--chakra-colors-bg-muted)", transform: "scale(1.005)" },
+          }}
         >
           <Text textStyle="sm" fontWeight="500" role="cell">{item.name}</Text>
           <Text textStyle="sm" color="fg.muted" role="cell">{item.itemNumber}</Text>
@@ -49,7 +54,7 @@ export const InventoryTable = ({ items, sort, onSort }: Props) => (
 
     {/* Mobile: card list */}
     <Flex direction="column" gap="3" display={{ base: "flex", md: "none" }}>
-      {items.map((item) => (
+      {items.map((item, index) => (
         <Box
           key={item.itemId}
           p="4"
@@ -58,7 +63,11 @@ export const InventoryTable = ({ items, sort, onSort }: Props) => (
           borderWidth="1px"
           borderColor="border"
           cursor="pointer"
-          _hover={{ shadow: "sm" }}
+          css={{
+            ...animations.cardHover,
+            ...animations.listItem(index),
+            "@keyframes fadeInUp": animations.fadeInUp["@keyframes fadeInUp"],
+          }}
         >
           <Flex justify="space-between" align="start" mb="2">
             <Text textStyle="sm" fontWeight="600">{item.name}</Text>

@@ -1,8 +1,9 @@
 import { Button, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import type { LucideIcon } from "lucide-react"
+import { animations } from "../theme/animations"
 
 export const EmptyState = ({ icon: Icon, title, description, actionLabel, onAction }: Props) => (
-  <Flex align="center" justify="center" py="16">
+  <Flex align="center" justify="center" py="16" css={{ ...animations.scaleIn, "@keyframes scaleIn": animations.scaleIn["@keyframes scaleIn"] }}>
     <VStack gap="4" textAlign="center">
       {Icon ? (
         <Flex

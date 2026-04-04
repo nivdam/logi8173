@@ -1,5 +1,6 @@
 import { Box, Flex, Grid, Heading, Text } from "@chakra-ui/react"
 import { t } from "../../lib/i18n"
+import { animations } from "../../theme/animations"
 import type { CompanyBreakdown as CompanyBreakdownType } from "../../types"
 
 const barColors = ["sage.400", "sky.400", "sunburst.400", "rose.300", "sage.600"]
@@ -14,6 +15,11 @@ export const CompanyBreakdown = ({ breakdown }: Props) => {
       borderWidth="1px"
       borderColor="border"
       p={{ base: "4", md: "5" }}
+      css={{
+        ...animations.fadeInUp,
+        animationDelay: "0.3s",
+        opacity: 0,
+      }}
     >
       <Heading size="md" fontWeight="600" mb="4">
         {t("dashboard.companyBreakdown")}
