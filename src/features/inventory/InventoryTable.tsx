@@ -1,7 +1,7 @@
 import { Box, Flex, Grid, Text } from "@chakra-ui/react"
 import { StatusBadge } from "../../components/StatusBadge"
 import { SortableHeader, type SortConfig } from "../../components/SortableHeader"
-import { getItemStatusColor, getItemStatusLabel } from "../../lib/formatters"
+import { getItemStatusLabel } from "../../lib/formatters"
 import { t } from "../../lib/i18n"
 import type { InventoryItem } from "../../types"
 
@@ -42,7 +42,7 @@ export const InventoryTable = ({ items, sort, onSort }: Props) => (
           <Text textStyle="sm" color="fg.muted" role="cell">{item.itemNumber}</Text>
           <Text textStyle="sm" color="fg.muted" role="cell">{item.category}</Text>
           <Text textStyle="sm" fontWeight="500" role="cell">{item.currentQty} {item.unitOfMeasure}</Text>
-          <StatusBadge label={getItemStatusLabel(item.status)} color={getItemStatusColor(item.status)} />
+          <StatusBadge status={item.status} label={getItemStatusLabel(item.status)} />
         </Grid>
       ))}
     </Grid>
@@ -62,7 +62,7 @@ export const InventoryTable = ({ items, sort, onSort }: Props) => (
         >
           <Flex justify="space-between" align="start" mb="2">
             <Text textStyle="sm" fontWeight="600">{item.name}</Text>
-            <StatusBadge label={getItemStatusLabel(item.status)} color={getItemStatusColor(item.status)} />
+            <StatusBadge status={item.status} label={getItemStatusLabel(item.status)} />
           </Flex>
           <Flex gap="4" flexWrap="wrap">
             <Flex direction="column">

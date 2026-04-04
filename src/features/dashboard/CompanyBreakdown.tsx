@@ -2,6 +2,8 @@ import { Box, Flex, Grid, Heading, Text } from "@chakra-ui/react"
 import { t } from "../../lib/i18n"
 import type { CompanyBreakdown as CompanyBreakdownType } from "../../types"
 
+const barColors = ["sage.400", "sky.400", "sunburst.400", "rose.300", "sage.600"]
+
 export const CompanyBreakdown = ({ breakdown }: Props) => {
   const maxCount = Math.max(...breakdown.map((company) => company.issuedCount))
 
@@ -11,21 +13,21 @@ export const CompanyBreakdown = ({ breakdown }: Props) => {
       borderRadius="xl"
       borderWidth="1px"
       borderColor="border"
-      p="5"
+      p={{ base: "4", md: "5" }}
     >
       <Heading size="md" fontWeight="600" mb="4">
         {t("dashboard.companyBreakdown")}
       </Heading>
       <Grid gap="3">
-        {breakdown.map((company) => (
+        {breakdown.map((company, index) => (
           <Flex key={company.companyName} align="center" gap="3">
-            <Text textStyle="sm" w="20" flexShrink={0}>
+            <Text textStyle="sm" w={{ base: "16", md: "20" }} flexShrink={0}>
               {company.companyName}
             </Text>
-            <Box flex="1" h="6" bg="bg.muted" borderRadius="md" overflow="hidden">
+            <Box flex="1" h="7" bg="bg.muted" borderRadius="md" overflow="hidden">
               <Box
                 h="full"
-                bg="sage.400"
+                bg={barColors[index % barColors.length]}
                 borderRadius="md"
                 css={{
                   width: `${(company.issuedCount / maxCount) * 100}%`,
@@ -33,7 +35,7 @@ export const CompanyBreakdown = ({ breakdown }: Props) => {
                 }}
               />
             </Box>
-            <Text textStyle="sm" fontWeight="500" w="8" textAlign="start">
+            <Text textStyle="sm" fontWeight="600" w="8" textAlign="start">
               {company.issuedCount}
             </Text>
           </Flex>

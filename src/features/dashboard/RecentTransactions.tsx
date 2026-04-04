@@ -1,4 +1,4 @@
-import { Box, Grid, Heading, Text } from "@chakra-ui/react"
+import { Box, Flex, Grid, Heading, Text } from "@chakra-ui/react"
 import { t } from "../../lib/i18n"
 import { formatDateTime, getTransactionTypeLabel } from "../../lib/formatters"
 import type { Transaction } from "../../types"
@@ -15,12 +15,14 @@ export const RecentTransactions = ({ transactions }: Props) => (
     borderRadius="xl"
     borderWidth="1px"
     borderColor="border"
-    p="5"
+    p={{ base: "4", md: "5" }}
   >
     <Heading size="md" fontWeight="600" mb="4">
       {t("dashboard.recentTransactions")}
     </Heading>
-    <Grid gap="0" role="table">
+
+    {/* Desktop: table */}
+    <Grid gap="0" role="table" display={{ base: "none", md: "grid" }}>
       <Grid
         templateColumns="1fr 1fr 1fr auto"
         gap="4"
@@ -52,6 +54,30 @@ export const RecentTransactions = ({ transactions }: Props) => (
         </Grid>
       ))}
     </Grid>
+
+    {/* Mobile: card list */}
+    <Flex direction="column" gap="3" display={{ base: "flex", md: "none" }}>
+      {transactions.map((transaction) => (
+        <Box
+          key={transaction.txId}
+          p="3"
+          borderRadius="lg"
+          bg="bg.muted"
+        >
+          <Flex justify="space-between" align="center" mb="1.5">
+            <Text textStyle="sm" fontWeight="500">
+              {getTransactionTypeLabel(transaction.txType)}
+            </Text>
+            <Text textStyle="xs" color="fg.muted">
+              {formatDateTime(transaction.performedAt)}
+            </Text>
+          </Flex>
+          <Text textStyle="sm" color="fg.muted">
+            {transaction.receiverName} — {formatItemsSummary(transaction)}
+          </Text>
+        </Box>
+      ))}
+    </Flex>
   </Box>
 )
 
