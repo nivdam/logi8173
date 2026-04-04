@@ -3,7 +3,7 @@ import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react"
 const config = defineConfig({
   globalCss: {
     body: {
-      bg: { base: "#F8F9FB", _dark: "gray.900" },
+      bg: "bg.canvas",
       color: { base: "gray.900", _dark: "gray.50" },
       fontFamily: "Inter, sans-serif",
     },
@@ -39,6 +39,10 @@ const config = defineConfig({
     },
     semanticTokens: {
       colors: {
+        bg: {
+          canvas: { value: { base: "#F8F9FB", _dark: "{colors.gray.900}" } },
+          surface: { value: { base: "white", _dark: "{colors.gray.800}" } },
+        },
         brand: {
           solid: { value: { base: "{colors.brand.500}", _dark: "{colors.brand.400}" } },
           muted: { value: { base: "{colors.brand.50}", _dark: "{colors.brand.900}" } },

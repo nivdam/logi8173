@@ -7,7 +7,7 @@ export const SplashScreen = () => (
     align="center"
     justify="center"
     minH="100dvh"
-    bg={{ base: "#F8F9FB", _dark: "gray.900" }}
+    bg="bg.canvas"
     gap="6"
   >
     <Image src={logo} alt="סמל גדוד 8173" w="160px" h="auto" />

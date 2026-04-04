@@ -19,7 +19,7 @@ export const AppNav = () => (
     gap="1"
     borderInlineEndWidth="1px"
     borderColor="border.muted"
-    bg={{ base: "white", _dark: "gray.800" }}
+    bg="bg.surface"
     display={{ base: "none", md: "flex" }}
   >
     {navItems.map((item) => (
