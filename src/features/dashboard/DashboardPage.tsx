@@ -1,5 +1,6 @@
 import { Box, Flex, Grid, Heading, Text } from "@chakra-ui/react"
 import { Package, AlertTriangle, XCircle, CalendarCheck, ArrowUpRight } from "lucide-react"
+import { PageHeader } from "../../components/PageHeader"
 import { t } from "../../lib/i18n"
 import { dashboardMock } from "../../mocks/dashboard.mock"
 import { formatDateTime, getTransactionTypeLabel } from "../../lib/formatters"
@@ -15,15 +16,7 @@ const formatItemsSummary = (transaction: Transaction): string => {
 
 export const DashboardPage = () => (
   <Flex direction="column" gap={{ base: "6", md: "8" }}>
-    {/* Hero greeting */}
-    <Box css={{ ...animations.fadeInUp, "@keyframes fadeInUp": animations.fadeInUp["@keyframes fadeInUp"] }}>
-      <Heading size={{ base: "xl", md: "2xl" }} fontWeight="700" mb="1">
-        {t("dashboard.title")}
-      </Heading>
-      <Text textStyle={{ base: "sm", md: "md" }} color="fg.muted">
-        {t("dashboard.description")}
-      </Text>
-    </Box>
+    <PageHeader title={t("dashboard.title")} description={t("dashboard.description")} />
 
     {/* Bento Grid */}
     <Grid
@@ -44,7 +37,6 @@ export const DashboardPage = () => (
           </Box>
         </Flex>
         <Text textStyle="md" fontWeight="500">{t("dashboard.totalItems")}</Text>
-        <Text textStyle="sm" color="fg.muted" mt="1">{t("dashboard.description")}</Text>
       </BentoCard>
 
       {/* Low stock */}
@@ -90,58 +82,45 @@ export const DashboardPage = () => (
           </Flex>
         </Flex>
 
-        {/* Desktop rows */}
-        <Flex direction="column" gap="0" display={{ base: "none", md: "flex" }}>
+        <Flex direction="column" gap="0">
           {dashboardMock.recentTransactions.map((transaction, index) => (
             <Flex
               key={transaction.txId}
-              align="center"
-              justify="space-between"
-              py="3.5"
+              gap="4"
+              py="4"
               borderTopWidth={index > 0 ? "1px" : "0"}
               borderColor="border"
+              align="center"
               css={{
                 ...animations.listItem(index),
                 "@keyframes fadeInUp": animations.fadeInUp["@keyframes fadeInUp"],
               }}
             >
-              <Flex direction="column" gap="0.5">
-                <Text textStyle="sm" fontWeight="500">{transaction.receiverName}</Text>
-                <Text textStyle="xs" color="fg.muted">{formatItemsSummary(transaction)}</Text>
-              </Flex>
-              <Flex direction="column" align="end" gap="0.5">
-                <Text textStyle="xs" fontWeight="500" color={transaction.txType === "issue" ? "sage.600" : "sky.600"}>
-                  {getTransactionTypeLabel(transaction.txType)}
-                </Text>
-                <Text textStyle="xs" color="fg.muted">{formatDateTime(transaction.performedAt)}</Text>
-              </Flex>
-            </Flex>
-          ))}
-        </Flex>
-
-        {/* Mobile cards */}
-        <Flex direction="column" gap="3" display={{ base: "flex", md: "none" }}>
-          {dashboardMock.recentTransactions.map((transaction, index) => (
-            <Box
-              key={transaction.txId}
-              p="3"
-              borderRadius="lg"
-              bg="bg.muted"
-              css={{
-                ...animations.listItem(index),
-                "@keyframes fadeInUp": animations.fadeInUp["@keyframes fadeInUp"],
-              }}
-            >
-              <Flex justify="space-between" align="center" mb="1">
-                <Text textStyle="sm" fontWeight="500">{transaction.receiverName}</Text>
-                <Text textStyle="xs" fontWeight="500" color={transaction.txType === "issue" ? "sage.600" : "sky.600"}>
-                  {getTransactionTypeLabel(transaction.txType)}
+              {/* Type badge */}
+              <Flex
+                align="center"
+                justify="center"
+                w="10"
+                h="10"
+                borderRadius="lg"
+                bg={transaction.txType === "issue" ? "sage.50" : transaction.txType === "return" ? "sky.50" : "gray.100"}
+                color={transaction.txType === "issue" ? "sage.700" : transaction.txType === "return" ? "sky.700" : "gray.600"}
+                flexShrink={0}
+              >
+                <Text textStyle="xs" fontWeight="600">
+                  {getTransactionTypeLabel(transaction.txType).slice(0, 3)}
                 </Text>
               </Flex>
-              <Text textStyle="xs" color="fg.muted">
-                {formatItemsSummary(transaction)} · {formatDateTime(transaction.performedAt)}
+              {/* Details */}
+              <Flex direction="column" gap="0.5" flex="1" minW="0">
+                <Text textStyle="sm" fontWeight="600">{transaction.receiverName}</Text>
+                <Text textStyle="sm" color="fg.muted" truncate>{formatItemsSummary(transaction)}</Text>
+              </Flex>
+              {/* Date */}
+              <Text textStyle="xs" color="fg.muted" flexShrink={0} display={{ base: "none", md: "block" }}>
+                {formatDateTime(transaction.performedAt)}
               </Text>
-            </Box>
+            </Flex>
           ))}
         </Flex>
       </BentoCard>
