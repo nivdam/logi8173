@@ -1,6 +1,7 @@
 import { useState } from "react"
-import { Box, Button, Flex, Text } from "@chakra-ui/react"
+import { Button, Flex, Heading, Image, Text, VStack } from "@chakra-ui/react"
 import { t } from "../lib/i18n"
+import logo from "../assets/logo-8173.png"
 
 export const useErrorBanner = () => {
   const [error, setError] = useState<string | undefined>(undefined)
@@ -15,31 +16,45 @@ export const ErrorBanner = ({ message, onDismiss }: Props) => {
   if (!message) return null
 
   return (
-    <Box
+    <Flex
       position="fixed"
-      top="0"
-      insetInline="0"
-      zIndex="banner"
-      bg="red.600"
-      color="white"
-      px="4"
-      py="3"
+      inset="0"
+      zIndex="modal"
+      align="center"
+      justify="center"
+      bg="blackAlpha.600"
     >
-      <Flex align="center" justify="space-between" maxW="600px" mx="auto">
-        <Text textStyle="sm" fontWeight="500">
-          {t("common.error")}: {message}
-        </Text>
-        <Button
-          variant="ghost"
-          size="xs"
-          color="white"
-          _hover={{ bg: "red.700" }}
-          onClick={onDismiss}
-        >
-          {t("common.close")}
-        </Button>
+      <Flex
+        direction="column"
+        align="center"
+        maxW="sm"
+        mx="4"
+        p="8"
+        bg="bg.card"
+        borderRadius="xl"
+        shadow="lg"
+        role="alert"
+      >
+        <VStack gap="5">
+          <Image src={logo} alt={t("app.battalion")} w="80px" h="auto" opacity="0.8" />
+          <Heading size="xl" fontWeight="600" textAlign="center">
+            {t("common.error")}
+          </Heading>
+          <Text textStyle="md" color="fg.muted" textAlign="center">
+            {message}
+          </Text>
+          <Button
+            colorPalette="red"
+            variant="solid"
+            size="md"
+            borderRadius="md"
+            onClick={onDismiss}
+          >
+            {t("common.close")}
+          </Button>
+        </VStack>
       </Flex>
-    </Box>
+    </Flex>
   )
 }
 
