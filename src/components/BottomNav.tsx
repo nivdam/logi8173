@@ -1,5 +1,6 @@
 import { Box, Flex, Text } from "@chakra-ui/react";
 import { NavLink } from "react-router-dom";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 import {
   LayoutDashboard,
   Package,
@@ -36,48 +37,76 @@ export const BottomNav = () => (
       h="14"
       mx="auto"
       maxW="md"
-      shadow="lg"
+      shadow="xl"
     >
       {navItems.map((item) => (
         <NavLink key={item.to} to={item.to} end={item.to === "/"}>
-          {({ isActive }) =>
-            isActive ? (
-              <Flex direction="column" align="center" position="relative">
-                <Box
-                  position="absolute"
-                  top="-1px"
-                  w={12}
-                  h="4px"
-                  borderBottomRadius="full"
-                  bg="sunburst.400"
-                />
-                <Flex
-                  align="center"
-                  gap="2"
-                  bg="sage.600"
-                  borderRadius="xl"
-                  px="3.5"
-                  py="2"
-                >
-                  <item.icon size={18} strokeWidth={2} color="white" />
-                  <Text
-                    textStyle="xs"
-                    fontWeight="500"
-                    color="white"
-                    lineHeight="1"
-                  >
-                    {item.label}
-                  </Text>
-                </Flex>
-              </Flex>
-            ) : (
-              <Flex align="center" justify="center" w="10" h="10">
-                <item.icon size={20} strokeWidth={1.5} color="#8db1a8" />
-              </Flex>
-            )
-          }
+          {({ isActive }) => (
+            <NavItem item={item} isActive={isActive} />
+          )}
         </NavLink>
       ))}
     </Flex>
   </Box>
 );
+
+const NavItem = ({ item, isActive }: NavItemProps) => {
+  const [animateRef] = useAutoAnimate({ duration: 200 });
+
+  return (
+    <Flex
+      ref={animateRef}
+      direction="column"
+      align="center"
+      position="relative"
+    >
+      {isActive ? (
+        <Box
+          key="indicator"
+          position="absolute"
+          top="-1px"
+          w={12}
+          h="4px"
+          borderBottomRadius="full"
+          bg="sunburst.400"
+        />
+      ) : null}
+      <Flex
+        align="center"
+        justify="center"
+        gap="2"
+        bg={isActive ? "sage.600" : "transparent"}
+        borderRadius="xl"
+        px={isActive ? "3.5" : "0"}
+        py="2"
+        minW="10"
+        css={{
+          transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
+      >
+        <item.icon
+          size={isActive ? 18 : 20}
+          strokeWidth={isActive ? 2 : 1.5}
+          color={isActive ? "white" : "#8db1a8"}
+          style={{ transition: "all 0.2s ease" }}
+        />
+        {isActive ? (
+          <Text
+            key="label"
+            textStyle="xs"
+            fontWeight="500"
+            color="white"
+            lineHeight="1"
+          >
+            {item.label}
+          </Text>
+        ) : null}
+      </Flex>
+    </Flex>
+  );
+};
+
+type NavItemProps = {
+  item: (typeof navItems)[number]
+  isActive: boolean
+}
