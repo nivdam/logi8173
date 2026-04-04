@@ -303,6 +303,82 @@ All spacing uses Chakra's scale tokens (multiples of 4px):
 
 ---
 
+## Layout Patterns
+
+### Bento Box Dashboard
+Dashboard uses an iOS-widget-inspired Bento grid layout:
+- Cards in varying sizes (1-col, 2-col, 3-col spans)
+- Hierarchical sizing: most important stat gets the biggest card
+- `borderRadius="2xl"`, `padding="6"`, generous white space
+- Each card has a colored icon tint matching its semantic meaning
+
+### Tables (Desktop) / Cards (Mobile)
+- Desktop (≥md): CSS Grid table with sortable column headers
+- Mobile (<md): stacked cards with key info at a glance
+- Both layouts use the same data source and filters
+- Sort headers: `SortableHeader` component with asc/desc/neutral arrow icons
+
+### Page Layout
+- Main content: `maxW="1200px"`, `padding: 8` (desktop), `padding: 4` (mobile)
+- `pb: 24` on mobile for bottom nav clearance
+- Consistent `PageHeader` component on all pages (title + description)
+
+---
+
+## Micro-Animations
+
+Source: `src/theme/animations.ts` — pure CSS, zero dependencies
+
+| Animation | Usage | Duration |
+|-----------|-------|----------|
+| `fadeInUp` | Page sections, headers on load | 0.4s ease |
+| `scaleIn` | Empty state appearance | 0.3s ease |
+| `cardHover` | Cards lift on hover/tap | 0.2s cubic-bezier |
+| `listItem(index)` | Staggered cascade for lists | 0.4s + 0.05s × index |
+| `pulse` | "Gap" status badge (draws attention) | 2s infinite |
+
+### Principles
+- Every interactive element has a transition (min 0.15s)
+- Cards: `translateY(-2px)` + shadow on hover
+- Table rows: subtle `scale(1.005)` on hover
+- Staggered entrance: items appear one by one, 50ms apart
+- Icon hover: `scale(1.1) rotate(-5deg)` on stat card icons
+
+---
+
+## Shared Components
+
+Source: `src/components/`
+
+| Component | Purpose | Props |
+|-----------|---------|-------|
+| `PageHeader` | Page title + description | `title`, `description?` |
+| `StatCard` | Bento stat card with icon + number | `icon`, `value`, `label`, `color?`, `bgTint?`, `index?` |
+| `SearchInput` | Debounced search with clear button | `placeholder`, `onSearch` |
+| `FilterSelect` | Chakra NativeSelect dropdown | `label`, `value`, `options`, `onChange` |
+| `SortableHeader` | Clickable column header with arrows | `label`, `sortKey`, `currentSort`, `onSort` |
+| `StatusBadge` | Colored pill with icon for item status | `status`, `label` |
+| `EmptyState` | No-data state with icon + CTA | `icon?`, `title`, `description?`, `actionLabel?`, `onAction?` |
+| `ErrorBanner` | Modal overlay for errors | `message`, `onDismiss` |
+| `UserAvatar` | Google avatar with initial fallback | `name`, `avatarUrl`, `size?` |
+
+---
+
+## Navigation
+
+### Desktop (≥md)
+- Sidebar: 200px wide, light background (`bg.card`)
+- Active: `sage.100` background, `sage.700` text, orange indicator bar (sunburst.400) on inline-start
+- CSS transitions on all states
+
+### Mobile (<md)
+- Floating bottom nav bar: `sage.800` background, `borderRadius="2xl"`, side margins
+- Active: `sage.600` pill with white icon + label, orange top indicator
+- Inactive: muted sage icons, no label
+- Label appears with CSS `max-width` + `opacity` transition (no DOM add/remove)
+
+---
+
 ## Changelog
 
 | Date | Change |
@@ -311,3 +387,4 @@ All spacing uses Chakra's scale tokens (multiples of 4px):
 | 2026-04-04 | Added: toasts, mobile field use, confirmation flows, RTL textAlign/radii, contrast rules (Codex review) |
 | 2026-04-04 | Replaced color palette: brand.* → sage/rose/sky. Added semantic tokens (bg, bg.card, bg.muted, fg, border). Source of truth: `src/theme/` |
 | 2026-04-04 | Switched font from Inter to Heebo (Hebrew-optimized). Added interactive/focus/disabled tokens. xs restricted from critical text (Gemini review) |
+| 2026-04-05 | Phase 2: Bento Box dashboard, micro-animations system, shared components library, table/card responsive pattern, navigation design (desktop sidebar + mobile floating bar) |

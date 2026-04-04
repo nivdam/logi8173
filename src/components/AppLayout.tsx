@@ -50,8 +50,9 @@ export const AppLayout = () => {
         <Box
           as="main"
           flex="1"
-          p={{ base: "4", md: "6" }}
-          pb={{ base: "20", md: "6" }}
+          p={{ base: "4", md: "8" }}
+          pb={{ base: "24", md: "8" }}
+          maxW="1200px"
           overflowY="auto"
         >
           <Outlet />
