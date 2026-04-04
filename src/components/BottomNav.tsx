@@ -26,7 +26,7 @@ export const BottomNav = () => (
       justify="space-around"
       alignItems="center"
       h="14"
-      bg="gray.900"
+      bg="gray.800"
       borderRadius="2xl"
       mx="auto"
       maxW="md"
@@ -45,18 +45,14 @@ export const BottomNav = () => (
             >
               {isActive ? (
                 <>
-                  {/* Triangle indicator above pill */}
+                  {/* Top bar indicator */}
                   <Box
                     position="absolute"
-                    top="-1px"
-                    css={{
-                      width: 0,
-                      height: 0,
-                      borderLeft: "6px solid transparent",
-                      borderRight: "6px solid transparent",
-                      borderTop: "6px solid",
-                      borderTopColor: "#E8942A",
-                    }}
+                    top="0"
+                    w="10"
+                    h="3px"
+                    borderBottomRadius="full"
+                    bg="#E8942A"
                   />
                   {/* Active pill */}
                   <Flex
