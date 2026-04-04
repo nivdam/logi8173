@@ -16,27 +16,63 @@ Living document. Every UI component must conform to these rules. Updated as the 
 
 ## Color Palette
 
-### Semantic Tokens
+Source of truth: `src/theme/foundation/colors.ts`
 
-| Token | Light Mode | Dark Mode | Usage |
-|-------|-----------|-----------|-------|
-| `brand.solid` | `brand.500` (#008f56) | `brand.400` (#26a86d) | Primary buttons, active nav, links |
-| `brand.muted` | `brand.50` (#e6f5f0) | `brand.900` (#003d24) | Active nav background, selected states |
-| `brand.fg` | `brand.700` (#006b40) | `brand.300` (#4db884) | Active nav text, emphasis |
-| `bg.canvas` | `#F8F9FB` | `gray.900` | Page background |
-| `bg.surface` | `white` | `gray.800` | Cards, header, sidebar |
-| `fg.default` | `gray.900` | `gray.50` | Primary text |
-| `fg.muted` | `gray.500` | `gray.400` | Secondary text, descriptions |
-| `border.muted` | `gray.200` | `gray.700` | Dividers, card borders |
+### Primary — Sage (muted green-teal, from battalion logo)
+
+| Scale | Hex | Usage |
+|-------|-----|-------|
+| `sage.50` | #f0f5f4 | Selection highlight |
+| `sage.100` | #d9e5e2 | Active nav background, selected states |
+| `sage.200` | #b3cbc5 | |
+| `sage.300` | #8db1a8 | |
+| `sage.400` | #7C9A92 | **Main brand color** |
+| `sage.500` | #6a857e | |
+| `sage.600` | #586e68 | |
+| `sage.700` | #465752 | Active nav text, emphasis |
+| `sage.800` | #34403d | |
+| `sage.900` | #222a28 | |
+
+### Danger — Rose (soft red)
+
+Main: `rose.300` (#E9A6A6). Full scale in `colors.ts`.
+
+### Info — Sky Blue
+
+Main: `sky.300` (#A0C4FF). Full scale in `colors.ts`.
+
+### Neutrals — Gray
+
+| Scale | Hex | Usage |
+|-------|-----|-------|
+| `gray.50` | #F8F9FB | App background (light) |
+| `gray.100` | #F0F4F8 | Muted backgrounds |
+| `gray.200` | #E4E9ED | Borders, dividers |
+| `gray.500` | #747A85 | Secondary text |
+| `gray.800` | #333C4D | Cards (dark mode) |
+| `gray.900` | #16171A | Primary text / background (dark) |
 
 ### Status Colors
 
-| Status | Color | Token | Usage |
-|--------|-------|-------|-------|
-| Success | Green | `green.600` / `green.400` | Stock OK, activity closed successfully |
-| Warning | Amber | `yellow.600` / `yellow.400` | Low stock, pending items |
-| Error | Red | `red.600` / `red.400` | Shortages, missing signatures, errors |
-| Info | Blue | `blue.500` / `blue.400` | Informational badges, links |
+| Status | Color | Hex | Usage |
+|--------|-------|-----|-------|
+| Success | `green.600` | #19BE65 | Stock OK, activity closed |
+| Warning | `yellow.600` | #FDA828 | Low stock, pending |
+| Error | `red.600` | #F92457 | Shortages, errors (distinct from rose) |
+
+### Semantic Tokens
+
+| Token | Light | Dark | Usage |
+|-------|-------|------|-------|
+| `bg` | `gray.50` | `gray.900` | Page background |
+| `bg.card` | `white` | `gray.800` | Cards, header, sidebar |
+| `bg.muted` | `gray.100` | `gray.700` | Hover backgrounds, subtle fills |
+| `fg` | `gray.900` | `white` | Primary text |
+| `fg.muted` | `gray.500` | `gray.400` | Secondary text, descriptions |
+| `border` | `gray.200` | `gray.700` | Dividers, card borders |
+| `success` | `green.600` | `green.600` | |
+| `warning` | `yellow.600` | `yellow.600` | |
+| `error` | `red.600` | `red.600` | |
 
 ### Forbidden
 
@@ -272,3 +308,4 @@ All spacing uses Chakra's scale tokens (multiples of 4px):
 |------|--------|
 | 2026-04-04 | Initial design system created |
 | 2026-04-04 | Added: toasts, mobile field use, confirmation flows, RTL textAlign/radii, contrast rules (Codex review) |
+| 2026-04-04 | Replaced color palette: brand.* → sage/rose/sky. Added semantic tokens (bg, bg.card, bg.muted, fg, border). Source of truth: `src/theme/` |

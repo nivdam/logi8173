@@ -36,7 +36,7 @@ export const LoginPage = () => {
       align="center"
       justify="center"
       minH="100dvh"
-      bg="bg.canvas"
+      bg="bg"
       px="4"
     >
       <VStack gap="8">

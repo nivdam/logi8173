@@ -17,7 +17,7 @@ export const AppLayout = () => {
         py="3"
         borderBottomWidth="1px"
         borderColor="border.muted"
-        bg="bg.surface"
+        bg="bg.card"
       >
         <Image src={logo} alt="סמל גדוד 8173" boxSize="36px" />
         <Heading size="md" fontWeight="600">

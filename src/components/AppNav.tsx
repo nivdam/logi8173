@@ -18,8 +18,8 @@ export const AppNav = () => (
     px="2"
     gap="1"
     borderInlineEndWidth="1px"
-    borderColor="border.muted"
-    bg="bg.surface"
+    borderColor="border"
+    bg="bg.card"
     display={{ base: "none", md: "flex" }}
   >
     {navItems.map((item) => (
@@ -29,10 +29,10 @@ export const AppNav = () => (
             px="3"
             py="2"
             borderRadius="md"
-            bg={isActive ? "brand.muted" : "transparent"}
-            color={isActive ? "brand.fg" : "fg.muted"}
+            bg={isActive ? "sage.100" : "transparent"}
+            color={isActive ? "sage.700" : "fg.muted"}
             fontWeight={isActive ? "600" : "400"}
-            _hover={{ bg: isActive ? "brand.muted" : "bg.subtle" }}
+            _hover={{ bg: isActive ? "sage.100" : "bg.muted" }}
             cursor="pointer"
           >
             <Text textStyle="sm">{item.label}</Text>
