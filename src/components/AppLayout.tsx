@@ -20,7 +20,7 @@ export const AppLayout = () => {
         borderColor="border"
         bg="bg.card"
       >
-        <Image src={logo} alt={t("app.battalion")} boxSize="36px" />
+        <Image src={logo} alt={t("app.battalion")} h="36px" w="auto" />
         <Heading size="md" fontWeight="600">
           {t("app.name")}
         </Heading>
