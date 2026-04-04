@@ -1,0 +1,37 @@
+import type { Activity } from "../types"
+
+export const activitiesMock: Activity[] = [
+  {
+    activityId: "act1",
+    name: "אימון פלסם אפריל 2026",
+    activityType: "training",
+    status: "active",
+    openedBy: "niv.damianovich@gmail.com",
+    startDate: "2026-04-01",
+    endDate: undefined,
+    createdAt: "2026-03-28",
+    closedAt: undefined,
+  },
+  {
+    activityId: "act2",
+    name: "תעסוקה מרץ 2026",
+    activityType: "training",
+    status: "closed",
+    openedBy: "niv.damianovich@gmail.com",
+    startDate: "2026-03-10",
+    endDate: "2026-03-14",
+    createdAt: "2026-03-05",
+    closedAt: "2026-03-15",
+  },
+  {
+    activityId: "act3",
+    name: "כוננות קיץ 2026",
+    activityType: "operation",
+    status: "draft",
+    openedBy: "niv.damianovich@gmail.com",
+    startDate: "2026-06-01",
+    endDate: undefined,
+    createdAt: "2026-04-01",
+    closedAt: undefined,
+  },
+]

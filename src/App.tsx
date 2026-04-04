@@ -1,10 +1,10 @@
 import { Route, Routes } from "react-router-dom"
 import { AppLayout } from "./components/AppLayout"
 import { RequireAuth } from "./components/RequireAuth"
-import { DashboardPage } from "./pages/DashboardPage"
-import { InventoryPage } from "./pages/InventoryPage"
+import { DashboardPage } from "./features/dashboard/DashboardPage"
+import { InventoryPage } from "./features/inventory/InventoryPage"
+import { SoldiersPage } from "./features/soldiers/SoldiersPage"
 import { ActivitiesPage } from "./pages/ActivitiesPage"
-import { SoldiersPage } from "./pages/SoldiersPage"
 import { SettingsPage } from "./pages/SettingsPage"
 import { LoginPage } from "./pages/LoginPage"
 
