@@ -5,6 +5,7 @@ import { t } from "../lib/i18n";
 import logo from "../assets/logo.png";
 import { AppNav } from "./AppNav";
 import { BottomNav } from "./BottomNav";
+import { UserAvatar } from "./UserAvatar";
 
 export const AppLayout = () => {
   const { operator, logout } = useAuth();
@@ -29,14 +30,10 @@ export const AppLayout = () => {
         <Flex ms="auto" align="center" gap="3">
           {operator ? (
             <>
-              {operator.avatarUrl ? (
-                <Image
-                  src={operator.avatarUrl}
-                  alt={operator.fullName}
-                  boxSize="32px"
-                  borderRadius="full"
-                />
-              ) : null}
+              <UserAvatar
+                name={operator.fullName}
+                avatarUrl={operator.avatarUrl}
+              />
               <Text textStyle="sm" display={{ base: "none", md: "block" }}>
                 {operator.fullName}
               </Text>

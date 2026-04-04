@@ -1,4 +1,4 @@
-import { Box, Flex, Text } from "@chakra-ui/react"
+import { Flex, Text } from "@chakra-ui/react"
 import { NavLink } from "react-router-dom"
 import { LayoutDashboard, Package, CalendarCheck, Users, Settings } from "lucide-react"
 import { t } from "../lib/i18n"
@@ -15,11 +15,13 @@ export const AppNav = () => (
   <Flex
     as="nav"
     direction="column"
-    w="220px"
+    w="200px"
     py="4"
-    px="3"
-    gap="1.5"
-    bg="sage.800"
+    px="2"
+    gap="1"
+    borderInlineEndWidth="1px"
+    borderColor="border"
+    bg="bg.card"
     display={{ base: "none", md: "flex" }}
   >
     {navItems.map((item) => (
@@ -29,51 +31,21 @@ export const AppNav = () => (
             align="center"
             gap="3"
             px="3"
-            py="2.5"
-            borderRadius="xl"
-            position="relative"
+            py="2"
+            borderRadius="md"
+            bg={isActive ? "sage.100" : "transparent"}
+            color={isActive ? "sage.700" : "fg.muted"}
+            fontWeight={isActive ? "600" : "400"}
+            _hover={{ bg: isActive ? "sage.100" : "bg.muted" }}
             cursor="pointer"
-            css={{
-              background: isActive
-                ? "var(--chakra-colors-sage-600)"
-                : "transparent",
-              transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
-              "&:hover": {
-                background: isActive
-                  ? "var(--chakra-colors-sage-600)"
-                  : "var(--chakra-colors-sage-700)",
-              },
-            }}
+            css={{ transition: "all 0.2s ease" }}
           >
-            {/* Orange indicator bar on the right */}
-            <Box
-              position="absolute"
-              insetInlineEnd="-3px"
-              top="50%"
-              css={{
-                transform: isActive ? "translateY(-50%) scaleY(1)" : "translateY(-50%) scaleY(0)",
-                opacity: isActive ? 1 : 0,
-                transition: "all 0.25s ease",
-              }}
-              w="4px"
-              h="6"
-              borderRadius="full"
-              bg="sunburst.400"
-            />
             <item.icon
               size={18}
-              strokeWidth={isActive ? 2 : 1.5}
-              color={isActive ? "white" : "#8db1a8"}
+              strokeWidth={isActive ? 2.2 : 1.8}
               style={{ transition: "all 0.2s ease" }}
             />
-            <Text
-              textStyle="sm"
-              fontWeight={isActive ? "500" : "400"}
-              color={isActive ? "white" : "#8db1a8"}
-              css={{ transition: "color 0.2s ease" }}
-            >
-              {item.label}
-            </Text>
+            <Text textStyle="sm">{item.label}</Text>
           </Flex>
         )}
       </NavLink>
