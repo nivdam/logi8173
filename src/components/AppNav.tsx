@@ -1,13 +1,14 @@
-import { Box, Flex, Text } from "@chakra-ui/react"
+import { Flex, Text } from "@chakra-ui/react"
 import { NavLink } from "react-router-dom"
+import { LayoutDashboard, Package, CalendarCheck, Users, Settings } from "lucide-react"
 import { t } from "../lib/i18n"
 
 const navItems = [
-  { to: "/", label: t("nav.dashboard") },
-  { to: "/inventory", label: t("nav.inventory") },
-  { to: "/activities", label: t("nav.activities") },
-  { to: "/soldiers", label: t("nav.soldiers") },
-  { to: "/settings", label: t("nav.settings") },
+  { to: "/", label: t("nav.dashboard"), icon: LayoutDashboard },
+  { to: "/inventory", label: t("nav.inventory"), icon: Package },
+  { to: "/activities", label: t("nav.activities"), icon: CalendarCheck },
+  { to: "/soldiers", label: t("nav.soldiers"), icon: Users },
+  { to: "/settings", label: t("nav.settings"), icon: Settings },
 ]
 
 export const AppNav = () => (
@@ -26,7 +27,9 @@ export const AppNav = () => (
     {navItems.map((item) => (
       <NavLink key={item.to} to={item.to} end={item.to === "/"}>
         {({ isActive }) => (
-          <Box
+          <Flex
+            align="center"
+            gap="3"
             px="3"
             py="2"
             borderRadius="md"
@@ -36,8 +39,9 @@ export const AppNav = () => (
             _hover={{ bg: isActive ? "sage.100" : "bg.muted" }}
             cursor="pointer"
           >
+            <item.icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />
             <Text textStyle="sm">{item.label}</Text>
-          </Box>
+          </Flex>
         )}
       </NavLink>
     ))}

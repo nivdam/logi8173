@@ -1,13 +1,14 @@
 import { Flex, Text } from "@chakra-ui/react"
 import { NavLink } from "react-router-dom"
+import { LayoutDashboard, Package, CalendarCheck, Users, Settings } from "lucide-react"
 import { t } from "../lib/i18n"
 
 const navItems = [
-  { to: "/", label: t("nav.dashboard"), icon: "📊" },
-  { to: "/inventory", label: t("nav.inventory"), icon: "📦" },
-  { to: "/activities", label: t("nav.activities"), icon: "📋" },
-  { to: "/soldiers", label: t("nav.soldiers"), icon: "👤" },
-  { to: "/settings", label: t("nav.settings"), icon: "⚙️" },
+  { to: "/", label: t("nav.dashboard"), icon: LayoutDashboard },
+  { to: "/inventory", label: t("nav.inventory"), icon: Package },
+  { to: "/activities", label: t("nav.activities"), icon: CalendarCheck },
+  { to: "/soldiers", label: t("nav.soldiers"), icon: Users },
+  { to: "/settings", label: t("nav.settings"), icon: Settings },
 ]
 
 export const BottomNav = () => (
@@ -37,9 +38,7 @@ export const BottomNav = () => (
             minW="12"
             color={isActive ? "sage.600" : "fg.muted"}
           >
-            <Text fontSize="xl" lineHeight="1">
-              {item.icon}
-            </Text>
+            <item.icon size={22} strokeWidth={isActive ? 2.2 : 1.8} />
             <Text
               textStyle="xs"
               fontWeight={isActive ? "600" : "400"}
