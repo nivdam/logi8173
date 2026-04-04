@@ -1,0 +1,88 @@
+{
+  "app": {
+    "name": "Logi8173",
+    "tagline": "ניהול לוגיסטיקה דיגיטלית",
+    "battalion": "גדוד הנדסה 8173 — מילואים"
+  },
+  "nav": {
+    "dashboard": "לוח בקרה",
+    "inventory": "מלאי",
+    "activities": "פעילויות",
+    "soldiers": "חיילים",
+    "settings": "הגדרות"
+  },
+  "auth": {
+    "login": "התחבר",
+    "logout": "התנתק",
+    "loginPrompt": "אנא התחבר עם חשבון Google כדי להמשיך",
+    "noAccess": "אין הרשאה",
+    "noAccessDescription": "אין לך הרשאה לצפות בדף זה.",
+    "loading": "טוען..."
+  },
+  "dashboard": {
+    "title": "לוח בקרה",
+    "description": "סיכום מצב מלאי, פעילויות אחרונות וחוסרים."
+  },
+  "inventory": {
+    "title": "מלאי",
+    "description": "ניהול פריטי ציוד — חיפוש, סינון ומעקב כמויות."
+  },
+  "activities": {
+    "title": "פעילויות",
+    "description": "רשימת פעילויות — אימונים, תעסוקה, מבצעים."
+  },
+  "soldiers": {
+    "title": "חיילים",
+    "description": "רשימת חיילים — חיפוש לפי שם, מספר אישי או פלוגה."
+  },
+  "settings": {
+    "title": "הגדרות",
+    "description": "ניהול מפעילים, פלוגות וחיבור ל-Google Drive."
+  },
+  "common": {
+    "save": "שמור",
+    "cancel": "ביטול",
+    "delete": "מחק",
+    "edit": "ערוך",
+    "add": "הוסף",
+    "search": "חיפוש",
+    "filter": "סינון",
+    "back": "חזרה",
+    "confirm": "אישור",
+    "close": "סגור",
+    "loading": "טוען...",
+    "noResults": "לא נמצאו תוצאות",
+    "error": "שגיאה",
+    "success": "בוצע בהצלחה"
+  },
+  "status": {
+    "active": "פעיל",
+    "draft": "טיוטה",
+    "closed": "סגור",
+    "shortage": "חוסר",
+    "pending": "ממתין",
+    "ok": "תקין",
+    "low": "מלאי נמוך"
+  },
+  "transaction": {
+    "issue": "הנפקה",
+    "return": "החזרה",
+    "borrowIn": "השאלה נכנסת",
+    "returnBorrow": "החזרת השאלה",
+    "countAdjustment": "תיקון ספירה",
+    "writeOff": "מחיקה"
+  },
+  "signature": {
+    "sign": "חתום",
+    "clear": "נקה חתימה",
+    "confirm": "אני מאשר/ת",
+    "giverSignature": "חתימת מוסר",
+    "receiverSignature": "חתימת מקבל"
+  },
+  "roles": {
+    "admin": "מנהל",
+    "warehouse_operator": "רס\"פ / מפעיל מחסן",
+    "commander": "מפקד",
+    "viewer": "צופה"
+  }
+}

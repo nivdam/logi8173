@@ -1,6 +1,7 @@
 import { Box, Button, Flex, Heading, Image, Text } from "@chakra-ui/react"
 import { Outlet } from "react-router-dom"
 import { useAuth } from "../lib/auth-context"
+import { t } from "../lib/i18n"
 import logo from "../assets/logo.png"
 import { AppNav } from "./AppNav"
 
@@ -16,12 +17,12 @@ export const AppLayout = () => {
         px="4"
         py="3"
         borderBottomWidth="1px"
-        borderColor="border.muted"
+        borderColor="border"
         bg="bg.card"
       >
-        <Image src={logo} alt="סמל גדוד 8173" boxSize="36px" />
+        <Image src={logo} alt={t("app.battalion")} boxSize="36px" />
         <Heading size="md" fontWeight="600">
-          Logi8173
+          {t("app.name")}
         </Heading>
 
         <Flex ms="auto" align="center" gap="3">
@@ -38,12 +39,8 @@ export const AppLayout = () => {
               <Text textStyle="sm" display={{ base: "none", md: "block" }}>
                 {operator.fullName}
               </Text>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={logout}
-              >
-                התנתק
+              <Button variant="ghost" size="sm" onClick={logout}>
+                {t("auth.logout")}
               </Button>
             </>
           ) : null}

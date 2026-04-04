@@ -1,8 +1,9 @@
 import { Navigate } from "react-router-dom"
 import { Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { useAuth } from "../lib/auth-context"
-import type { OperatorRole } from "../lib/auth.types"
 import { canAccessRoute } from "../lib/auth-helpers"
+import { t } from "../lib/i18n"
+import type { OperatorRole } from "../lib/auth.types"
 
 export const RequireAuth = ({
   requiredRole,
@@ -18,8 +19,8 @@ export const RequireAuth = ({
     return (
       <Flex align="center" justify="center" minH="50dvh">
         <VStack gap="4">
-          <Heading size="lg">אין הרשאה</Heading>
-          <Text color="fg.muted">אין לך הרשאה לצפות בדף זה.</Text>
+          <Heading size="lg">{t("auth.noAccess")}</Heading>
+          <Text color="fg.muted">{t("auth.noAccessDescription")}</Text>
         </VStack>
       </Flex>
     )

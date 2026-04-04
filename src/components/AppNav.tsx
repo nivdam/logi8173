@@ -1,12 +1,13 @@
 import { Box, Flex, Text } from "@chakra-ui/react"
 import { NavLink } from "react-router-dom"
+import { t } from "../lib/i18n"
 
 const navItems = [
-  { to: "/", label: "לוח בקרה" },
-  { to: "/inventory", label: "מלאי" },
-  { to: "/activities", label: "פעילויות" },
-  { to: "/soldiers", label: "חיילים" },
-  { to: "/settings", label: "הגדרות" },
+  { to: "/", label: t("nav.dashboard") },
+  { to: "/inventory", label: t("nav.inventory") },
+  { to: "/activities", label: t("nav.activities") },
+  { to: "/soldiers", label: t("nav.soldiers") },
+  { to: "/settings", label: t("nav.settings") },
 ]
 
 export const AppNav = () => (

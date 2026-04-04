@@ -1,0 +1,88 @@
+{
+  "app": {
+    "name": "Logi8173",
+    "tagline": "Digital Logistics Management",
+    "battalion": "Engineering Battalion 8173 — Reserves"
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "inventory": "Inventory",
+    "activities": "Activities",
+    "soldiers": "Soldiers",
+    "settings": "Settings"
+  },
+  "auth": {
+    "login": "Sign In",
+    "logout": "Sign Out",
+    "loginPrompt": "Please sign in with your Google account to continue",
+    "noAccess": "Access Denied",
+    "noAccessDescription": "You do not have permission to view this page.",
+    "loading": "Loading..."
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "Inventory health, recent activity, and shortage summary."
+  },
+  "inventory": {
+    "title": "Inventory",
+    "description": "Manage equipment items — search, filter, and track quantities."
+  },
+  "activities": {
+    "title": "Activities",
+    "description": "Activity list — training, operations, exercises."
+  },
+  "soldiers": {
+    "title": "Soldiers",
+    "description": "Soldier directory — search by name, ID, or company."
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage operators, companies, and Google Drive connection."
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "filter": "Filter",
+    "back": "Back",
+    "confirm": "Confirm",
+    "close": "Close",
+    "loading": "Loading...",
+    "noResults": "No results found",
+    "error": "Error",
+    "success": "Success"
+  },
+  "status": {
+    "active": "Active",
+    "draft": "Draft",
+    "closed": "Closed",
+    "shortage": "Shortage",
+    "pending": "Pending",
+    "ok": "OK",
+    "low": "Low Stock"
+  },
+  "transaction": {
+    "issue": "Issue",
+    "return": "Return",
+    "borrowIn": "Borrow In",
+    "returnBorrow": "Return Borrow",
+    "countAdjustment": "Count Adjustment",
+    "writeOff": "Write Off"
+  },
+  "signature": {
+    "sign": "Sign",
+    "clear": "Clear Signature",
+    "confirm": "I confirm",
+    "giverSignature": "Giver Signature",
+    "receiverSignature": "Receiver Signature"
+  },
+  "roles": {
+    "admin": "Admin",
+    "warehouse_operator": "Warehouse Operator",
+    "commander": "Commander",
+    "viewer": "Viewer"
+  }
+}

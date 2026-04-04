@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom"
 import { jwtDecode } from "./login-helpers"
 import { useAuthLogin } from "../lib/auth-context"
 import { DEV_ADMIN_EMAIL } from "../lib/config"
+import { t } from "../lib/i18n"
 import type { OperatorRole } from "../lib/auth.types"
 import logo from "../assets/logo-with-text.png"
 
@@ -41,12 +42,12 @@ export const LoginPage = () => {
     >
       <VStack gap="8">
         <VStack gap="4">
-          <Image src={logo} alt="סמל גדוד 8173" w="140px" h="auto" />
+          <Image src={logo} alt={t("app.battalion")} w="140px" h="auto" />
           <Heading size="2xl" fontWeight="700">
-            Logi8173
+            {t("app.tagline")}
           </Heading>
           <Text textStyle="lg" color="fg.muted">
-            ניהול לוגיסטיקה דיגיטלית
+            {t("auth.loginPrompt")}
           </Text>
         </VStack>
 
@@ -62,7 +63,7 @@ export const LoginPage = () => {
         />
 
         <Text textStyle="xs" color="fg.muted">
-          גדוד הנדסה 8173 — מילואים
+          {t("app.battalion")}
         </Text>
       </VStack>
     </Flex>
