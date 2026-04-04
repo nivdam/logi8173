@@ -36,7 +36,7 @@ export const SoldiersTable = ({ soldiers, sort, onSort }: Props) => (
           cursor="pointer"
           css={{
             ...animations.listItem(index),
-            "@keyframes fadeInUp": animations.fadeInUp["@keyframes fadeInUp"],
+            
             transition: "background 0.15s ease, transform 0.15s ease",
             "&:hover": { background: "var(--chakra-colors-bg-muted)", transform: "scale(1.005)" },
           }}
@@ -64,7 +64,7 @@ export const SoldiersTable = ({ soldiers, sort, onSort }: Props) => (
           css={{
             ...animations.cardHover,
             ...animations.listItem(index),
-            "@keyframes fadeInUp": animations.fadeInUp["@keyframes fadeInUp"],
+            
           }}
         >
           <Flex justify="space-between" align="center" mb="2">

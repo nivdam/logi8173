@@ -32,7 +32,12 @@
     "txType": "Type",
     "txReceiver": "Receiver",
     "txItems": "Items",
-    "txDate": "Date"
+    "txDate": "Date",
+    "newIssuance": "New Issuance",
+    "viewInventory": "View inventory",
+    "viewLowStock": "View low stock",
+    "viewGaps": "View gaps",
+    "viewActivities": "View activities"
   },
   "inventory": {
     "title": "Inventory",

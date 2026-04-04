@@ -32,7 +32,12 @@
     "txType": "סוג",
     "txReceiver": "מקבל",
     "txItems": "פריטים",
-    "txDate": "תאריך"
+    "txDate": "תאריך",
+    "newIssuance": "הנפקה חדשה",
+    "viewInventory": "צפה במלאי",
+    "viewLowStock": "צפה במלאי נמוך",
+    "viewGaps": "צפה בחוסרים",
+    "viewActivities": "צפה בפעילויות"
   },
   "inventory": {
     "title": "מלאי",

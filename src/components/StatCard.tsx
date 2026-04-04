@@ -15,7 +15,6 @@ export const StatCard = ({ icon: Icon, value, label, color = "sage.600", bgTint 
     css={{
       ...animations.cardHover,
       ...animations.listItem(index),
-      "@keyframes fadeInUp": animations.fadeInUp["@keyframes fadeInUp"],
     }}
   >
     <Flex align="center" gap="3">

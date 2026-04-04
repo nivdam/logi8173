@@ -1,12 +1,15 @@
-import { Box, Flex, Grid, Heading, Text } from "@chakra-ui/react"
-import { Package, AlertTriangle, XCircle, CalendarCheck, ArrowUpRight } from "lucide-react"
+import { Box, Button, Flex, Grid, Heading, Text } from "@chakra-ui/react"
+import {
+  Package, AlertTriangle, XCircle, CalendarCheck,
+  Plus, Search, ChevronLeft,
+} from "lucide-react"
 import { PageHeader } from "../../components/PageHeader"
 import { t } from "../../lib/i18n"
 import { dashboardMock } from "../../mocks/dashboard.mock"
-import { formatDateTime, getTransactionTypeLabel } from "../../lib/formatters"
+import { activitiesMock } from "../../mocks/activities.mock"
+import { formatDateTime, getTransactionTypeLabel, getActivityStatusLabel } from "../../lib/formatters"
 import { animations } from "../../theme/animations"
-import { CompanyBreakdown } from "./CompanyBreakdown"
-import type { Transaction } from "../../types"
+import type { Transaction, ActivityStatus } from "../../types"
 
 const formatItemsSummary = (transaction: Transaction): string => {
   const totalQty = transaction.items.reduce((sum, item) => sum + Math.abs(item.qty), 0)
@@ -14,71 +17,89 @@ const formatItemsSummary = (transaction: Transaction): string => {
   return `${transaction.items.length} ${t("dashboard.txItems")} (${totalQty})`
 }
 
+const activityStatusColor: Record<ActivityStatus, string> = {
+  active: "green.600",
+  draft: "gray.500",
+  closed: "sky.600",
+  credit: "yellow.600",
+  reconciliation: "sunburst.400",
+}
+
 export const DashboardPage = () => (
   <Flex direction="column" gap={{ base: "6", md: "8" }}>
-    <PageHeader title={t("dashboard.title")} description={t("dashboard.description")} />
+    {/* Header + actions */}
+    <Flex justify="space-between" align={{ base: "start", md: "center" }} direction={{ base: "column", md: "row" }} gap="4">
+      <PageHeader title={t("dashboard.title")} description={t("dashboard.description")} />
+      <Flex gap="3">
+        <Button size="sm" variant="outline" borderRadius="lg" css={animations.cardHover}>
+          <Search size={16} />
+          {t("common.search")}
+        </Button>
+        <Button size="sm" borderRadius="lg" bg="sage.600" color="white" _hover={{ bg: "sage.700" }} css={animations.cardHover}>
+          <Plus size={16} />
+          {t("dashboard.newIssuance")}
+        </Button>
+      </Flex>
+    </Flex>
 
-    {/* Bento Grid */}
-    <Grid
-      templateColumns={{ base: "1fr", md: "repeat(4, 1fr)" }}
-      templateRows={{ base: "auto", md: "auto auto" }}
-      gap={{ base: "4", md: "5" }}
-    >
-      {/* Big stat — total items (spans 2 cols) */}
-      <BentoCard colSpan={{ base: 1, md: 2 }} index={0}>
-        <Flex align="center" gap="4" mb="3">
-          <Flex align="center" justify="center" w="12" h="12" borderRadius="xl" bg="sky.50" color="sky.600">
-            <Package size={24} />
-          </Flex>
-          <Box>
-            <Heading size={{ base: "3xl", md: "3xl" }} fontWeight="800" color="sky.600" lineHeight="1">
-              {dashboardMock.totalItems}
-            </Heading>
-          </Box>
-        </Flex>
-        <Text textStyle="md" fontWeight="500">{t("dashboard.totalItems")}</Text>
-      </BentoCard>
+    {/* Stat cards row */}
+    <Grid templateColumns={{ base: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }} gap={{ base: "3", md: "5" }}>
+      <StatCard
+        label={t("dashboard.totalItems")}
+        value={dashboardMock.totalItems}
+        icon={Package}
+        color="sage.600"
+        iconBg="sage.50"
+        link={t("dashboard.viewInventory")}
+        index={0}
+      />
+      <StatCard
+        label={t("dashboard.lowStock")}
+        value={dashboardMock.lowStockCount}
+        icon={AlertTriangle}
+        color="sunburst.400"
+        iconBg="sunburst.400/10"
+        link={t("dashboard.viewLowStock")}
+        index={1}
+      />
+      <StatCard
+        label={t("dashboard.gaps")}
+        value={dashboardMock.gapCount}
+        icon={XCircle}
+        color="red.600"
+        iconBg="rose.50"
+        link={t("dashboard.viewGaps")}
+        index={2}
+      />
+      <StatCard
+        label={t("dashboard.activeActivities")}
+        value={dashboardMock.activeActivities}
+        icon={CalendarCheck}
+        color="sky.600"
+        iconBg="sky.50"
+        link={t("dashboard.viewActivities")}
+        index={3}
+      />
+    </Grid>
 
-      {/* Low stock */}
-      <BentoCard index={1}>
-        <Flex align="center" justify="center" w="10" h="10" borderRadius="xl" bg="yellow.600/10" color="yellow.600" mb="3">
-          <AlertTriangle size={20} />
-        </Flex>
-        <Heading size="2xl" fontWeight="800" color="yellow.600" lineHeight="1" mb="2">
-          {dashboardMock.lowStockCount}
-        </Heading>
-        <Text textStyle="sm" color="fg.muted">{t("dashboard.lowStock")}</Text>
-      </BentoCard>
-
-      {/* Gaps */}
-      <BentoCard index={2} highlight={dashboardMock.gapCount > 0}>
-        <Flex align="center" justify="center" w="10" h="10" borderRadius="xl" bg="rose.50" color="red.600" mb="3">
-          <XCircle size={20} />
-        </Flex>
-        <Heading size="2xl" fontWeight="800" color="red.600" lineHeight="1" mb="2">
-          {dashboardMock.gapCount}
-        </Heading>
-        <Text textStyle="sm" color="fg.muted">{t("dashboard.gaps")}</Text>
-      </BentoCard>
-
-      {/* Active activities */}
-      <BentoCard index={3}>
-        <Flex align="center" justify="center" w="10" h="10" borderRadius="xl" bg="sage.50" color="sage.600" mb="3">
-          <CalendarCheck size={20} />
-        </Flex>
-        <Heading size="2xl" fontWeight="800" color="sage.600" lineHeight="1" mb="2">
-          {dashboardMock.activeActivities}
-        </Heading>
-        <Text textStyle="sm" color="fg.muted">{t("dashboard.activeActivities")}</Text>
-      </BentoCard>
-
-      {/* Recent transactions (spans 3 cols) */}
-      <BentoCard colSpan={{ base: 1, md: 3 }} index={4}>
+    {/* Two sections */}
+    <Grid templateColumns={{ base: "1fr", lg: "3fr 2fr" }} gap={{ base: "4", md: "5" }}>
+      {/* Recent transactions */}
+      <Box
+        bg="bg.card"
+        borderRadius="2xl"
+        borderWidth="1px"
+        borderColor="border"
+        p={{ base: "5", md: "6" }}
+        css={animations.delayedFadeInUp(0.25)}
+      >
         <Flex justify="space-between" align="center" mb="5">
-          <Heading size="md" fontWeight="600">{t("dashboard.recentTransactions")}</Heading>
+          <Flex align="center" gap="2">
+            <Heading size="md" fontWeight="600">{t("dashboard.recentTransactions")}</Heading>
+          </Flex>
           <Flex align="center" gap="1" color="sage.500" cursor="pointer" _hover={{ color: "sage.700" }} css={{ transition: "color 0.15s ease" }}>
-            <Text textStyle="xs">{t("common.viewAll")}</Text>
-            <ArrowUpRight size={14} />
+            <Text textStyle="sm">{t("common.viewAll")}</Text>
+            <ChevronLeft size={16} />
           </Flex>
         </Flex>
 
@@ -86,74 +107,214 @@ export const DashboardPage = () => (
           {dashboardMock.recentTransactions.map((transaction, index) => (
             <Flex
               key={transaction.txId}
-              gap="4"
-              py="4"
+              gap="3"
+              py="3.5"
               borderTopWidth={index > 0 ? "1px" : "0"}
               borderColor="border"
               align="center"
               css={{
                 ...animations.listItem(index),
-                "@keyframes fadeInUp": animations.fadeInUp["@keyframes fadeInUp"],
+                
+                transition: "background 0.15s ease",
+                borderRadius: "var(--chakra-radii-lg)",
+                marginInline: "-8px",
+                paddingInline: "8px",
+                "&:hover": { background: "var(--chakra-colors-bg-muted)" },
               }}
             >
-              {/* Type badge */}
+              {/* Avatar circle with initials */}
               <Flex
                 align="center"
                 justify="center"
                 w="10"
                 h="10"
-                borderRadius="lg"
-                bg={transaction.txType === "issue" ? "sage.50" : transaction.txType === "return" ? "sky.50" : "gray.100"}
-                color={transaction.txType === "issue" ? "sage.700" : transaction.txType === "return" ? "sky.700" : "gray.600"}
+                borderRadius="full"
+                bg={transaction.txType === "issue" ? "sage.100" : "sky.100"}
+                color={transaction.txType === "issue" ? "sage.700" : "sky.700"}
+                fontWeight="600"
+                textStyle="sm"
                 flexShrink={0}
               >
-                <Text textStyle="xs" fontWeight="600">
-                  {getTransactionTypeLabel(transaction.txType).slice(0, 3)}
-                </Text>
+                {transaction.receiverName.split(" ").map((word) => word[0]).join("")}
               </Flex>
               {/* Details */}
               <Flex direction="column" gap="0.5" flex="1" minW="0">
                 <Text textStyle="sm" fontWeight="600">{transaction.receiverName}</Text>
-                <Text textStyle="sm" color="fg.muted" truncate>{formatItemsSummary(transaction)}</Text>
+                <Text textStyle="xs" color="fg.muted" truncate>{formatItemsSummary(transaction)}</Text>
               </Flex>
-              {/* Date */}
+              {/* Type badge */}
+              <Flex
+                px="2.5"
+                py="1"
+                borderRadius="full"
+                bg={transaction.txType === "issue" ? "sage.50" : transaction.txType === "return" ? "sky.50" : "gray.100"}
+                flexShrink={0}
+              >
+                <Text
+                  textStyle="xs"
+                  fontWeight="500"
+                  color={transaction.txType === "issue" ? "sage.700" : transaction.txType === "return" ? "sky.700" : "gray.600"}
+                >
+                  {getTransactionTypeLabel(transaction.txType)}
+                </Text>
+              </Flex>
+              {/* Date — desktop only */}
               <Text textStyle="xs" color="fg.muted" flexShrink={0} display={{ base: "none", md: "block" }}>
                 {formatDateTime(transaction.performedAt)}
               </Text>
             </Flex>
           ))}
         </Flex>
-      </BentoCard>
-
-      {/* Company breakdown (1 col) */}
-      <Box css={{ ...animations.listItem(5), "@keyframes fadeInUp": animations.fadeInUp["@keyframes fadeInUp"] }}>
-        <CompanyBreakdown breakdown={dashboardMock.companyBreakdown} />
       </Box>
+
+      {/* Activities + Company breakdown */}
+      <Flex direction="column" gap={{ base: "4", md: "5" }}>
+        {/* Activities */}
+        <Box
+          bg="bg.card"
+          borderRadius="2xl"
+          borderWidth="1px"
+          borderColor="border"
+          p={{ base: "5", md: "6" }}
+          css={animations.delayedFadeInUp(0.35)}
+        >
+          <Flex justify="space-between" align="center" mb="5">
+            <Flex align="center" gap="2">
+              <CalendarCheck size={18} />
+              <Heading size="md" fontWeight="600">{t("nav.activities")}</Heading>
+            </Flex>
+            <Flex align="center" gap="1" color="sage.500" cursor="pointer" _hover={{ color: "sage.700" }} css={{ transition: "color 0.15s ease" }}>
+              <Text textStyle="sm">{t("common.viewAll")}</Text>
+              <ChevronLeft size={16} />
+            </Flex>
+          </Flex>
+
+          <Flex direction="column" gap="3">
+            {activitiesMock.map((activity, index) => (
+              <Flex
+                key={activity.activityId}
+                justify="space-between"
+                align="center"
+                p="3"
+                borderRadius="xl"
+                bg="bg.muted"
+                cursor="pointer"
+                css={{
+                  ...animations.cardHover,
+                  ...animations.listItem(index),
+                  
+                }}
+              >
+                <Flex direction="column" gap="0.5">
+                  <Text textStyle="sm" fontWeight="500">{activity.name}</Text>
+                  <Text textStyle="xs" color="fg.muted">{activity.startDate}</Text>
+                </Flex>
+                <Flex
+                  px="2.5"
+                  py="1"
+                  borderRadius="full"
+                  bg={`${activityStatusColor[activity.status]}/10`}
+                >
+                  <Text textStyle="xs" fontWeight="500" color={activityStatusColor[activity.status]}>
+                    {getActivityStatusLabel(activity.status)}
+                  </Text>
+                </Flex>
+              </Flex>
+            ))}
+          </Flex>
+        </Box>
+
+        {/* Company breakdown */}
+        <Box
+          bg="bg.card"
+          borderRadius="2xl"
+          borderWidth="1px"
+          borderColor="border"
+          p={{ base: "5", md: "6" }}
+          css={animations.delayedFadeInUp(0.45)}
+        >
+          <Heading size="md" fontWeight="600" mb="5">{t("dashboard.companyBreakdown")}</Heading>
+          <Flex direction="column" gap="4">
+            {dashboardMock.companyBreakdown.map((company, index) => {
+              const maxCount = Math.max(...dashboardMock.companyBreakdown.map((c) => c.issuedCount))
+              return (
+                <Flex
+                  key={company.companyName}
+                  direction="column"
+                  gap="1.5"
+                  css={{
+                    ...animations.listItem(index),
+                    
+                  }}
+                >
+                  <Flex justify="space-between" align="baseline">
+                    <Text textStyle="sm" fontWeight="500">{company.companyName}</Text>
+                    <Text textStyle="sm" fontWeight="700">{company.issuedCount}</Text>
+                  </Flex>
+                  <Box h="2" bg="bg.muted" borderRadius="full" overflow="hidden">
+                    <Box
+                      h="full"
+                      bg={["sage.400", "sky.400", "sunburst.400", "rose.300", "sage.600"][index % 5]}
+                      borderRadius="full"
+                      css={{
+                        width: `${(company.issuedCount / maxCount) * 100}%`,
+                        transition: "width 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
+                      }}
+                    />
+                  </Box>
+                </Flex>
+              )
+            })}
+          </Flex>
+        </Box>
+      </Flex>
     </Grid>
   </Flex>
 )
 
-const BentoCard = ({ children, colSpan, index = 0, highlight = false }: BentoCardProps) => (
+const StatCard = ({ label, value, icon: Icon, color, iconBg, link, index }: StatCardProps) => (
   <Box
-    p={{ base: "5", md: "6" }}
     bg="bg.card"
     borderRadius="2xl"
     borderWidth="1px"
-    borderColor={highlight ? "red.600/30" : "border"}
-    gridColumn={colSpan}
+    borderColor="border"
+    p={{ base: "4", md: "5" }}
     css={{
       ...animations.cardHover,
       ...animations.listItem(index),
-      "@keyframes fadeInUp": animations.fadeInUp["@keyframes fadeInUp"],
+      
     }}
   >
-    {children}
+    <Flex justify="space-between" align="start" mb={{ base: "3", md: "4" }}>
+      <Text textStyle="sm" color="fg.muted">{label}</Text>
+      <Flex
+        align="center"
+        justify="center"
+        w="9"
+        h="9"
+        borderRadius="xl"
+        bg={iconBg}
+        color={color}
+      >
+        <Icon size={18} />
+      </Flex>
+    </Flex>
+    <Heading size={{ base: "2xl", md: "3xl" }} fontWeight="700" color={color} lineHeight="1" mb="3">
+      {value}
+    </Heading>
+    <Flex align="center" gap="1" color="fg.muted" cursor="pointer" _hover={{ color: "fg" }} css={{ transition: "color 0.15s ease" }}>
+      <Text textStyle="xs">{link}</Text>
+      <ChevronLeft size={14} />
+    </Flex>
   </Box>
 )
 
-type BentoCardProps = {
-  children: React.ReactNode
-  colSpan?: Record<string, number>
-  index?: number
-  highlight?: boolean
+type StatCardProps = {
+  label: string
+  value: number
+  icon: typeof Package
+  color: string
+  iconBg: string
+  link: string
+  index: number
 }
