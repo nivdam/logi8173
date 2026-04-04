@@ -4,6 +4,7 @@ import { useAuth } from "../lib/auth-context"
 import { t } from "../lib/i18n"
 import logo from "../assets/logo.png"
 import { AppNav } from "./AppNav"
+import { BottomNav } from "./BottomNav"
 
 export const AppLayout = () => {
   const { operator, logout } = useAuth()
@@ -49,10 +50,11 @@ export const AppLayout = () => {
 
       <Flex flex="1">
         <AppNav />
-        <Box as="main" flex="1" p="6" overflowY="auto">
+        <Box as="main" flex="1" p={{ base: "4", md: "6" }} pb={{ base: "20", md: "6" }} overflowY="auto">
           <Outlet />
         </Box>
       </Flex>
+      <BottomNav />
     </Flex>
   )
 }
