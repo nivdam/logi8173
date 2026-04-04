@@ -44,7 +44,9 @@
     "status": "סטטוס",
     "searchPlaceholder": "חיפוש לפי שם או מק\"ט...",
     "noResultsDescription": "לא נמצאו פריטים התואמים לחיפוש.",
-    "clearFilters": "נקה סינון"
+    "clearFilters": "נקה סינון",
+    "allCategories": "כל הקטגוריות",
+    "allStatuses": "כל הסטטוסים"
   },
   "activities": {
     "title": "פעילויות",
@@ -60,7 +62,9 @@
     "phone": "טלפון",
     "searchPlaceholder": "חיפוש לפי שם או מספר אישי...",
     "noResultsDescription": "לא נמצאו חיילים התואמים לחיפוש.",
-    "clearSearch": "נקה חיפוש"
+    "clearSearch": "נקה חיפוש",
+    "allCompanies": "כל הפלוגות",
+    "allPlatoons": "כל המחלקות"
   },
   "settings": {
     "title": "הגדרות",

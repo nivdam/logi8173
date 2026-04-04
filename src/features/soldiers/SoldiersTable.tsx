@@ -1,8 +1,9 @@
 import { Box, Flex, Grid, Text } from "@chakra-ui/react"
+import { SortableHeader, type SortConfig } from "../../components/SortableHeader"
 import { t } from "../../lib/i18n"
 import type { Soldier } from "../../types"
 
-export const SoldiersTable = ({ soldiers }: Props) => (
+export const SoldiersTable = ({ soldiers, sort, onSort }: Props) => (
   <>
     {/* Desktop: grid table */}
     <Grid gap="0" role="table" display={{ base: "none", md: "grid" }}>
@@ -15,11 +16,11 @@ export const SoldiersTable = ({ soldiers }: Props) => (
         bg="bg.muted"
         borderRadius="lg"
       >
-        <Text textStyle="xs" fontWeight="600" color="fg.muted" role="columnheader">{t("soldiers.fullName")}</Text>
-        <Text textStyle="xs" fontWeight="600" color="fg.muted" role="columnheader">{t("soldiers.personalId")}</Text>
-        <Text textStyle="xs" fontWeight="600" color="fg.muted" role="columnheader">{t("soldiers.company")}</Text>
-        <Text textStyle="xs" fontWeight="600" color="fg.muted" role="columnheader">{t("soldiers.platoon")}</Text>
-        <Text textStyle="xs" fontWeight="600" color="fg.muted" role="columnheader">{t("soldiers.phone")}</Text>
+        <SortableHeader label={t("soldiers.fullName")} sortKey="fullName" currentSort={sort} onSort={onSort} />
+        <SortableHeader label={t("soldiers.personalId")} sortKey="personalId" currentSort={sort} onSort={onSort} />
+        <SortableHeader label={t("soldiers.company")} sortKey="company" currentSort={sort} onSort={onSort} />
+        <SortableHeader label={t("soldiers.platoon")} sortKey="platoon" currentSort={sort} onSort={onSort} />
+        <SortableHeader label={t("soldiers.phone")} sortKey="phone" currentSort={sort} onSort={onSort} />
       </Grid>
       {soldiers.map((soldier) => (
         <Grid
@@ -87,4 +88,6 @@ export const SoldiersTable = ({ soldiers }: Props) => (
 
 type Props = {
   soldiers: Soldier[]
+  sort: SortConfig
+  onSort: (sort: SortConfig) => void
 }

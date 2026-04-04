@@ -1,10 +1,11 @@
 import { Box, Flex, Grid, Text } from "@chakra-ui/react"
 import { StatusBadge } from "../../components/StatusBadge"
+import { SortableHeader, type SortConfig } from "../../components/SortableHeader"
 import { getItemStatusColor, getItemStatusLabel } from "../../lib/formatters"
 import { t } from "../../lib/i18n"
 import type { InventoryItem } from "../../types"
 
-export const InventoryTable = ({ items }: Props) => (
+export const InventoryTable = ({ items, sort, onSort }: Props) => (
   <>
     {/* Desktop: grid table */}
     <Grid gap="0" role="table" display={{ base: "none", md: "grid" }}>
@@ -17,11 +18,11 @@ export const InventoryTable = ({ items }: Props) => (
         bg="bg.muted"
         borderRadius="lg"
       >
-        <Text textStyle="xs" fontWeight="600" color="fg.muted" role="columnheader">{t("inventory.name")}</Text>
-        <Text textStyle="xs" fontWeight="600" color="fg.muted" role="columnheader">{t("inventory.itemNumber")}</Text>
-        <Text textStyle="xs" fontWeight="600" color="fg.muted" role="columnheader">{t("inventory.category")}</Text>
-        <Text textStyle="xs" fontWeight="600" color="fg.muted" role="columnheader">{t("inventory.qty")}</Text>
-        <Text textStyle="xs" fontWeight="600" color="fg.muted" role="columnheader">{t("inventory.status")}</Text>
+        <SortableHeader label={t("inventory.name")} sortKey="name" currentSort={sort} onSort={onSort} />
+        <SortableHeader label={t("inventory.itemNumber")} sortKey="itemNumber" currentSort={sort} onSort={onSort} />
+        <SortableHeader label={t("inventory.category")} sortKey="category" currentSort={sort} onSort={onSort} />
+        <SortableHeader label={t("inventory.qty")} sortKey="currentQty" currentSort={sort} onSort={onSort} />
+        <SortableHeader label={t("inventory.status")} sortKey="status" currentSort={sort} onSort={onSort} />
       </Grid>
       {items.map((item) => (
         <Grid
@@ -85,4 +86,6 @@ export const InventoryTable = ({ items }: Props) => (
 
 type Props = {
   items: InventoryItem[]
+  sort: SortConfig
+  onSort: (sort: SortConfig) => void
 }

@@ -44,7 +44,9 @@
     "status": "Status",
     "searchPlaceholder": "Search by name or item #...",
     "noResultsDescription": "No items match your search.",
-    "clearFilters": "Clear Filters"
+    "clearFilters": "Clear Filters",
+    "allCategories": "All Categories",
+    "allStatuses": "All Statuses"
   },
   "activities": {
     "title": "Activities",
@@ -60,7 +62,9 @@
     "phone": "Phone",
     "searchPlaceholder": "Search by name or personal ID...",
     "noResultsDescription": "No soldiers match your search.",
-    "clearSearch": "Clear Search"
+    "clearSearch": "Clear Search",
+    "allCompanies": "All Companies",
+    "allPlatoons": "All Platoons"
   },
   "settings": {
     "title": "Settings",
