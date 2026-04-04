@@ -69,11 +69,23 @@ export const semanticColors = defineSemanticTokens.colors({
   fg: {
     DEFAULT: { value: { _light: "{colors.gray.900}", _dark: "white" } },
     muted: { value: { _light: "{colors.gray.500}", _dark: "{colors.gray.400}" } },
+    onPrimary: { value: "white" },
   },
   border: {
     DEFAULT: { value: { _light: "{colors.gray.200}", _dark: "{colors.gray.700}" } },
+    focus: { value: { _light: "{colors.sage.400}", _dark: "{colors.sage.300}" } },
+    error: { value: "{colors.red.600}" },
   },
   success: { value: "{colors.green.600}" },
   warning: { value: "{colors.yellow.600}" },
   error: { value: "{colors.red.600}" },
+  interactive: {
+    DEFAULT: { value: { _light: "{colors.sage.600}", _dark: "{colors.sage.400}" } },
+    hover: { value: { _light: "{colors.sage.700}", _dark: "{colors.sage.300}" } },
+    disabled: { value: { _light: "{colors.gray.300}", _dark: "{colors.gray.600}" } },
+  },
+  surface: {
+    selected: { value: { _light: "{colors.sage.100}", _dark: "{colors.sage.900}" } },
+    disabled: { value: { _light: "{colors.gray.100}", _dark: "{colors.gray.800}" } },
+  },
 })

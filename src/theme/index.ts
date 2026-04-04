@@ -13,7 +13,7 @@ const config = defineConfig({
     body: {
       color: "fg",
       bg: "bg",
-      fontFamily: "'Inter', sans-serif",
+      fontFamily: "'Heebo', sans-serif",
       lineHeight: "1.6",
     },
     "*::selection": {

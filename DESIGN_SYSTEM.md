@@ -96,9 +96,10 @@ Main: `sky.300` (#A0C4FF). Full scale in `colors.ts`.
 ### Rules
 
 - Always use `textStyle` prop — never raw `fontSize`
-- Font: Inter (loaded as system default via Chakra)
+- Font: **Heebo** (Hebrew-optimized, loaded from Google Fonts) — NOT Inter
 - `fontWeight="600"` for headings, `"400"` for body
 - No `fontWeight="bold"` — use `"600"` or `"700"` explicitly
+- `xs` (12px) — **never for critical/operational text** (field conditions). Use `sm` as minimum for actionable content
 
 ---
 
@@ -309,3 +310,4 @@ All spacing uses Chakra's scale tokens (multiples of 4px):
 | 2026-04-04 | Initial design system created |
 | 2026-04-04 | Added: toasts, mobile field use, confirmation flows, RTL textAlign/radii, contrast rules (Codex review) |
 | 2026-04-04 | Replaced color palette: brand.* → sage/rose/sky. Added semantic tokens (bg, bg.card, bg.muted, fg, border). Source of truth: `src/theme/` |
+| 2026-04-04 | Switched font from Inter to Heebo (Hebrew-optimized). Added interactive/focus/disabled tokens. xs restricted from critical text (Gemini review) |
