@@ -25,6 +25,10 @@ const config = defineConfig({
     tokens: {
       colors,
       shadows,
+      fonts: {
+        heading: { value: "'Heebo', sans-serif" },
+        body: { value: "'Heebo', sans-serif" },
+      },
     },
     semanticTokens: {
       colors: semanticColors,

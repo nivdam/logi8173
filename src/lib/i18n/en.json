@@ -17,6 +17,7 @@
     "loginPrompt": "Please sign in with your Google account to continue",
     "noAccess": "Access Denied",
     "noAccessDescription": "You do not have permission to view this page.",
+    "loginFailed": "Google sign-in failed. Please try again.",
     "loading": "Loading..."
   },
   "dashboard": {

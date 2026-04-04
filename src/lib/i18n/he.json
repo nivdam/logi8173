@@ -17,6 +17,7 @@
     "loginPrompt": "אנא התחבר עם חשבון Google כדי להמשיך",
     "noAccess": "אין הרשאה",
     "noAccessDescription": "אין לך הרשאה לצפות בדף זה.",
+    "loginFailed": "התחברות עם Google נכשלה. נסה שוב.",
     "loading": "טוען..."
   },
   "dashboard": {

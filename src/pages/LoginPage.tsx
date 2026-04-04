@@ -3,6 +3,7 @@ import { GoogleLogin, type CredentialResponse } from "@react-oauth/google"
 import { useNavigate } from "react-router-dom"
 import { jwtDecode } from "./login-helpers"
 import { useAuthLogin } from "../lib/auth-context"
+import { ErrorBanner, useErrorBanner } from "../components/ErrorBanner"
 import { DEV_ADMIN_EMAIL } from "../lib/config"
 import { t } from "../lib/i18n"
 import type { OperatorRole } from "../lib/auth.types"
@@ -11,6 +12,7 @@ import logo from "../assets/logo-with-text.png"
 export const LoginPage = () => {
   const navigate = useNavigate()
   const onLoginSuccess = useAuthLogin()
+  const { error, showError, clearError } = useErrorBanner()
 
   const handleGoogleSuccess = (credentialResponse: CredentialResponse) => {
     const idToken = credentialResponse.credential
@@ -32,6 +34,8 @@ export const LoginPage = () => {
   }
 
   return (
+    <>
+    <ErrorBanner message={error} onDismiss={clearError} />
     <Flex
       direction="column"
       align="center"
@@ -54,7 +58,7 @@ export const LoginPage = () => {
         <GoogleLogin
           onSuccess={handleGoogleSuccess}
           onError={() => {
-            console.error("Google login failed")
+            showError(t("auth.loginFailed"))
           }}
           theme="outline"
           size="large"
@@ -67,6 +71,7 @@ export const LoginPage = () => {
         </Text>
       </VStack>
     </Flex>
+    </>
   )
 }
 
