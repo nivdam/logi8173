@@ -18,71 +18,50 @@ export const BottomNav = () => (
     bottom="0"
     insetInline="0"
     zIndex="sticky"
-    px="3"
-    pb="env(safe-area-inset-bottom, 6px)"
+    px="4"
+    pb="env(safe-area-inset-bottom, 10px)"
   >
-  <Flex
-    as="nav"
-    bg="bg.card"
-    borderWidth="1px"
-    borderColor="border"
-    borderRadius="2xl"
-    justify="space-around"
-    alignItems="center"
-    h="16"
-    mx="auto"
-    maxW="md"
-    shadow="md"
-  >
-    {navItems.map((item) => (
-      <NavLink key={item.to} to={item.to} end={item.to === "/"}>
-        {({ isActive }) => (
-          <Flex
-            direction="column"
-            align="center"
-            gap="1"
-            py="1.5"
-            position="relative"
-          >
-            {isActive ? (
-              <Box
-                position="absolute"
-                top="-2px"
-                w="10"
-                h="3px"
-                borderBottomRadius="full"
-                bg="#E8942A"
-              />
-            ) : null}
-            <Flex
-              align="center"
-              justify="center"
-              gap="1.5"
-              px={isActive ? "3" : "0"}
-              py={isActive ? "1.5" : "0"}
-              borderRadius="full"
-              bg={isActive ? "sage.100" : "transparent"}
-            >
-              <item.icon
-                size={20}
-                strokeWidth={isActive ? 2 : 1.4}
-                style={{ opacity: isActive ? 1 : 0.4 }}
-              />
-              {isActive ? (
+    <Flex
+      as="nav"
+      bg="sage.800"
+      borderRadius="2xl"
+      justify="space-around"
+      alignItems="center"
+      h="14"
+      mx="auto"
+      maxW="md"
+      shadow="lg"
+    >
+      {navItems.map((item) => (
+        <NavLink key={item.to} to={item.to} end={item.to === "/"}>
+          {({ isActive }) => (
+            isActive ? (
+              <Flex
+                align="center"
+                gap="2"
+                bg="sage.600"
+                borderRadius="xl"
+                px="3.5"
+                py="2"
+              >
+                <item.icon size={18} strokeWidth={2} color="white" />
                 <Text
                   textStyle="xs"
-                  fontWeight="400"
-                  color="sage.700"
+                  fontWeight="500"
+                  color="white"
                   lineHeight="1"
                 >
                   {item.label}
                 </Text>
-              ) : null}
-            </Flex>
-          </Flex>
-        )}
-      </NavLink>
-    ))}
-  </Flex>
+              </Flex>
+            ) : (
+              <Flex align="center" justify="center" w="10" h="10">
+                <item.icon size={20} strokeWidth={1.5} color="#8db1a8" />
+              </Flex>
+            )
+          )}
+        </NavLink>
+      ))}
+    </Flex>
   </Box>
 )
