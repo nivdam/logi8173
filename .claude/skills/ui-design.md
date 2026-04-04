@@ -8,155 +8,220 @@ trigger: when writing JSX, creating components, building pages, or making design
 
 ## Before writing any component
 
-1. **Read `DESIGN_SYSTEM.md`** at project root — it is the single source of truth for colors, typography, spacing, and component rules
-2. **Check if a similar component already exists** in `src/components/`
-3. **Mobile first** — start with the mobile layout, then expand for desktop
+1. **Read `DESIGN_SYSTEM.md`** at project root — single source of truth
+2. **Check `src/components/`** for existing shared components
+3. **Mobile first** — start with mobile layout, then expand for desktop
+4. **Use `src/theme/animations.ts`** for all motion — never create inline keyframes
 
 ## Component Creation Checklist
 
-- [ ] Uses Chakra UI components only (no native HTML tags)
-- [ ] Uses theme tokens for colors, spacing, shadows (no raw hex/px)
-- [ ] Uses `textStyle` for typography (no raw `fontSize`)
-- [ ] RTL-safe: `ps`/`pe` not `pl`/`pr`, `start`/`end` not `left`/`right`
-- [ ] Has both light and dark mode variants (use semantic tokens)
+- [ ] Chakra UI components only (no native HTML tags)
+- [ ] Theme tokens for colors, spacing, shadows (no raw hex/px)
+- [ ] `textStyle` for typography (no raw `fontSize`)
+- [ ] RTL-safe: `ps`/`pe`, `start`/`end`, `borderInlineEndWidth`
+- [ ] Semantic tokens for light/dark mode (`bg`, `fg`, `border`)
 - [ ] Touch targets ≥ 44px on interactive elements
-- [ ] Hebrew text for all user-facing strings
+- [ ] Hebrew text via `t()` from `src/lib/i18n`
 - [ ] One component per file, types at bottom
+- [ ] Micro-animation on interactive elements (cardHover, listItem)
 
-## Layout Patterns
-
-### Page Layout
-```tsx
-<Flex direction="column" minH="100vh" bg="bg.canvas">
-  <Header />
-  <Flex flex="1">
-    <Sidebar display={{ base: "none", md: "flex" }} />
-    <Box as="main" flex="1" p={{ base: "4", md: "6" }} overflowY="auto">
-      {children}
-    </Box>
-  </Flex>
-</Flex>
-```
-
-### Card
-```tsx
-<Box bg="bg.surface" borderWidth="1px" borderColor="border.muted" borderRadius="lg" p={{ base: "4", md: "6" }} shadow="sm">
-  {content}
-</Box>
-```
-
-### Dashboard Bento Card
-```tsx
-<Box bg="bg.surface" borderWidth="1px" borderColor="border.muted" borderRadius="lg" p="5" shadow="sm" cursor="pointer" _hover={{ shadow: "md", borderColor: "brand.200" }} transition="all 0.2s">
-  <Text textStyle="sm" color="fg.muted">{label}</Text>
-  <Text textStyle="2xl" fontWeight="700" mt="1">{value}</Text>
-</Box>
-```
-
-### Form Field
-```tsx
-<Field.Root>
-  <Field.Label textStyle="sm" fontWeight="500">{label}</Field.Label>
-  <Input size="md" />
-  <Field.ErrorText textStyle="xs" color="red.500">{error}</Field.ErrorText>
-</Field.Root>
-```
-
-### Empty State
-```tsx
-<Flex direction="column" align="center" justify="center" py="16" gap="4">
-  <Icon boxSize="12" color="fg.muted" />
-  <Text textStyle="lg" fontWeight="600">{title}</Text>
-  <Text textStyle="sm" color="fg.muted">{description}</Text>
-  <Button colorPalette="brand" mt="2">{actionLabel}</Button>
-</Flex>
-```
-
-## Color Usage Quick Reference
+## Design Tokens Quick Reference
 
 | Purpose | Token |
 |---------|-------|
-| Page background | `bg.canvas` |
-| Card/surface | `bg.surface` |
-| Primary text | `fg.default` |
+| Page background | `bg` |
+| Card/surface | `bg.card` |
+| Hover/subtle background | `bg.muted` |
+| Primary text | `fg` |
 | Secondary text | `fg.muted` |
-| Borders | `border.muted` |
-| Primary action | `colorPalette="brand"` |
-| Danger action | `colorPalette="red"` |
-| Success indicator | `green.600` |
-| Warning indicator | `yellow.600` |
-| Error indicator | `red.600` |
-| Info indicator | `blue.500` |
+| Borders | `border` |
+| Focus ring | `border.focus` |
+| Error border | `border.error` |
+
+### Brand Colors
+
+| Color | Usage |
+|-------|-------|
+| `sage.50`–`sage.900` | Primary brand (from logo shield) |
+| `sunburst.300`–`sunburst.500` | Accent/indicator (from logo sunburst) |
+| `sky.50`–`sky.900` | Info, secondary accent |
+| `rose.50`–`rose.900` | Soft danger |
+| `green.600` | Success |
+| `yellow.600` | Warning |
+| `red.600` | Error |
+
+## Layout Patterns
+
+### Page Structure
+```
+<Flex direction="column" gap={{ base: "5", md: "7" }}>
+  <PageHeader title={t("page.title")} description={t("page.description")} />
+  {/* filters */}
+  {/* content */}
+</Flex>
+```
+- Main content area: `maxW="1200px"`, `p={{ base: "4", md: "8" }}`
+- Bottom padding on mobile: `pb="24"` (for floating bottom nav clearance)
+- Always use `PageHeader` component for page titles — consistent across all pages
+
+### Bento Card (Dashboard)
+```
+<Box
+  bg="bg.card"
+  borderRadius="2xl"
+  borderWidth="1px"
+  borderColor="border"
+  p={{ base: "4", md: "5" }}
+  css={{ ...animations.cardHover, ...animations.listItem(index) }}
+>
+```
+- `borderRadius="2xl"` — iOS widget feel
+- `p="5"` or `p="6"` — generous padding
+- `cardHover` animation on all cards
+
+### Stat Card (VetCRM style)
+```
+┌─────────────────────┐
+│ Label          Icon  │
+│                      │
+│ BIG NUMBER           │
+│                      │
+│ View link >          │
+└─────────────────────┘
+```
+- Label top-right, icon top-left (RTL)
+- Number: `size="3xl"`, `fontWeight="700"`, colored
+- Link at bottom: `textStyle="xs"`, `color="fg.muted"`, chevron icon
+- Each card has unique color + tinted icon background
+
+### Table (Desktop) → Cards (Mobile)
+- Desktop (≥md): CSS Grid with `SortableHeader` columns
+- Mobile (<md): stacked cards with key info visible
+- Same data, same filters — just different layout
+- Grid header row: `bg="bg.muted"`, `borderRadius="lg"`
+- Table rows: `_hover={{ bg: "bg.muted" }}`, `cursor="pointer"`
+
+### Transaction Row (Dashboard)
+```
+┌─────────────────────────────────────────┐
+│ [Avatar] Name        [Type Badge] Date  │
+│          Item summary                   │
+└─────────────────────────────────────────┘
+```
+- Avatar: circle with initials, colored by type (sage=issue, sky=return)
+- Type badge: pill with colored background
+- Date: desktop only, hidden on mobile
+
+## Shared Components (`src/components/`)
+
+| Component | When to use |
+|-----------|-------------|
+| `PageHeader` | Every page — title + optional description |
+| `SearchInput` | Search with debounce + clear button |
+| `FilterSelect` | Chakra NativeSelect dropdown for filters |
+| `SortableHeader` | Clickable table column header with sort arrows |
+| `StatusBadge` | Item status pill (ok/low/gap) with icon |
+| `EmptyState` | No data / no results state |
+| `ErrorBanner` | Modal overlay for error messages |
+| `UserAvatar` | Google avatar with initial fallback |
+
+## Animations (`src/theme/animations.ts`)
+
+Keyframes defined in `src/theme/animations.css` (imported in main.tsx).
+
+| Helper | Usage |
+|--------|-------|
+| `animations.fadeInUp` | Page sections on load |
+| `animations.scaleIn` | Empty state appearance |
+| `animations.pulse` | Attention-drawing (gap badge) |
+| `animations.cardHover` | Card lift + shadow on hover |
+| `animations.listItem(index)` | Staggered list entrance (50ms apart) |
+| `animations.delayedFadeInUp(sec)` | Delayed section entrance |
+
+### Rules
+- Every card: `css={animations.cardHover}`
+- Every list: `css={animations.listItem(index)}`
+- Page sections: `css={animations.delayedFadeInUp(0.25)}`
+- Never use inline `@keyframes` — they're defined globally
+- Interactive elements: minimum `transition: "all 0.15s ease"`
+
+## Navigation
+
+### Desktop Sidebar
+- Light: `bg="bg.card"`, `borderInlineEndWidth="1px"`
+- Active: `bg="sage.100"`, `color="sage.700"`, orange indicator bar (`sunburst.400`)
+- Inactive: `color="fg.muted"`, hover `bg="bg.muted"`
+- Icons: Lucide, `size={18}`
+
+### Mobile Bottom Nav
+- Floating: `sage.800`, `borderRadius="2xl"`, side margins, `shadow="xl"`
+- Active: `sage.600` pill + white icon + label (CSS transition, no DOM swap)
+- Inactive: icon only, `color="#8db1a8"`
+- Orange top indicator bar on active tab
+- Label animates via `max-width` + `opacity` transition
+
+## Icons
+
+- Source: **Lucide** (`lucide-react`) — NOT react-icons
+- Default: `size={20}`, `strokeWidth={1.5}`
+- Active/selected: `strokeWidth={2}` or `strokeWidth={2.2}`
+- Always import specific icons: `import { Package } from "lucide-react"`
 
 ## Status Badges
 
-| Status | Hebrew | colorPalette |
-|--------|--------|-------------|
-| Active | פעיל | `green` |
-| Draft | טיוטה | `gray` |
-| Closed | סגור | `blue` |
-| Shortage | חוסר | `red` |
-| Pending | ממתין | `yellow` |
+| Status | Hebrew | Color | Icon |
+|--------|--------|-------|------|
+| ok | תקין | `green.600` | `CircleCheck` |
+| low | מלאי נמוך | `yellow.600` | `AlertTriangle` |
+| gap | חוסר | `red.600` | `CircleX` (+ pulse animation) |
 
-## Button Variants
+Activity statuses:
 
-| Use Case | Code |
-|----------|------|
-| Primary action | `<Button colorPalette="brand">שמור</Button>` |
-| Secondary | `<Button variant="outline">ביטול</Button>` |
-| Danger | `<Button colorPalette="red">מחק</Button>` |
-| Ghost/subtle | `<Button variant="ghost">עוד</Button>` |
+| Status | Hebrew | Color |
+|--------|--------|-------|
+| active | פעיל | `green.600` |
+| draft | טיוטה | `gray.500` |
+| closed | סגור | `sky.600` |
+| credit | זיכוי | `yellow.600` |
+| reconciliation | התאמה | `sunburst.400` |
 
-## Responsive Breakpoints
+## Buttons
 
-- `base` (0px) — mobile, single column
-- `md` (768px) — tablet, sidebar appears
-- `lg` (1024px) — desktop, full layout
+| Use Case | Style |
+|----------|-------|
+| Primary action | `bg="sage.600"` `color="white"` `_hover={{ bg: "sage.700" }}` |
+| Secondary | `variant="outline"` `borderRadius="lg"` |
+| Danger | `colorPalette="red"` |
+| Ghost/subtle | `variant="ghost"` |
 
-```tsx
-// Example responsive props
-p={{ base: "4", md: "6" }}
-display={{ base: "none", md: "flex" }}
-gridTemplateColumns={{ base: "1fr", md: "1fr 1fr", lg: "1fr 1fr 1fr 1fr" }}
-```
+## Font
+
+- **Heebo** (Google Fonts) — Hebrew-optimized
+- Loaded in `index.html`, configured in `src/theme/index.ts`
+- `fonts.heading` and `fonts.body` both set to Heebo
 
 ## RTL Cheat Sheet
 
 ```tsx
 // ✅ Correct (RTL-safe)
-ps="4"              // padding-inline-start
-pe="4"              // padding-inline-end
-ms="auto"           // margin-inline-start
+ps="4"                    // padding-inline-start
+pe="4"                    // padding-inline-end
+ms="auto"                 // margin-inline-start
 textAlign="start"
 borderInlineEndWidth="1px"
-borderStartRadius="lg"
+insetInlineStart="0"
+<ChevronLeft />           // points right in RTL = "forward"
 
 // ❌ Wrong (breaks in RTL)
-pl="4"
-pr="4"
-ml="auto"
+pl="4"  pr="4"  ml="auto"
 textAlign="right"
 borderRightWidth="1px"
-borderTopRightRadius="lg"
+left="0"
 ```
 
-## Icons
+## i18n
 
-- Source: `react-icons/md` (Material Design)
-- Default size: `boxSize="5"` (20px)
-- Compact: `boxSize="4"` (16px)
-- Always wrap with Chakra `Icon`
-
-## Shadows
-
-| Token | Usage |
-|-------|-------|
-| `sm` | Cards, subtle elevation |
-| `md` | Dialogs, modals, dropdowns |
-| `lg` | Floating elements, popovers |
-
-## Toasts vs Alerts
-
-- **Toast**: transient success/info ("הפריט נשמר") — auto-dismiss 3-5s
-- **Inline Alert**: errors and destructive outcomes — persistent, user must dismiss
-- **Banner**: offline state — sticky at top, persistent until reconnected
+- All user-facing text via `t()` from `src/lib/i18n`
+- Hebrew: `src/lib/i18n/he.json` (default)
+- English: `src/lib/i18n/en.json`
+- Never hardcode Hebrew strings in components
