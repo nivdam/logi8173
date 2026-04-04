@@ -37,6 +37,19 @@ export const BottomNav = () => (
           {({ isActive }) => (
             isActive ? (
               <Flex
+                direction="column"
+                align="center"
+                position="relative"
+              >
+                <Box
+                  position="absolute"
+                  top="-7px"
+                  w="8"
+                  h="3px"
+                  borderBottomRadius="full"
+                  bg="#E8942A"
+                />
+              <Flex
                 align="center"
                 gap="2"
                 bg="sage.600"
@@ -53,6 +66,7 @@ export const BottomNav = () => (
                 >
                   {item.label}
                 </Text>
+              </Flex>
               </Flex>
             ) : (
               <Flex align="center" justify="center" w="10" h="10">
