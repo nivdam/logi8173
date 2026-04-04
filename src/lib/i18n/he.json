@@ -84,7 +84,8 @@
     "loading": "טוען...",
     "noResults": "לא נמצאו תוצאות",
     "error": "שגיאה",
-    "success": "בוצע בהצלחה"
+    "success": "בוצע בהצלחה",
+    "viewAll": "הצג הכל"
   },
   "status": {
     "active": "פעיל",

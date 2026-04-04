@@ -45,7 +45,7 @@ export const InventoryPage = () => {
   }
 
   return (
-    <VStack align="stretch" gap="5">
+    <VStack align="stretch" gap={{ base: "5", md: "7" }}>
       <PageHeader title={t("inventory.title")} description={t("inventory.description")} />
 
       <Flex gap="3" flexWrap="wrap" align="center">

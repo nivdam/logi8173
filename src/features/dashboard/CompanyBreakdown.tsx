@@ -10,40 +10,43 @@ export const CompanyBreakdown = ({ breakdown }: Props) => {
 
   return (
     <Box
+      p={{ base: "5", md: "6" }}
       bg="bg.card"
-      borderRadius="xl"
+      borderRadius="2xl"
       borderWidth="1px"
       borderColor="border"
-      p={{ base: "4", md: "5" }}
-      css={{
-        ...animations.fadeInUp,
-        animationDelay: "0.3s",
-        opacity: 0,
-      }}
+      h="full"
+      css={animations.cardHover}
     >
-      <Heading size="md" fontWeight="600" mb="4">
+      <Heading size="md" fontWeight="600" mb="5">
         {t("dashboard.companyBreakdown")}
       </Heading>
-      <Grid gap="3">
+      <Grid gap="4">
         {breakdown.map((company, index) => (
-          <Flex key={company.companyName} align="center" gap="3">
-            <Text textStyle="sm" w={{ base: "16", md: "20" }} flexShrink={0}>
-              {company.companyName}
-            </Text>
-            <Box flex="1" h="7" bg="bg.muted" borderRadius="md" overflow="hidden">
+          <Flex
+            key={company.companyName}
+            direction="column"
+            gap="1.5"
+            css={{
+              ...animations.listItem(index),
+              "@keyframes fadeInUp": animations.fadeInUp["@keyframes fadeInUp"],
+            }}
+          >
+            <Flex justify="space-between" align="baseline">
+              <Text textStyle="sm" fontWeight="500">{company.companyName}</Text>
+              <Text textStyle="sm" fontWeight="700">{company.issuedCount}</Text>
+            </Flex>
+            <Box h="2" bg="bg.muted" borderRadius="full" overflow="hidden">
               <Box
                 h="full"
                 bg={barColors[index % barColors.length]}
-                borderRadius="md"
+                borderRadius="full"
                 css={{
                   width: `${(company.issuedCount / maxCount) * 100}%`,
-                  transition: "width 0.5s ease",
+                  transition: "width 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
                 }}
               />
             </Box>
-            <Text textStyle="sm" fontWeight="600" w="8" textAlign="start">
-              {company.issuedCount}
-            </Text>
           </Flex>
         ))}
       </Grid>

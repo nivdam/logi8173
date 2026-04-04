@@ -84,7 +84,8 @@
     "loading": "Loading...",
     "noResults": "No results found",
     "error": "Error",
-    "success": "Success"
+    "success": "Success",
+    "viewAll": "View All"
   },
   "status": {
     "active": "Active",

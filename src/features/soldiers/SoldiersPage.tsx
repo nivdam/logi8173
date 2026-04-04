@@ -45,7 +45,7 @@ export const SoldiersPage = () => {
   }
 
   return (
-    <VStack align="stretch" gap="5">
+    <VStack align="stretch" gap={{ base: "5", md: "7" }}>
       <PageHeader title={t("soldiers.title")} description={t("soldiers.description")} />
 
       <Flex gap="3" flexWrap="wrap" align="center">
