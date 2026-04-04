@@ -12,86 +12,69 @@ const navItems = [
 ]
 
 export const BottomNav = () => (
-  <Box
-    display={{ base: "block", md: "none" }}
+  <Flex
+    as="nav"
+    display={{ base: "flex", md: "none" }}
     position="fixed"
     bottom="0"
     insetInline="0"
     zIndex="sticky"
-    px="3"
-    pb="env(safe-area-inset-bottom, 8px)"
+    bg="bg.card"
+    borderTopWidth="1px"
+    borderColor="border"
+    justify="space-around"
+    alignItems="center"
+    h="16"
+    pb="env(safe-area-inset-bottom, 0px)"
   >
-    <Flex
-      as="nav"
-      justify="space-around"
-      alignItems="center"
-      h="14"
-      bg="gray.800"
-      borderRadius="2xl"
-      mx="auto"
-      maxW="md"
-      position="relative"
-      shadow="lg"
-    >
-      {navItems.map((item) => (
-        <NavLink key={item.to} to={item.to} end={item.to === "/"}>
-          {({ isActive }) => (
+    {navItems.map((item) => (
+      <NavLink key={item.to} to={item.to} end={item.to === "/"}>
+        {({ isActive }) => (
+          <Flex
+            direction="column"
+            align="center"
+            gap="1"
+            py="1.5"
+            position="relative"
+          >
+            {isActive ? (
+              <Box
+                position="absolute"
+                top="-2px"
+                w="10"
+                h="3px"
+                borderBottomRadius="full"
+                bg="sage.400"
+              />
+            ) : null}
             <Flex
               align="center"
               justify="center"
-              position="relative"
-              h="full"
-              px="2"
+              gap="1.5"
+              px={isActive ? "3" : "0"}
+              py={isActive ? "1.5" : "0"}
+              borderRadius="full"
+              bg={isActive ? "sage.100" : "transparent"}
             >
+              <item.icon
+                size={20}
+                strokeWidth={isActive ? 2 : 1.4}
+                style={{ opacity: isActive ? 1 : 0.4 }}
+              />
               {isActive ? (
-                <>
-                  {/* Top bar indicator */}
-                  <Box
-                    position="absolute"
-                    top="0"
-                    w="10"
-                    h="3px"
-                    borderBottomRadius="full"
-                    bg="#E8942A"
-                  />
-                  {/* Active pill */}
-                  <Flex
-                    align="center"
-                    gap="2"
-                    bg="gray.700"
-                    borderRadius="xl"
-                    px="4"
-                    py="2"
-                  >
-                    <item.icon size={18} strokeWidth={2.2} color="white" />
-                    <Text
-                      textStyle="sm"
-                      fontWeight="600"
-                      color="white"
-                      lineHeight="1"
-                    >
-                      {item.label}
-                    </Text>
-                  </Flex>
-                </>
-              ) : (
-                <Flex
-                  align="center"
-                  justify="center"
-                  w="10"
-                  h="10"
+                <Text
+                  textStyle="xs"
+                  fontWeight="400"
+                  color="sage.700"
+                  lineHeight="1"
                 >
-                  <item.icon
-                    size={20}
-                    strokeWidth={1.4}
-                    color="#9CA3AF"
-                  />
-                </Flex>
-              )}
+                  {item.label}
+                </Text>
+              ) : null}
             </Flex>
-          )}
-        </NavLink>
-      ))}
-    </Flex>
-  </Box>
+          </Flex>
+        )}
+      </NavLink>
+    ))}
+  </Flex>
 )
