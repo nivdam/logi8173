@@ -39,7 +39,10 @@ export const AppNav = () => (
             _hover={{ bg: isActive ? "sage.100" : "bg.muted" }}
             cursor="pointer"
             position="relative"
-            css={{ transition: "all 0.2s ease" }}
+            css={{
+              transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+              transform: isActive ? "translateX(-2px)" : "translateX(0)",
+            }}
           >
             <Box
               position="absolute"
@@ -55,12 +58,13 @@ export const AppNav = () => (
                 transition: "all 0.25s ease",
               }}
             />
-            <item.icon
-              size={18}
-              strokeWidth={isActive ? 2.2 : 1.8}
-              style={{ transition: "all 0.2s ease" }}
-            />
-            <Text textStyle="sm">{item.label}</Text>
+            <Box css={{ transition: "transform 0.2s ease", transform: isActive ? "scale(1.1)" : "scale(1)", display: "flex" }}>
+              <item.icon
+                size={18}
+                strokeWidth={isActive ? 2.2 : 1.8}
+              />
+            </Box>
+            <Text textStyle="sm" css={{ transition: "all 0.2s ease" }}>{item.label}</Text>
           </Flex>
         )}
       </NavLink>
