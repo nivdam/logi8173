@@ -58,6 +58,11 @@ export const colors = defineTokens.colors({
   red: {
     600: { value: "#F92457" },
   },
+  sunburst: {
+    300: { value: "#F0C75E" },
+    400: { value: "#E8942A" },
+    500: { value: "#D9831F" },
+  },
 })
 
 export const semanticColors = defineSemanticTokens.colors({
