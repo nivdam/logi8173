@@ -12,65 +12,90 @@ const navItems = [
 ]
 
 export const BottomNav = () => (
-  <Flex
-    as="nav"
-    display={{ base: "flex", md: "none" }}
+  <Box
+    display={{ base: "block", md: "none" }}
     position="fixed"
     bottom="0"
     insetInline="0"
     zIndex="sticky"
-    bg="bg.card"
-    borderTopWidth="1px"
-    borderColor="border"
-    justify="space-around"
-    alignItems="center"
-    h="16"
-    pb="env(safe-area-inset-bottom, 0px)"
-    shadow="lg"
+    px="3"
+    pb="env(safe-area-inset-bottom, 8px)"
   >
-    {navItems.map((item) => (
-      <NavLink key={item.to} to={item.to} end={item.to === "/"}>
-        {({ isActive }) => (
-          <Flex
-            direction="column"
-            align="center"
-            gap="1"
-            py="1"
-            minW="16"
-            transition="all 0.2s ease"
-          >
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="center"
-              w={isActive ? "14" : "10"}
-              h="8"
-              borderRadius="full"
-              bg={isActive ? "#2D5A3D" : "transparent"}
-              transition="all 0.3s cubic-bezier(0.4, 0, 0.2, 1)"
+    <Flex
+      as="nav"
+      justify="space-around"
+      alignItems="center"
+      h="14"
+      bg="gray.900"
+      borderRadius="2xl"
+      mx="auto"
+      maxW="md"
+      position="relative"
+      shadow="lg"
+    >
+      {navItems.map((item) => (
+        <NavLink key={item.to} to={item.to} end={item.to === "/"}>
+          {({ isActive }) => (
+            <Flex
+              align="center"
+              justify="center"
+              position="relative"
+              h="full"
+              px="2"
             >
-              <item.icon
-                size={20}
-                strokeWidth={isActive ? 2.3 : 1.5}
-                color={isActive ? "#F0C75E" : undefined}
-                style={{
-                  opacity: isActive ? 1 : 0.45,
-                  transition: "all 0.2s ease",
-                }}
-              />
-            </Box>
-            <Text
-              textStyle="xs"
-              fontWeight={isActive ? "600" : "400"}
-              color={isActive ? "#2D5A3D" : "fg.muted"}
-              transition="all 0.2s ease"
-              lineHeight="1"
-            >
-              {item.label}
-            </Text>
-          </Flex>
-        )}
-      </NavLink>
-    ))}
-  </Flex>
+              {isActive ? (
+                <>
+                  {/* Triangle indicator above pill */}
+                  <Box
+                    position="absolute"
+                    top="-1px"
+                    css={{
+                      width: 0,
+                      height: 0,
+                      borderLeft: "6px solid transparent",
+                      borderRight: "6px solid transparent",
+                      borderTop: "6px solid",
+                      borderTopColor: "#E8942A",
+                    }}
+                  />
+                  {/* Active pill */}
+                  <Flex
+                    align="center"
+                    gap="2"
+                    bg="gray.700"
+                    borderRadius="xl"
+                    px="4"
+                    py="2"
+                  >
+                    <item.icon size={18} strokeWidth={2.2} color="white" />
+                    <Text
+                      textStyle="sm"
+                      fontWeight="600"
+                      color="white"
+                      lineHeight="1"
+                    >
+                      {item.label}
+                    </Text>
+                  </Flex>
+                </>
+              ) : (
+                <Flex
+                  align="center"
+                  justify="center"
+                  w="10"
+                  h="10"
+                >
+                  <item.icon
+                    size={20}
+                    strokeWidth={1.4}
+                    color="#9CA3AF"
+                  />
+                </Flex>
+              )}
+            </Flex>
+          )}
+        </NavLink>
+      ))}
+    </Flex>
+  </Box>
 )
