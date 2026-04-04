@@ -22,11 +22,29 @@
   },
   "dashboard": {
     "title": "לוח בקרה",
-    "description": "סיכום מצב מלאי, פעילויות אחרונות וחוסרים."
+    "description": "סיכום מצב מלאי, פעילויות אחרונות וחוסרים.",
+    "totalItems": "סה\"כ פריטים",
+    "lowStock": "מלאי נמוך",
+    "gaps": "חוסרים",
+    "activeActivities": "פעילויות פעילות",
+    "recentTransactions": "טרנזקציות אחרונות",
+    "companyBreakdown": "הנפקות לפי פלוגה",
+    "txType": "סוג",
+    "txReceiver": "מקבל",
+    "txItems": "פריטים",
+    "txDate": "תאריך"
   },
   "inventory": {
     "title": "מלאי",
-    "description": "ניהול פריטי ציוד — חיפוש, סינון ומעקב כמויות."
+    "description": "ניהול פריטי ציוד — חיפוש, סינון ומעקב כמויות.",
+    "name": "שם הפריט",
+    "itemNumber": "מק\"ט",
+    "category": "קטגוריה",
+    "qty": "כמות",
+    "status": "סטטוס",
+    "searchPlaceholder": "חיפוש לפי שם או מק\"ט...",
+    "noResultsDescription": "לא נמצאו פריטים התואמים לחיפוש.",
+    "clearFilters": "נקה סינון"
   },
   "activities": {
     "title": "פעילויות",
@@ -34,7 +52,15 @@
   },
   "soldiers": {
     "title": "חיילים",
-    "description": "רשימת חיילים — חיפוש לפי שם, מספר אישי או פלוגה."
+    "description": "רשימת חיילים — חיפוש לפי שם, מספר אישי או פלוגה.",
+    "fullName": "שם מלא",
+    "personalId": "מספר אישי",
+    "company": "פלוגה",
+    "platoon": "מחלקה",
+    "phone": "טלפון",
+    "searchPlaceholder": "חיפוש לפי שם או מספר אישי...",
+    "noResultsDescription": "לא נמצאו חיילים התואמים לחיפוש.",
+    "clearSearch": "נקה חיפוש"
   },
   "settings": {
     "title": "הגדרות",

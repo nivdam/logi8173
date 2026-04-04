@@ -22,11 +22,29 @@
   },
   "dashboard": {
     "title": "Dashboard",
-    "description": "Inventory health, recent activity, and shortage summary."
+    "description": "Inventory health, recent activity, and shortage summary.",
+    "totalItems": "Total Items",
+    "lowStock": "Low Stock",
+    "gaps": "Gaps",
+    "activeActivities": "Active Activities",
+    "recentTransactions": "Recent Transactions",
+    "companyBreakdown": "Issuance by Company",
+    "txType": "Type",
+    "txReceiver": "Receiver",
+    "txItems": "Items",
+    "txDate": "Date"
   },
   "inventory": {
     "title": "Inventory",
-    "description": "Manage equipment items — search, filter, and track quantities."
+    "description": "Manage equipment items — search, filter, and track quantities.",
+    "name": "Item Name",
+    "itemNumber": "Item #",
+    "category": "Category",
+    "qty": "Quantity",
+    "status": "Status",
+    "searchPlaceholder": "Search by name or item #...",
+    "noResultsDescription": "No items match your search.",
+    "clearFilters": "Clear Filters"
   },
   "activities": {
     "title": "Activities",
@@ -34,7 +52,15 @@
   },
   "soldiers": {
     "title": "Soldiers",
-    "description": "Soldier directory — search by name, ID, or company."
+    "description": "Soldier directory — search by name, ID, or company.",
+    "fullName": "Full Name",
+    "personalId": "Personal ID",
+    "company": "Company",
+    "platoon": "Platoon",
+    "phone": "Phone",
+    "searchPlaceholder": "Search by name or personal ID...",
+    "noResultsDescription": "No soldiers match your search.",
+    "clearSearch": "Clear Search"
   },
   "settings": {
     "title": "Settings",
