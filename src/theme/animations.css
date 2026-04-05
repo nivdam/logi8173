@@ -12,3 +12,14 @@
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
 }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes progressSlide {
+  0% { width: 0%; margin-inline-start: 0%; }
+  50% { width: 40%; margin-inline-start: 30%; }
+  100% { width: 0%; margin-inline-start: 100%; }
+}

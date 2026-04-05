@@ -1,5 +1,8 @@
 import { APPS_SCRIPT_URL } from "./config"
 import { getStoredSession, clearSession } from "./auth-helpers"
+import { mockApiRequest } from "./mock-api"
+
+const USE_MOCK = !APPS_SCRIPT_URL || APPS_SCRIPT_URL === "mock"
 
 const getIdToken = (): string => {
   const session = getStoredSession()
@@ -11,26 +14,38 @@ const appsScriptRequest = async <T>(
   action: string,
   body: Record<string, unknown> = {},
 ): Promise<T> => {
-  const url = new URL(APPS_SCRIPT_URL)
-  url.searchParams.set("action", action)
-
-  const response = await fetch(url.toString(), {
-    method: "POST",
-    headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify({ ...body, idToken: getIdToken() }),
-    redirect: "follow",
-  })
-
-  const json = await response.json()
-
-  if (!json.ok) {
-    if (json.error === "TOKEN_EXPIRED") {
-      return handleTokenExpired(() => appsScriptRequest<T>(action, body))
-    }
-    throw new ApiError(json.error, json.message)
+  if (USE_MOCK) {
+    return mockApiRequest<T>(action)
   }
 
-  return json.data as T
+  try {
+    const url = new URL(APPS_SCRIPT_URL)
+    url.searchParams.set("action", action)
+
+    const response = await fetch(url.toString(), {
+      method: "POST",
+      headers: { "Content-Type": "text/plain" },
+      body: JSON.stringify({ ...body, idToken: getIdToken() }),
+      redirect: "follow",
+    })
+
+    const json = await response.json()
+
+    if (!json.ok) {
+      if (json.error === "TOKEN_EXPIRED") {
+        return handleTokenExpired(() => appsScriptRequest<T>(action, body))
+      }
+      throw new ApiError(json.error, json.message)
+    }
+
+    return json.data as T
+  } catch {
+    // API unreachable — fall back to mock data in dev mode
+    if (import.meta.env.DEV) {
+      return mockApiRequest<T>(action)
+    }
+    throw new ApiError("NETWORK_ERROR", "Could not reach the server")
+  }
 }
 
 let refreshAttemptInProgress = false
@@ -75,8 +90,6 @@ const silentReAuth = (): Promise<string | undefined> => {
         clearTimeout(timeoutId)
         reject(new Error("Silent re-auth failed"))
       }
-      // On success, the GoogleOAuthProvider callback fires and stores the new token.
-      // We check if a new token arrived.
       clearTimeout(timeoutId)
       const session = getStoredSession()
       resolve(session?.idToken)

@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router-dom"
 import { AppLayout } from "./components/AppLayout"
 import { RequireAuth } from "./components/RequireAuth"
+import { RequireSetup } from "./components/RequireSetup"
 import { DashboardPage } from "./features/dashboard/DashboardPage"
 import { InventoryPage } from "./features/inventory/InventoryPage"
 import { SoldiersPage } from "./features/soldiers/SoldiersPage"
@@ -14,7 +15,9 @@ export const App = () => (
     <Route
       element={
         <RequireAuth>
-          <AppLayout />
+          <RequireSetup>
+            <AppLayout />
+          </RequireSetup>
         </RequireAuth>
       }
     >

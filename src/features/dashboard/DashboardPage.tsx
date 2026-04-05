@@ -5,8 +5,7 @@ import {
 } from "lucide-react"
 import { PageHeader } from "../../components/PageHeader"
 import { t } from "../../lib/i18n"
-import { dashboardMock } from "../../mocks/dashboard.mock"
-import { activitiesMock } from "../../mocks/activities.mock"
+import { useDashboard, useActivities } from "../../api"
 import { formatDateTime, getTransactionTypeLabel, getActivityStatusLabel } from "../../lib/formatters"
 import { animations } from "../../theme/animations"
 import type { Transaction, ActivityStatus } from "../../types"
@@ -25,7 +24,13 @@ const activityStatusColor: Record<ActivityStatus, string> = {
   reconciliation: "sunburst.400",
 }
 
-export const DashboardPage = () => (
+export const DashboardPage = () => {
+  const { data: dashboard } = useDashboard()
+  const { data: activities } = useActivities()
+
+  if (!dashboard || !activities) return null
+
+  return (
   <Flex direction="column" gap={{ base: "6", md: "8" }}>
     {/* Header + actions */}
     <Flex justify="space-between" align={{ base: "start", md: "center" }} direction={{ base: "column", md: "row" }} gap="4">
@@ -46,7 +51,7 @@ export const DashboardPage = () => (
     <Grid templateColumns={{ base: "repeat(2, 1fr)", md: "repeat(4, 1fr)" }} gap={{ base: "3", md: "5" }}>
       <StatCard
         label={t("dashboard.totalItems")}
-        value={dashboardMock.totalItems}
+        value={dashboard.totalItems}
         icon={Package}
         color="sage.600"
         iconBg="sage.50"
@@ -55,7 +60,7 @@ export const DashboardPage = () => (
       />
       <StatCard
         label={t("dashboard.lowStock")}
-        value={dashboardMock.lowStockCount}
+        value={dashboard.lowStockCount}
         icon={AlertTriangle}
         color="sunburst.400"
         iconBg="sunburst.400/10"
@@ -64,7 +69,7 @@ export const DashboardPage = () => (
       />
       <StatCard
         label={t("dashboard.gaps")}
-        value={dashboardMock.gapCount}
+        value={dashboard.gapCount}
         icon={XCircle}
         color="red.600"
         iconBg="rose.50"
@@ -73,7 +78,7 @@ export const DashboardPage = () => (
       />
       <StatCard
         label={t("dashboard.activeActivities")}
-        value={dashboardMock.activeActivities}
+        value={dashboard.activeActivities}
         icon={CalendarCheck}
         color="sky.600"
         iconBg="sky.50"
@@ -104,7 +109,7 @@ export const DashboardPage = () => (
         </Flex>
 
         <Flex direction="column" gap="0">
-          {dashboardMock.recentTransactions.map((transaction, index) => (
+          {dashboard.recentTransactions.map((transaction, index) => (
             <Flex
               key={transaction.txId}
               gap="3"
@@ -190,7 +195,7 @@ export const DashboardPage = () => (
           </Flex>
 
           <Flex direction="column" gap="3">
-            {activitiesMock.map((activity, index) => (
+            {activities.map((activity, index) => (
               <Flex
                 key={activity.activityId}
                 justify="space-between"
@@ -235,8 +240,8 @@ export const DashboardPage = () => (
         >
           <Heading size="md" fontWeight="600" mb="5">{t("dashboard.companyBreakdown")}</Heading>
           <Flex direction="column" gap="4">
-            {dashboardMock.companyBreakdown.map((company, index) => {
-              const maxCount = Math.max(...dashboardMock.companyBreakdown.map((c) => c.issuedCount))
+            {dashboard.companyBreakdown.map((company, index) => {
+              const maxCount = Math.max(...dashboard.companyBreakdown.map((c) => c.issuedCount))
               return (
                 <Flex
                   key={company.companyName}
@@ -270,7 +275,8 @@ export const DashboardPage = () => (
       </Flex>
     </Grid>
   </Flex>
-)
+  )
+}
 
 const StatCard = ({ label, value, icon: Icon, color, iconBg, link, index }: StatCardProps) => (
   <Box

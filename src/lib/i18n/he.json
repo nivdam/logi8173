@@ -71,6 +71,27 @@
     "allCompanies": "כל הפלוגות",
     "allPlatoons": "כל המחלקות"
   },
+  "setup": {
+    "title": "הגדרת המערכת",
+    "subtitle": "ברוכים הבאים ל-8173 לוגיסטיקה",
+    "description": "לפני שמתחילים, צריך לאתחל את המערכת. הפעולה תיצור את כל התיקיות וגליונות ה-Google Sheets שנדרשים.",
+    "whatCreated": "מה ייווצר?",
+    "driveFolder": "תיקיית Google Drive ראשית",
+    "masterInventory": "גליון מלאי ראשי (בטן הימ\"ח)",
+    "operatorsSheet": "גליון מפעילים",
+    "soldiersSheet": "גליון חיילים",
+    "companiesSheet": "גליון פלוגות",
+    "activitiesRegistry": "גליון פעילויות + יומן ביקורת",
+    "signaturesFolder": "תיקיית חתימות",
+    "initializeButton": "אתחל מערכת",
+    "initializing": "מאתחל...",
+    "successTitle": "המערכת מוכנה!",
+    "successDescription": "כל הקבצים נוצרו בהצלחה ב-Google Drive.",
+    "openDrive": "פתח ב-Google Drive",
+    "continueToApp": "המשך לאפליקציה",
+    "errorTitle": "שגיאה באתחול",
+    "checking": "בודק מצב מערכת..."
+  },
   "settings": {
     "title": "הגדרות",
     "description": "ניהול מפעילים, פלוגות וחיבור ל-Google Drive."
@@ -90,7 +111,8 @@
     "noResults": "לא נמצאו תוצאות",
     "error": "שגיאה",
     "success": "בוצע בהצלחה",
-    "viewAll": "הצג הכל"
+    "viewAll": "הצג הכל",
+    "refreshData": "רענון נתונים"
   },
   "status": {
     "active": "פעיל",
