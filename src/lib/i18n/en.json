@@ -71,6 +71,27 @@
     "allCompanies": "All Companies",
     "allPlatoons": "All Platoons"
   },
+  "setup": {
+    "title": "System Setup",
+    "subtitle": "Welcome to 8173 Logistics",
+    "description": "Before we begin, the system needs to be initialized. This will create all required Google Drive folders and Sheets.",
+    "whatCreated": "What will be created?",
+    "driveFolder": "Root Google Drive folder",
+    "masterInventory": "Master inventory sheet (HIMACH)",
+    "operatorsSheet": "Operators sheet",
+    "soldiersSheet": "Soldiers sheet",
+    "companiesSheet": "Companies sheet",
+    "activitiesRegistry": "Activities registry + audit log",
+    "signaturesFolder": "Signatures folder",
+    "initializeButton": "Initialize System",
+    "initializing": "Initializing...",
+    "successTitle": "System Ready!",
+    "successDescription": "All files have been created successfully in Google Drive.",
+    "openDrive": "Open in Google Drive",
+    "continueToApp": "Continue to App",
+    "errorTitle": "Initialization Error",
+    "checking": "Checking system status..."
+  },
   "settings": {
     "title": "Settings",
     "description": "Manage operators, companies, and Google Drive connection."
@@ -90,7 +111,8 @@
     "noResults": "No results found",
     "error": "Error",
     "success": "Success",
-    "viewAll": "View All"
+    "viewAll": "View All",
+    "refreshData": "Refresh data"
   },
   "status": {
     "active": "Active",

@@ -7,7 +7,7 @@ import { FilterSelect } from "../../components/FilterSelect"
 import { EmptyState } from "../../components/EmptyState"
 import { t } from "../../lib/i18n"
 import { filterInventory, sortInventory } from "../../lib/filters"
-import { inventoryMock } from "../../mocks/inventory.mock"
+import { useInventory } from "../../api"
 import { InventoryTable } from "./InventoryTable"
 import type { SortConfig } from "../../components/SortableHeader"
 import type { ItemCategory, ItemStatus } from "../../types"
@@ -28,12 +28,13 @@ const statusOptions = [
 ]
 
 export const InventoryPage = () => {
+  const { data: inventoryItems = [] } = useInventory()
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<ItemCategory | undefined>(undefined)
   const [statusFilter, setStatusFilter] = useState<ItemStatus | undefined>(undefined)
   const [sort, setSort] = useState<SortConfig>({ key: "name", direction: "asc" })
 
-  const filtered = filterInventory(inventoryMock, searchQuery, categoryFilter, statusFilter)
+  const filtered = filterInventory(inventoryItems, searchQuery, categoryFilter, statusFilter)
   const sortedItems = sortInventory(filtered, sort)
 
   const hasActiveFilters = searchQuery || categoryFilter || statusFilter
