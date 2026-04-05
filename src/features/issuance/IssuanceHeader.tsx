@@ -1,38 +1,53 @@
-import { useState } from "react"
 import { Box, Button, DatePicker, Flex, Grid, Heading, Input, Portal, Text } from "@chakra-ui/react"
 import {
   CalendarDateTime,
   getLocalTimeZone,
 } from "@internationalized/date"
 import { Calendar } from "lucide-react"
-import { useAuth } from "../../lib/auth-context"
+import { useAuth } from "../../lib/use-auth"
 import { t } from "../../lib/i18n"
 import { SoldierAutocomplete } from "./SoldierAutocomplete"
 import type { DateValue } from "@internationalized/date"
 import type { Soldier } from "../../types"
 
-const createNow = (): CalendarDateTime => {
-  const now = new Date()
+const parseIsoToCalendar = (iso: string): CalendarDateTime => {
+  const date = new Date(iso)
   return new CalendarDateTime(
-    now.getFullYear(),
-    now.getMonth() + 1,
-    now.getDate(),
-    now.getHours(),
-    now.getMinutes(),
+    date.getFullYear(),
+    date.getMonth() + 1,
+    date.getDate(),
+    date.getHours(),
+    date.getMinutes(),
   )
+}
+
+const calendarToIso = (date: CalendarDateTime): string => {
+  const d = new Date(date.year, date.month - 1, date.day, date.hour, date.minute)
+  return d.toISOString()
+}
+
+const formatDateTime = (date: CalendarDateTime): string => {
+  const day = date.day.toString().padStart(2, "0")
+  const month = date.month.toString().padStart(2, "0")
+  const hours = String(date.hour).padStart(2, "0")
+  const minutes = String(date.minute).padStart(2, "0")
+  return `${day}/${month}/${date.year}   ·   ${hours}:${minutes}`
 }
 
 export const IssuanceHeader = ({
   receiver,
+  performedAt,
   onSelectReceiver,
   onClearReceiver,
+  onSetPerformedAt,
 }: IssuanceHeaderProps) => {
-  const { operator } = useAuth()
-  const [dateValue, setDateValue] = useState<CalendarDateTime[]>([createNow()])
+  const { operator, operatorProfile } = useAuth()
+  const accountDisplayName = operatorProfile?.fullName || t("auth.accountNameFallback")
 
-  const timeValue = dateValue[0]
-    ? `${String(dateValue[0].hour).padStart(2, "0")}:${String(dateValue[0].minute).padStart(2, "0")}`
-    : ""
+  const calendarValue = parseIsoToCalendar(performedAt)
+  const dateValue = [calendarValue]
+
+  const timeValue = `${String(calendarValue.hour).padStart(2, "0")}:${String(calendarValue.minute).padStart(2, "0")}`
 
   const handleTimeChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const parts = event.currentTarget.value.split(":")
@@ -41,28 +56,21 @@ export const IssuanceHeader = ({
     const minutes = Number(parts[1])
     if (Number.isNaN(hours) || Number.isNaN(minutes)) return
     if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) return
-    setDateValue((previous) => {
-      const current = previous[0] ?? createNow()
-      return [current.set({ hour: hours, minute: minutes })]
-    })
+    const updated = calendarValue.set({ hour: hours, minute: minutes })
+    onSetPerformedAt(calendarToIso(updated))
   }
 
   const handleDateChange = (details: { value: DateValue[] }) => {
     const newDate = details.value[0]
-    if (!newDate) {
-      setDateValue([])
-      return
-    }
-    const previousTime = dateValue[0] ?? { hour: 0, minute: 0 }
-    setDateValue([
-      new CalendarDateTime(
-        newDate.year,
-        newDate.month,
-        newDate.day,
-        previousTime.hour,
-        previousTime.minute,
-      ),
-    ])
+    if (!newDate) return
+    const updated = new CalendarDateTime(
+      newDate.year,
+      newDate.month,
+      newDate.day,
+      calendarValue.hour,
+      calendarValue.minute,
+    )
+    onSetPerformedAt(calendarToIso(updated))
   }
 
   return (
@@ -81,10 +89,12 @@ export const IssuanceHeader = ({
             borderRadius="lg"
           >
             <Text textStyle="sm" fontWeight="600">
-              {operator?.fullName}
+              {accountDisplayName}
             </Text>
             <Text textStyle="xs" color="fg.muted">
-              {operator?.email}
+              {operatorProfile
+                ? `${operatorProfile.rank} · ${operatorProfile.personalId} · ${operatorProfile.phone}`
+                : operator?.email}
             </Text>
           </Flex>
         </Box>
@@ -121,9 +131,7 @@ export const IssuanceHeader = ({
           <DatePicker.Control>
             <DatePicker.Trigger asChild>
               <Button variant="outline" size="lg" borderRadius="lg" justifyContent="space-between" w={{ base: "full", md: "340px" }} px="5" h="12">
-                {dateValue[0]
-                  ? `${dateValue[0].day.toString().padStart(2, "0")}/${dateValue[0].month.toString().padStart(2, "0")}/${dateValue[0].year}   ·   ${String(dateValue[0].hour).padStart(2, "0")}:${String(dateValue[0].minute).padStart(2, "0")}`
-                  : t("issuance.date")}
+                {formatDateTime(calendarValue)}
                 <Calendar size={16} />
               </Button>
             </DatePicker.Trigger>
@@ -174,6 +182,8 @@ export const IssuanceHeader = ({
 
 type IssuanceHeaderProps = {
   receiver: Soldier | undefined
+  performedAt: string
   onSelectReceiver: (soldier: Soldier) => void
   onClearReceiver: () => void
+  onSetPerformedAt: (iso: string) => void
 }

@@ -4,10 +4,13 @@ import { X, User } from "lucide-react"
 import { useSoldiers } from "../../api"
 import { t } from "../../lib/i18n"
 import type { Soldier } from "../../types"
+import { AddSoldierDialog } from "./AddSoldierDialog"
 
 export const SoldierAutocomplete = ({ selectedSoldier, onSelect, onClear }: SoldierAutocompleteProps) => {
   const { data: soldiers = [] } = useSoldiers()
   const [inputValue, setInputValue] = useState("")
+  const [isComboboxOpen, setIsComboboxOpen] = useState(false)
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
   const filtered = useMemo(() => {
     if (!inputValue) return soldiers
@@ -39,6 +42,24 @@ export const SoldierAutocomplete = ({ selectedSoldier, onSelect, onClear }: Sold
     if (soldier) {
       onSelect(soldier)
       setInputValue("")
+      setIsComboboxOpen(false)
+    }
+  }
+
+  const handleSoldierCreated = (soldier: Soldier) => {
+    onSelect(soldier)
+    setInputValue("")
+  }
+
+  const handleOpenAddDialog = () => {
+    setIsComboboxOpen(false)
+    setIsAddDialogOpen(true)
+  }
+
+  const handleAddDialogOpenChange = (open: boolean) => {
+    setIsAddDialogOpen(open)
+    if (!open) {
+      setIsComboboxOpen(false)
     }
   }
 
@@ -94,65 +115,86 @@ export const SoldierAutocomplete = ({ selectedSoldier, onSelect, onClear }: Sold
   }
 
   return (
-    <Combobox.Root
-      collection={collection}
-      inputValue={inputValue}
-      onInputValueChange={handleInputChange}
-      onValueChange={handleSelect}
-      openOnClick
-    >
-      <Combobox.Control>
-        <Combobox.Input
-          placeholder={t("issuance.searchSoldierPlaceholder")}
-          aria-label={t("issuance.receiverSection")}
-        />
-        <Combobox.Trigger />
-      </Combobox.Control>
-      <Portal>
-        <Combobox.Positioner>
-          <Combobox.Content>
-            <Combobox.List>
-              {filtered.map((soldier) => (
-                <Combobox.Item key={soldier.personalId} item={soldier}>
-                  <Combobox.ItemText>
-                    <Flex align="center" gap="2">
-                      <Flex
-                        align="center"
-                        justify="center"
-                        w="7"
-                        h="7"
-                        borderRadius="full"
-                        bg="sage.50"
-                        color="sage.600"
-                        flexShrink={0}
-                      >
-                        <Text textStyle="xs" fontWeight="600">
-                          {soldier.fullName.charAt(0)}
-                        </Text>
+    <>
+      <Combobox.Root
+        collection={collection}
+        inputValue={inputValue}
+        open={isComboboxOpen}
+        onInputValueChange={handleInputChange}
+        onValueChange={handleSelect}
+        onOpenChange={(details) => setIsComboboxOpen(details.open)}
+        openOnClick
+      >
+        <Combobox.Control>
+          <Combobox.Input
+            placeholder={t("issuance.searchSoldierPlaceholder")}
+            aria-label={t("issuance.receiverSection")}
+          />
+          <Combobox.Trigger />
+        </Combobox.Control>
+        <Portal>
+          <Combobox.Positioner>
+            <Combobox.Content>
+              <Combobox.List>
+                {filtered.map((soldier) => (
+                  <Combobox.Item key={soldier.personalId} item={soldier}>
+                    <Combobox.ItemText>
+                      <Flex align="center" gap="2">
+                        <Flex
+                          align="center"
+                          justify="center"
+                          w="7"
+                          h="7"
+                          borderRadius="full"
+                          bg="sage.50"
+                          color="sage.600"
+                          flexShrink={0}
+                        >
+                          <Text textStyle="xs" fontWeight="600">
+                            {soldier.fullName.charAt(0)}
+                          </Text>
+                        </Flex>
+                        <Box minW="0">
+                          <Text textStyle="sm" fontWeight="500" truncate>
+                            {soldier.fullName}
+                          </Text>
+                          <Text textStyle="xs" color="fg.muted">
+                            {soldier.personalId}
+                            {soldier.company && ` · ${soldier.company}`}
+                          </Text>
+                        </Box>
                       </Flex>
-                      <Box minW="0">
-                        <Text textStyle="sm" fontWeight="500" truncate>
-                          {soldier.fullName}
-                        </Text>
-                        <Text textStyle="xs" color="fg.muted">
-                          {soldier.personalId}
-                          {soldier.company && ` · ${soldier.company}`}
-                        </Text>
-                      </Box>
-                    </Flex>
-                  </Combobox.ItemText>
-                </Combobox.Item>
-              ))}
-            </Combobox.List>
-            <Combobox.Empty>
-              <Text textStyle="sm" color="fg.muted" p="3" textAlign="center">
-                {t("issuance.noSoldiersFound")}
-              </Text>
-            </Combobox.Empty>
-          </Combobox.Content>
-        </Combobox.Positioner>
-      </Portal>
-    </Combobox.Root>
+                    </Combobox.ItemText>
+                  </Combobox.Item>
+                ))}
+              </Combobox.List>
+              <Combobox.Empty>
+                <Flex direction="column" gap="3" p="3" align="stretch">
+                  <Text textStyle="sm" color="fg.muted" textAlign="center">
+                    {t("issuance.noSoldiersFound")}
+                  </Text>
+                  <Button
+                    variant="outline"
+                    colorPalette="sage"
+                    size="sm"
+                    onClick={handleOpenAddDialog}
+                  >
+                    {t("issuance.addNewSoldier")}
+                  </Button>
+                </Flex>
+              </Combobox.Empty>
+            </Combobox.Content>
+          </Combobox.Positioner>
+        </Portal>
+      </Combobox.Root>
+
+      <AddSoldierDialog
+        open={isAddDialogOpen}
+        initialQuery={inputValue}
+        onOpenChange={handleAddDialogOpenChange}
+        onCreated={handleSoldierCreated}
+      />
+    </>
   )
 }
 

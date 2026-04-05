@@ -1,16 +1,6 @@
-import { useState } from "react"
 import { Button, Flex, Heading, Image, Text, VStack } from "@chakra-ui/react"
 import { t } from "../lib/i18n"
 import logo from "../assets/logo-8173.png"
-
-export const useErrorBanner = () => {
-  const [error, setError] = useState<string | undefined>(undefined)
-
-  const showError = (message: string) => setError(message)
-  const clearError = () => setError(undefined)
-
-  return { error, showError, clearError }
-}
 
 export const ErrorBanner = ({ message, onDismiss }: Props) => {
   if (!message) return null

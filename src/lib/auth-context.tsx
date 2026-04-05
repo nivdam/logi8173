@@ -1,55 +1,78 @@
-import { createContext, useContext, useState, useCallback } from "react"
+import { useCallback, useState } from "react"
 import { googleLogout } from "@react-oauth/google"
-import type { AuthState, AuthenticatedOperator } from "./auth.types"
+import type { AuthState, AuthenticatedOperator, OperatorProfile } from "./auth.types"
 import {
   getStoredSession,
+  getStoredOperatorProfile,
+  storeOperatorProfile,
+  clearStoredOperatorProfile,
   storeSession,
   clearSession,
+  updateStoredSessionProfile,
 } from "./auth-helpers"
 import type { StoredSession } from "./auth-helpers"
-
-const AuthContext = createContext<AuthState | undefined>(undefined)
-const AuthLoginContext = createContext<((session: StoredSession) => void) | undefined>(undefined)
+import { AuthContext, AuthLoginContext } from "./auth-store"
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const initialSession = getStoredSession()
   const [status, setStatus] = useState<AuthState["status"]>(() => {
-    const stored = getStoredSession()
-    return stored ? "authenticated" : "unauthenticated"
+    return initialSession ? "authenticated" : "unauthenticated"
   })
   const [operator, setOperator] = useState<AuthenticatedOperator | undefined>(
-    () => getStoredSession()?.operator,
+    () => initialSession?.operator,
+  )
+  const [operatorProfile, setOperatorProfile] = useState<OperatorProfile | undefined>(
+    () => initialSession?.operatorProfile,
   )
 
   const handleLoginSuccess = useCallback((session: StoredSession) => {
-    storeSession(session)
+    const nextProfile =
+      session.operatorProfile ?? getStoredOperatorProfile(session.operator.email)
+    storeSession({ ...session, operatorProfile: nextProfile })
     setOperator(session.operator)
+    setOperatorProfile(nextProfile)
     setStatus("authenticated")
   }, [])
+
+  const saveOperatorProfile = useCallback(
+    (profile: OperatorProfile) => {
+      if (!operator) return
+      storeOperatorProfile(operator.email, profile)
+      updateStoredSessionProfile(profile)
+      setOperatorProfile(profile)
+    },
+    [operator],
+  )
+
+  const clearOperatorProfile = useCallback(() => {
+    if (!operator) return
+    clearStoredOperatorProfile(operator.email)
+    updateStoredSessionProfile(undefined)
+    setOperatorProfile(undefined)
+  }, [operator])
 
   const logout = useCallback(() => {
     clearSession()
     googleLogout()
     setOperator(undefined)
+    setOperatorProfile(undefined)
     setStatus("unauthenticated")
   }, [])
 
   return (
-    <AuthContext.Provider value={{ status, operator, logout }}>
+    <AuthContext.Provider
+      value={{
+        status,
+        operator,
+        operatorProfile,
+        saveOperatorProfile,
+        clearOperatorProfile,
+        logout,
+      }}
+    >
       <AuthLoginContext.Provider value={handleLoginSuccess}>
         {children}
       </AuthLoginContext.Provider>
     </AuthContext.Provider>
   )
-}
-
-export const useAuth = (): AuthState => {
-  const context = useContext(AuthContext)
-  if (!context) throw new Error("useAuth must be used within AuthProvider")
-  return context
-}
-
-export const useAuthLogin = () => {
-  const context = useContext(AuthLoginContext)
-  if (!context) throw new Error("useAuthLogin must be used within AuthProvider")
-  return context
 }
