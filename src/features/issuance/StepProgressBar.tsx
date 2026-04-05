@@ -12,7 +12,7 @@ export const StepProgressBar = ({ currentStep }: Props) => {
   const currentIndex = STEPS.findIndex((step) => step.key === currentStep)
 
   return (
-    <Flex align="center" gap="2" w="100%">
+    <Flex align="center" gap="2" w="100%" role="navigation" aria-label={t("issuance.step")}>
       {STEPS.map((step, index) => {
         const isActive = index === currentIndex
         const isCompleted = index < currentIndex
@@ -31,6 +31,8 @@ export const StepProgressBar = ({ currentStep }: Props) => {
               flexShrink={0}
               bg={stepBg}
               color={stepColor}
+              aria-label={`${t("issuance.step")} ${index + 1}: ${step.label()}`}
+              aria-current={isActive ? "step" : undefined}
               fontWeight="600"
               textStyle="xs"
               css={{ transition: "all 0.2s ease" }}

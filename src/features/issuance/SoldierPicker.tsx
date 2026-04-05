@@ -62,8 +62,17 @@ const SoldierRow = ({ soldier, index, onSelect }: SoldierRowProps) => {
       px="3"
       borderRadius="xl"
       cursor="pointer"
+      role="button"
+      tabIndex={0}
+      aria-label={`${t("issuance.selectSoldier")}: ${soldier.fullName}`}
       _hover={{ bg: "bg.muted" }}
       onClick={handleSelect}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault()
+          handleSelect()
+        }
+      }}
       css={{
         ...animations.listItem(index),
         transition: "background 0.15s ease",

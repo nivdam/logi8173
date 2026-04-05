@@ -79,6 +79,7 @@ export const ItemSelectorRow = ({
 
       <Flex align="center" gap="1">
         <Button
+          aria-label={`${t("common.delete")} ${name}`}
           variant="ghost"
           size="xs"
           borderRadius="full"
@@ -105,6 +106,7 @@ export const ItemSelectorRow = ({
           {selectedQty}
         </Flex>
         <Button
+          aria-label={`${t("common.add")} ${name}`}
           variant="ghost"
           size="xs"
           borderRadius="full"

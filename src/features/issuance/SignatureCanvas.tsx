@@ -50,6 +50,8 @@ export const SignatureCanvas = ({ onSign, signatureData }: Props) => {
         borderRadius="xl"
         overflow="hidden"
         bg="white"
+        role="img"
+        aria-label={t("issuance.signHere")}
         css={{ transition: "border-color 0.2s ease", touchAction: "none" }}
       >
         <ReactSignatureCanvas

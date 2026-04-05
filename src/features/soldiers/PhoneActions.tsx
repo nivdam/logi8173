@@ -35,8 +35,10 @@ export const PhoneActions = ({ phone }: Props) => {
           dir="ltr"
           cursor="pointer"
           display="inline"
+          tabIndex={0}
           _hover={{ textDecoration: "underline" }}
-          role="cell"
+          role="button"
+          aria-label={`${phone} — ${t("soldiers.call")} / ${t("soldiers.whatsapp")}`}
         >
           {phone}
         </Text>

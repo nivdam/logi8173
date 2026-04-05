@@ -103,8 +103,9 @@ export const IssuanceReview = ({
 
       {/* Notes */}
       <Box css={animations.delayedFadeInUp(0.2)}>
-        <Text textStyle="sm" fontWeight="500" mb="2">{t("issuance.notes")}</Text>
+        <Text textStyle="sm" fontWeight="500" mb="2" id="notes-label">{t("issuance.notes")}</Text>
         <Textarea
+          aria-labelledby="notes-label"
           value={notes}
           onChange={handleNotesChange}
           placeholder={t("issuance.notesPlaceholder")}
