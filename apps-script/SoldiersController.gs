@@ -5,12 +5,14 @@
 var SoldiersController = {
   list: function(context) {
     var sheetId = getConfigProperty_('SOLDIERS_SHEET_ID');
+    ensureSheetHeaders_(sheetId, 'soldiers', SHEET_HEADERS['soldiers']);
     var rows = readAllRows_(sheetId, 'soldiers');
 
     return rows.map(function(row) {
       return {
         personalId: row.personal_id,
         fullName: row.full_name,
+        rank: row.rank || '',
         company: row.company,
         platoon: row.platoon || '',
         phone: row.phone || '',
@@ -21,11 +23,12 @@ var SoldiersController = {
 
   upsert: function(context) {
     var sheetId = getConfigProperty_('SOLDIERS_SHEET_ID');
+    ensureSheetHeaders_(sheetId, 'soldiers', SHEET_HEADERS['soldiers']);
     var body = context.request.body;
     var now = new Date().toISOString();
 
-    if (!body.personalId || !body.fullName || !body.company) {
-      throw createError_('VALIDATION_ERROR', 'personalId, fullName, and company are required');
+    if (!body.personalId || !body.fullName || !body.rank || !body.company) {
+      throw createError_('VALIDATION_ERROR', 'personalId, fullName, rank, and company are required');
     }
 
     var existing = findRow_(sheetId, 'soldiers', 'personal_id', body.personalId);
@@ -34,6 +37,7 @@ var SoldiersController = {
       var updated = {
         personal_id: body.personalId,
         full_name: body.fullName,
+        rank: body.rank,
         company: body.company,
         platoon: body.platoon || '',
         phone: body.phone || '',
@@ -52,6 +56,7 @@ var SoldiersController = {
     var newSoldier = {
       personal_id: body.personalId,
       full_name: body.fullName,
+      rank: body.rank,
       company: body.company,
       platoon: body.platoon || '',
       phone: body.phone || '',

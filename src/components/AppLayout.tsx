@@ -1,18 +1,41 @@
-import { Box, Button, Flex, Heading, Image, Text } from "@chakra-ui/react";
+import { useState } from "react";
+import { Box, Button, Flex, Heading, Image, Menu, Portal, Text } from "@chakra-ui/react";
 import { Outlet } from "react-router-dom";
-import { useAuth } from "../lib/auth-context";
+import { useAuth } from "../lib/use-auth";
 import { useAdaptivePolling } from "../lib/useAdaptivePolling";
 import { t } from "../lib/i18n";
 import logo from "../assets/logo.png";
 import { AppNav } from "./AppNav";
 import { BottomNav } from "./BottomNav";
 import { FetchProgressBar } from "./FetchProgressBar";
+import { OperatorProfileDialog } from "./OperatorProfileDialog";
 import { RefreshDataButton } from "./RefreshDataButton";
 import { UserAvatar } from "./UserAvatar";
+import type { OperatorProfile } from "../lib/auth.types";
 
 export const AppLayout = () => {
   useAdaptivePolling();
-  const { operator, logout } = useAuth();
+  const { operator, operatorProfile, saveOperatorProfile, clearOperatorProfile, logout } = useAuth();
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const accountDisplayName = operatorProfile?.fullName || t("auth.accountNameFallback");
+
+  const handleOpenProfileDialog = () => {
+    setIsProfileDialogOpen(true)
+  }
+
+  const handleProfileDialogOpenChange = (details: { open: boolean }) => {
+    setIsProfileDialogOpen(details.open)
+  }
+
+  const handleResetProfile = () => {
+    clearOperatorProfile()
+    setIsProfileDialogOpen(false)
+  }
+
+  const handleSaveProfile = (profile: OperatorProfile) => {
+    saveOperatorProfile(profile)
+    setIsProfileDialogOpen(false)
+  }
 
   return (
     <Flex direction="column" minH="100dvh">
@@ -35,19 +58,42 @@ export const AppLayout = () => {
         <Flex ms="auto" align="center" gap="2">
           <RefreshDataButton />
           {operator ? (
-            <>
-              <UserAvatar
-                name={operator.fullName}
-                avatarUrl={operator.avatarUrl}
-                email={operator.email}
-              />
-              <Text textStyle="sm" display={{ base: "none", md: "block" }}>
-                {operator.fullName}
-              </Text>
-              <Button variant="ghost" size="sm" onClick={logout}>
-                {t("auth.logout")}
-              </Button>
-            </>
+            <Menu.Root positioning={{ placement: "bottom-end" }}>
+              <Menu.Trigger asChild>
+                <Button variant="ghost" px="2" h="auto">
+                  <Flex align="center" gap="2">
+                    <UserAvatar
+                      name={accountDisplayName}
+                      avatarUrl={operator.avatarUrl}
+                    />
+                    <Text textStyle="sm" display={{ base: "none", md: "block" }}>
+                      {accountDisplayName}
+                    </Text>
+                  </Flex>
+                </Button>
+              </Menu.Trigger>
+              <Portal>
+                <Menu.Positioner>
+                  <Menu.Content minW="220px">
+                    <Box px="3" py="2">
+                      <Text textStyle="sm" fontWeight="600">
+                        {accountDisplayName}
+                      </Text>
+                      <Text textStyle="xs" color="fg.muted">
+                        {operator.email}
+                      </Text>
+                    </Box>
+                    <Menu.Separator />
+                    <Menu.Item value="edit-profile" onClick={handleOpenProfileDialog}>
+                      {t("auth.editProfile")}
+                    </Menu.Item>
+                    <Menu.Item value="logout" onClick={logout}>
+                      {t("auth.logout")}
+                    </Menu.Item>
+                  </Menu.Content>
+                </Menu.Positioner>
+              </Portal>
+            </Menu.Root>
           ) : null}
         </Flex>
       </Flex>
@@ -66,6 +112,18 @@ export const AppLayout = () => {
         </Box>
       </Flex>
       <BottomNav />
+      {operator && isProfileDialogOpen ? (
+        <OperatorProfileDialog
+          open
+          onOpenChange={handleProfileDialogOpenChange}
+          defaultFullName={operatorProfile?.fullName ?? ""}
+          initialProfile={operatorProfile}
+          isSaving={false}
+          showReset={operatorProfile !== undefined}
+          onReset={handleResetProfile}
+          onSubmit={handleSaveProfile}
+        />
+      ) : null}
     </Flex>
   );
 };

@@ -1,6 +1,6 @@
-import { useReducer, useCallback, useEffect } from "react"
+import { useReducer, useCallback } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
-import { useAuth } from "../../../lib/auth-context"
+import { useAuth } from "../../../lib/use-auth"
 import { useCreateTransaction } from "../../../api"
 import { toaster } from "../../../lib/toaster"
 import { t } from "../../../lib/i18n"
@@ -17,39 +17,22 @@ import type { Soldier } from "../../../types"
 import type { InventoryItem } from "../../../types/inventory"
 import type { IssuanceLineItem } from "../issuance.types"
 
-type IssuanceFormState = {
-  formId: string | undefined
-  receiver: Soldier | undefined
-  lines: IssuanceLineItem[]
-  globalNotes: string
-  receiverSignature: string
-  giverSignature: string
-  showSuccess: boolean
-}
-
-type IssuanceFormAction =
-  | { type: "SET_RECEIVER"; payload: Soldier | undefined }
-  | { type: "ADD_LINE_FROM_INVENTORY"; payload: InventoryItem }
-  | { type: "ADD_CUSTOM_LINE"; payload: string }
-  | { type: "ADD_EMPTY_LINE" }
-  | { type: "UPDATE_LINE_FIELD"; payload: { lineId: string; field: keyof IssuanceLineItem; value: string | number | boolean } }
-  | { type: "BIND_LINE_TO_ITEM"; payload: { lineId: string; item: InventoryItem } }
-  | { type: "DUPLICATE_LINE"; payload: string }
-  | { type: "REMOVE_LINE"; payload: string }
-  | { type: "SET_GLOBAL_NOTES"; payload: string }
-  | { type: "SET_RECEIVER_SIGNATURE"; payload: string }
-  | { type: "SET_GIVER_SIGNATURE"; payload: string }
-  | { type: "SHOW_SUCCESS"; payload: string }
-  | { type: "RESET" }
-
 const createInitialState = (): IssuanceFormState => ({
   formId: undefined,
   receiver: undefined,
+  performedAt: new Date().toISOString(),
   lines: [createEmptyLine()],
+  expandedLineIds: [],
   globalNotes: "",
   receiverSignature: "",
   giverSignature: "",
   showSuccess: false,
+})
+
+const appendLine = (state: IssuanceFormState, line: IssuanceLineItem): IssuanceFormState => ({
+  ...state,
+  lines: [...state.lines, line],
+  expandedLineIds: [...state.expandedLineIds, line.lineId],
 })
 
 const reducer = (state: IssuanceFormState, action: IssuanceFormAction): IssuanceFormState => {
@@ -57,18 +40,14 @@ const reducer = (state: IssuanceFormState, action: IssuanceFormAction): Issuance
     case "SET_RECEIVER":
       return { ...state, receiver: action.payload }
 
-    case "ADD_LINE_FROM_INVENTORY": {
-      const newLine = createLineFromInventoryItem(action.payload)
-      return { ...state, lines: [...state.lines, newLine] }
-    }
+    case "ADD_LINE_FROM_INVENTORY":
+      return appendLine(state, createLineFromInventoryItem(action.payload))
 
-    case "ADD_CUSTOM_LINE": {
-      const newLine = createCustomLine(action.payload)
-      return { ...state, lines: [...state.lines, newLine] }
-    }
+    case "ADD_CUSTOM_LINE":
+      return appendLine(state, createCustomLine(action.payload))
 
     case "ADD_EMPTY_LINE":
-      return { ...state, lines: [...state.lines, createEmptyLine()] }
+      return appendLine(state, createEmptyLine())
 
     case "UPDATE_LINE_FIELD":
       return {
@@ -104,16 +83,31 @@ const reducer = (state: IssuanceFormState, action: IssuanceFormAction): Issuance
       const sourceIndex = state.lines.findIndex((line) => line.lineId === action.payload)
       if (sourceIndex === -1) return state
       const source = state.lines[sourceIndex]
-      const duplicate = duplicateLine(source)
+      const duplicated = duplicateLine(source)
       const before = state.lines.slice(0, sourceIndex + 1)
       const after = state.lines.slice(sourceIndex + 1)
-      return { ...state, lines: [...before, duplicate, ...after] }
+      return {
+        ...state,
+        lines: [...before, duplicated, ...after],
+        expandedLineIds: [...state.expandedLineIds, duplicated.lineId],
+      }
     }
 
     case "REMOVE_LINE": {
       const remaining = state.lines.filter((line) => line.lineId !== action.payload)
-      return { ...state, lines: remaining.length === 0 ? [createEmptyLine()] : remaining }
+      if (remaining.length === 0) return createInitialState()
+      return {
+        ...state,
+        lines: remaining,
+        expandedLineIds: state.expandedLineIds.filter((id) => id !== action.payload),
+      }
     }
+
+    case "SET_EXPANDED_LINE_IDS":
+      return { ...state, expandedLineIds: action.payload }
+
+    case "SET_PERFORMED_AT":
+      return { ...state, performedAt: action.payload }
 
     case "SET_GLOBAL_NOTES":
       return { ...state, globalNotes: action.payload }
@@ -133,22 +127,15 @@ const reducer = (state: IssuanceFormState, action: IssuanceFormAction): Issuance
 }
 
 export const useIssuanceForm = () => {
-  const { operator } = useAuth()
+  const { operator, operatorProfile } = useAuth()
   const navigate = useNavigate()
   const [, setSearchParams] = useSearchParams()
   const createTransaction = useCreateTransaction()
 
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState)
 
-  // Sync formId to URL after successful submit
-  useEffect(() => {
-    if (state.formId && state.showSuccess) {
-      setSearchParams({ id: state.formId }, { replace: true })
-    }
-  }, [state.formId, state.showSuccess, setSearchParams])
-
-  const savedSignatureUrl = operator?.savedSignatureUrl
-  const hasGiverSignature = state.giverSignature !== "" || (savedSignatureUrl !== undefined && savedSignatureUrl !== "")
+  const savedSignature = operatorProfile?.savedSignature || operator?.savedSignatureUrl
+  const hasGiverSignature = state.giverSignature !== "" || (savedSignature !== undefined && savedSignature !== "")
   const filledLines = getFilledLines(state.lines)
   const hasValidLines = filledLines.length > 0 && !filledLines.some(hasLineErrors)
 
@@ -160,60 +147,70 @@ export const useIssuanceForm = () => {
 
   const totalItemCount = filledLines.reduce((sum, line) => sum + line.qty, 0)
 
-  const handleSelectReceiver = useCallback((soldier: Soldier) => {
+  const handleSelectReceiver = (soldier: Soldier) => {
     dispatch({ type: "SET_RECEIVER", payload: soldier })
-  }, [])
+  }
 
-  const handleClearReceiver = useCallback(() => {
+  const handleClearReceiver = () => {
     dispatch({ type: "SET_RECEIVER", payload: undefined })
-  }, [])
+  }
 
-  const handleAddEmptyLine = useCallback(() => {
+  const handleSetPerformedAt = (iso: string) => {
+    dispatch({ type: "SET_PERFORMED_AT", payload: iso })
+  }
+
+  const handleAddEmptyLine = () => {
     dispatch({ type: "ADD_EMPTY_LINE" })
-  }, [])
+  }
 
-  const handleBindLineToItem = useCallback((lineId: string, item: InventoryItem) => {
+  const handleBindLineToItem = (lineId: string, item: InventoryItem) => {
     dispatch({ type: "BIND_LINE_TO_ITEM", payload: { lineId, item } })
-  }, [])
+  }
 
-  const handleUpdateLineField = useCallback((lineId: string, field: keyof IssuanceLineItem, value: string | number | boolean) => {
+  const handleUpdateLineField = (lineId: string, field: keyof IssuanceLineItem, value: string | number | boolean) => {
     dispatch({ type: "UPDATE_LINE_FIELD", payload: { lineId, field, value } })
-  }, [])
+  }
 
-  const handleDuplicateLine = useCallback((lineId: string) => {
+  const handleDuplicateLine = (lineId: string) => {
     dispatch({ type: "DUPLICATE_LINE", payload: lineId })
-  }, [])
+  }
 
-  const handleRemoveLine = useCallback((lineId: string) => {
+  const handleRemoveLine = (lineId: string) => {
     dispatch({ type: "REMOVE_LINE", payload: lineId })
-  }, [])
+  }
 
-  const handleSetGlobalNotes = useCallback((notes: string) => {
+  const handleSetGlobalNotes = (notes: string) => {
     dispatch({ type: "SET_GLOBAL_NOTES", payload: notes })
-  }, [])
+  }
 
-  const handleSetReceiverSignature = useCallback((base64: string) => {
+  const handleExpandedLineIdsChange = (expandedLineIds: string[]) => {
+    dispatch({ type: "SET_EXPANDED_LINE_IDS", payload: expandedLineIds })
+  }
+
+  const handleSetReceiverSignature = (base64: string) => {
     dispatch({ type: "SET_RECEIVER_SIGNATURE", payload: base64 })
-  }, [])
+  }
 
-  const handleSetGiverSignature = useCallback((base64: string) => {
+  const handleSetGiverSignature = (base64: string) => {
     dispatch({ type: "SET_GIVER_SIGNATURE", payload: base64 })
-  }, [])
+  }
 
   const handleSubmit = useCallback(() => {
+    if (createTransaction.isPending) return
     if (!state.receiver || !operator) return
 
     const transactionItems = mapLinesToTransactionItems(state.lines)
     if (transactionItems.length === 0) return
 
-    const giverSignatureValue = state.giverSignature || savedSignatureUrl || ""
+    const giverSignatureValue = state.giverSignature || savedSignature || ""
 
     createTransaction.mutate(
       {
         activityId: "act1",
         txType: "issue",
-        giverPersonalId: operator.email,
-        giverName: operator.fullName,
+        performedAt: state.performedAt,
+        giverPersonalId: operatorProfile?.personalId || operator.email,
+        giverName: operatorProfile?.fullName || operator.fullName,
         receiverPersonalId: state.receiver.personalId,
         receiverName: state.receiver.fullName,
         items: transactionItems,
@@ -223,6 +220,7 @@ export const useIssuanceForm = () => {
       },
       {
         onSuccess: (result) => {
+          setSearchParams({ id: result.txId }, { replace: true })
           dispatch({ type: "SHOW_SUCCESS", payload: result.txId })
         },
         onError: () => {
@@ -235,11 +233,12 @@ export const useIssuanceForm = () => {
         },
       },
     )
-  }, [state.receiver, state.lines, state.globalNotes, state.receiverSignature, state.giverSignature, savedSignatureUrl, operator, createTransaction])
+  }, [state.receiver, state.performedAt, state.lines, state.globalNotes, state.receiverSignature, state.giverSignature, savedSignature, operator, operatorProfile, createTransaction, setSearchParams])
 
-  const handleNewIssuance = useCallback(() => {
+  const handleNewIssuance = () => {
+    setSearchParams({}, { replace: true })
     dispatch({ type: "RESET" })
-  }, [])
+  }
 
   const handleBackToDashboard = useCallback(() => {
     navigate("/")
@@ -252,12 +251,14 @@ export const useIssuanceForm = () => {
     isSubmitting: createTransaction.isPending,
     handleSelectReceiver,
     handleClearReceiver,
+    handleSetPerformedAt,
     handleAddEmptyLine,
     handleBindLineToItem,
     handleUpdateLineField,
     handleDuplicateLine,
     handleRemoveLine,
     handleSetGlobalNotes,
+    handleExpandedLineIdsChange,
     handleSetReceiverSignature,
     handleSetGiverSignature,
     handleSubmit,
@@ -265,3 +266,32 @@ export const useIssuanceForm = () => {
     handleBackToDashboard,
   }
 }
+
+type IssuanceFormState = {
+  formId: string | undefined
+  receiver: Soldier | undefined
+  performedAt: string
+  lines: IssuanceLineItem[]
+  expandedLineIds: string[]
+  globalNotes: string
+  receiverSignature: string
+  giverSignature: string
+  showSuccess: boolean
+}
+
+type IssuanceFormAction =
+  | { type: "SET_RECEIVER"; payload: Soldier | undefined }
+  | { type: "SET_PERFORMED_AT"; payload: string }
+  | { type: "ADD_LINE_FROM_INVENTORY"; payload: InventoryItem }
+  | { type: "ADD_CUSTOM_LINE"; payload: string }
+  | { type: "ADD_EMPTY_LINE" }
+  | { type: "UPDATE_LINE_FIELD"; payload: { lineId: string; field: keyof IssuanceLineItem; value: string | number | boolean } }
+  | { type: "BIND_LINE_TO_ITEM"; payload: { lineId: string; item: InventoryItem } }
+  | { type: "DUPLICATE_LINE"; payload: string }
+  | { type: "REMOVE_LINE"; payload: string }
+  | { type: "SET_EXPANDED_LINE_IDS"; payload: string[] }
+  | { type: "SET_GLOBAL_NOTES"; payload: string }
+  | { type: "SET_RECEIVER_SIGNATURE"; payload: string }
+  | { type: "SET_GIVER_SIGNATURE"; payload: string }
+  | { type: "SHOW_SUCCESS"; payload: string }
+  | { type: "RESET" }

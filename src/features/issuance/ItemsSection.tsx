@@ -1,4 +1,3 @@
-import { useState, useEffect, useRef } from "react"
 import { Accordion, Badge, Box, Button, Flex, Grid, Heading, ScrollArea, Text } from "@chakra-ui/react"
 import { Plus } from "lucide-react"
 import { t } from "../../lib/i18n"
@@ -14,29 +13,9 @@ export const ItemsSection = ({
   onBindToItem,
   onDuplicate,
   onRemove,
+  expandedItems,
+  onExpandedItemsChange,
 }: ItemsSectionProps) => {
-  const [expandedItems, setExpandedItems] = useState<string[]>([])
-  const previousLineIdsRef = useRef<string[]>([])
-
-  // Auto-expand newly added lines on mobile, reset on form clear
-  useEffect(() => {
-    const currentIds = lines.map((line) => line.lineId)
-    const previousIds = previousLineIdsRef.current
-
-    // Reset: single empty line with no previous state
-    if (currentIds.length === 1 && previousIds.length !== 1) {
-      setExpandedItems([])
-      previousLineIdsRef.current = currentIds
-      return
-    }
-
-    const newIds = currentIds.filter((id) => !previousIds.includes(id))
-    if (newIds.length > 0) {
-      setExpandedItems((previous) => [...previous, ...newIds])
-    }
-    previousLineIdsRef.current = currentIds
-  }, [lines])
-
   return (
     <Box>
       <Flex align="center" justify="space-between" mb="3">
@@ -96,7 +75,7 @@ export const ItemsSection = ({
           collapsible
           multiple
           value={expandedItems}
-          onValueChange={(details) => setExpandedItems(details.value)}
+          onValueChange={(details) => onExpandedItemsChange(details.value)}
         >
           {lines.map((line, index) => (
             <ItemCardMobile
@@ -137,4 +116,6 @@ type ItemsSectionProps = {
   onBindToItem: (lineId: string, item: InventoryItem) => void
   onDuplicate: (lineId: string) => void
   onRemove: (lineId: string) => void
+  expandedItems: string[]
+  onExpandedItemsChange: (expandedItems: string[]) => void
 }

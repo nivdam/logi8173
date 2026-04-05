@@ -1,6 +1,6 @@
 import { Navigate } from "react-router-dom"
 import { Flex, Heading, Text, VStack } from "@chakra-ui/react"
-import { useAuth } from "../lib/auth-context"
+import { useAuth } from "../lib/use-auth"
 import { canAccessRoute } from "../lib/auth-helpers"
 import { t } from "../lib/i18n"
 import type { OperatorRole } from "../lib/auth.types"
