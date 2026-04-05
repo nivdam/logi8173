@@ -46,14 +46,40 @@ pnpm type-check   # TypeScript check
 
 ```
 src/
-├── api/           # Google Apps Script API client + React Query hooks
+├── api/           # React Query hooks per entity (useInventory, useSoldiers, etc.)
 ├── features/      # Feature modules (inventory, transactions, activities, soldiers, dashboard)
 ├── pages/         # Route pages
 ├── components/    # Shared UI components
-├── lib/           # Utilities, auth, config
-├── types/         # Shared types
+├── lib/           # Utilities, auth, config, api client
+├── types/         # Shared types (7 entities + setup)
 └── assets/        # Logo, static files
+
+apps-script/       # Google Apps Script backend (deployed separately to script.google.com)
+├── Main.gs        # doGet/doPost entry points
+├── Router.gs      # POST-only routing, 17 endpoints
+├── Auth.gs        # Token verification (cached) + operator lookup
+├── Config.gs      # PropertiesService + CacheService
+├── SheetsRepo.gs  # Low-level Sheets read/write
+├── DriveRepo.gs   # Folder/file/signature operations
+├── AuditLog.gs    # Mandatory audit + sheet protection
+├── *Controller.gs # Domain controllers (Setup, Inventory, Soldiers, etc.)
+└── appsscript.json
 ```
+
+## API Pattern
+
+- All requests are POST (idToken in body, never in URL)
+- Response: `{ ok: true, data }` or `{ ok: false, error, message }`
+- Actions routed via `?action=entity.verb` (e.g., `inventory.list`, `tx.create`)
+- LockService on mutations to prevent race conditions
+- Token verification cached via CacheService (5-min TTL)
+- Audit logging is mandatory — operation fails if audit fails
+
+## Deployment
+
+- **Frontend**: Vercel (auto-deploy from GitHub)
+- **Backend**: Google Apps Script (manual deploy from script.google.com)
+- **Config**: `SETUP_ADMIN_EMAIL` + `WEB_CLIENT_ID` must be set in Script Properties before first use
 
 ## Plan
 

@@ -10,6 +10,7 @@ type Activity = {
   openedBy: string
   startDate: string
   endDate: string | undefined
+  folderId: string
   createdAt: string
   closedAt: string | undefined
 }

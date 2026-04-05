@@ -1,0 +1,34 @@
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
+import { api } from "../lib/api"
+import type { InventoryItem } from "../types"
+
+export const useInventory = () =>
+  useQuery({
+    queryKey: ["inventory"],
+    queryFn: () => api.get<InventoryItem[]>("inventory.list"),
+  })
+
+export const useUpsertInventoryItem = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (item: UpsertInventoryItemInput) =>
+      api.post<{ itemId: string; name: string }>("inventory.upsert", item),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+    },
+  })
+}
+
+type UpsertInventoryItemInput = {
+  itemId?: string
+  itemNumber?: string
+  name: string
+  category: string
+  tags?: string[]
+  unitOfMeasure?: string
+  initialQty?: number
+  minThreshold?: number
+  notes?: string
+}
