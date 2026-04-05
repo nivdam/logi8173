@@ -1,4 +1,4 @@
-import { Box, Button, Flex, Grid, Heading, Text } from "@chakra-ui/react"
+import { Box, Button, Flex, Grid, Heading, Spinner, Text } from "@chakra-ui/react"
 import {
   Package, AlertTriangle, XCircle, CalendarCheck,
   Plus, Search, ChevronLeft,
@@ -25,8 +25,17 @@ const activityStatusColor: Record<ActivityStatus, string> = {
 }
 
 export const DashboardPage = () => {
-  const { data: dashboard } = useDashboard()
-  const { data: activities } = useActivities()
+  const { data: dashboard, isPending: isDashboardPending } = useDashboard()
+  const { data: activities, isPending: isActivitiesPending } = useActivities()
+  const isLoading = isDashboardPending || isActivitiesPending
+
+  if (isLoading) {
+    return (
+      <Flex justify="center" align="center" py="24">
+        <Spinner size="lg" color="sage.400" />
+      </Flex>
+    )
+  }
 
   if (!dashboard || !activities) return null
 
