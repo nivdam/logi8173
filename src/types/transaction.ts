@@ -5,6 +5,10 @@ type TransactionLineItem = {
   name: string
   qty: number
   condition: "new" | "used" | "damaged"
+  unitOfMeasure?: string
+  notes?: string
+  serialNumber?: string
+  isCustom?: boolean
 }
 
 type Transaction = {

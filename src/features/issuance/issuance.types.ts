@@ -1,13 +1,18 @@
-type IssuanceStep = "soldier" | "items" | "review" | "success"
+import type { UnitOfMeasure } from "../../types/inventory"
 
 type ItemCondition = "new" | "used" | "damaged"
 
-type SelectedItem = {
+type IssuanceLineItem = {
+  lineId: string
   itemId: string
+  catalogNumber: string
   name: string
-  availableQty: number
-  selectedQty: number
+  qty: number
+  unitOfMeasure: UnitOfMeasure
   condition: ItemCondition
+  notes: string
+  isCustom: boolean
+  availableQty: number
 }
 
-export type { IssuanceStep, ItemCondition, SelectedItem }
+export type { ItemCondition, IssuanceLineItem }

@@ -8,7 +8,7 @@ import { SoldiersPage } from "./features/soldiers/SoldiersPage"
 import { ActivitiesPage } from "./pages/ActivitiesPage"
 import { SettingsPage } from "./pages/SettingsPage"
 import { LoginPage } from "./pages/LoginPage"
-import { IssuanceWizard } from "./features/issuance/IssuanceWizard"
+import { IssuanceForm } from "./features/issuance/IssuanceForm"
 import { NotFoundPage } from "./pages/NotFoundPage"
 
 export const App = () => (
@@ -27,7 +27,7 @@ export const App = () => (
       <Route path="inventory" element={<InventoryPage />} />
       <Route path="activities" element={<ActivitiesPage />} />
       <Route path="soldiers" element={<SoldiersPage />} />
-      <Route path="issue" element={<IssuanceWizard />} />
+      <Route path="issue" element={<IssuanceForm />} />
       <Route
         path="settings"
         element={

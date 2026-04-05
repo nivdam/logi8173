@@ -36,6 +36,7 @@ type CreateTransactionInput = {
   items: TransactionLineItem[]
   notes?: string
   signatureBase64?: string
+  giverSignatureBase64?: string
   clientTxId?: string
 }
 
