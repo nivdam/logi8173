@@ -15,6 +15,7 @@ export const transactionsMock: Transaction[] = [
       { itemId: "i2", name: "קסדה קרבית", qty: 1, condition: "new" },
     ],
     notes: "הנפקה לאימון פלסם",
+    signatureUrl: "",
   },
   {
     txId: "tx2",
@@ -30,6 +31,7 @@ export const transactionsMock: Transaction[] = [
       { itemId: "i5", name: "פנס טקטי", qty: 1, condition: "used" },
     ],
     notes: "",
+    signatureUrl: "",
   },
   {
     txId: "tx3",
@@ -44,6 +46,7 @@ export const transactionsMock: Transaction[] = [
       { itemId: "i3", name: "מכשיר קשר מוטורולה", qty: 2, condition: "new" },
     ],
     notes: "2 מכשירים לפלוגה ב'",
+    signatureUrl: "",
   },
   {
     txId: "tx4",
@@ -58,6 +61,7 @@ export const transactionsMock: Transaction[] = [
       { itemId: "i1", name: "וסט מגן", qty: 1, condition: "used" },
     ],
     notes: "החזרה מתעסוקה מרץ",
+    signatureUrl: "",
   },
   {
     txId: "tx5",
@@ -73,6 +77,7 @@ export const transactionsMock: Transaction[] = [
       { itemId: "i5", name: "פנס טקטי", qty: 2, condition: "new" },
     ],
     notes: "ציוד לסיירת",
+    signatureUrl: "",
   },
   {
     txId: "tx6",
@@ -87,6 +92,7 @@ export const transactionsMock: Transaction[] = [
       { itemId: "i11", name: "אוזניות תקשורת", qty: 1, condition: "new" },
     ],
     notes: "",
+    signatureUrl: "",
   },
   {
     txId: "tx7",
@@ -102,6 +108,7 @@ export const transactionsMock: Transaction[] = [
       { itemId: "i12", name: "כפפות עבודה", qty: 1, condition: "damaged" },
     ],
     notes: "כפפות פגומות — לבדיקה",
+    signatureUrl: "",
   },
   {
     txId: "tx8",
@@ -116,6 +123,7 @@ export const transactionsMock: Transaction[] = [
       { itemId: "i4", name: "סוללות CR123", qty: -5, condition: "new" },
     ],
     notes: "תיקון ספירה — נמצאו 5 פחות מהרשום",
+    signatureUrl: "",
   },
   {
     txId: "tx9",
@@ -130,6 +138,7 @@ export const transactionsMock: Transaction[] = [
       { itemId: "i8", name: "ערכת עזרה ראשונה", qty: 1, condition: "new" },
     ],
     notes: "",
+    signatureUrl: "",
   },
   {
     txId: "tx10",
@@ -144,5 +153,6 @@ export const transactionsMock: Transaction[] = [
       { itemId: "i7", name: "מטען USB נייד", qty: 2, condition: "damaged" },
     ],
     notes: "מטענים שרופים — מחיקה",
+    signatureUrl: "",
   },
 ]

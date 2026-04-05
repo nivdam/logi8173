@@ -18,6 +18,7 @@ type Transaction = {
   performedAt: string
   items: TransactionLineItem[]
   notes: string
+  signatureUrl: string
 }
 
 export type { Transaction, TransactionType, TransactionLineItem }
