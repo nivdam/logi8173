@@ -7,28 +7,29 @@ import { FilterSelect } from "../../components/FilterSelect"
 import { EmptyState } from "../../components/EmptyState"
 import { t } from "../../lib/i18n"
 import { filterSoldiers, sortSoldiers, getUniquePlatoons } from "../../lib/filters"
-import { soldiersMock } from "../../mocks/soldiers.mock"
-import { companiesMock } from "../../mocks/companies.mock"
+import { useSoldiers, useCompanies } from "../../api"
 import { SoldiersTable } from "./SoldiersTable"
 import type { SortConfig } from "../../components/SortableHeader"
 
-const companyOptions = companiesMock.map((company) => ({
-  value: company.name,
-  label: company.name,
-}))
-
 export const SoldiersPage = () => {
+  const { data: soldiers = [] } = useSoldiers()
+  const { data: companies = [] } = useCompanies()
   const [searchQuery, setSearchQuery] = useState("")
   const [companyFilter, setCompanyFilter] = useState<string | undefined>(undefined)
   const [platoonFilter, setPlatoonFilter] = useState<string | undefined>(undefined)
   const [sort, setSort] = useState<SortConfig>({ key: "fullName", direction: "asc" })
 
-  const platoonOptions = getUniquePlatoons(soldiersMock, companyFilter).map((platoon) => ({
+  const companyOptions = companies.map((company) => ({
+    value: company.name,
+    label: company.name,
+  }))
+
+  const platoonOptions = getUniquePlatoons(soldiers, companyFilter).map((platoon) => ({
     value: platoon,
     label: platoon,
   }))
 
-  const filtered = filterSoldiers(soldiersMock, searchQuery, companyFilter, platoonFilter)
+  const filtered = filterSoldiers(soldiers, searchQuery, companyFilter, platoonFilter)
   const sortedSoldiers = sortSoldiers(filtered, sort)
 
   const hasActiveFilters = searchQuery || companyFilter || platoonFilter

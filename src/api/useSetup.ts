@@ -7,6 +7,8 @@ export const useSetupStatus = () =>
     queryKey: ["setup", "status"],
     queryFn: () => api.get<SetupStatus>("setup.status"),
     staleTime: Infinity,
+    refetchInterval: false,
+    retry: 1,
   })
 
 export const useInitializeSystem = () => {
