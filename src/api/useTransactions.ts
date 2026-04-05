@@ -29,6 +29,7 @@ export const useCreateTransaction = () => {
 type CreateTransactionInput = {
   activityId: string
   txType: TransactionType
+  performedAt?: string
   giverPersonalId?: string
   giverName?: string
   receiverPersonalId?: string

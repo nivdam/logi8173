@@ -18,7 +18,16 @@
     "noAccess": "Access Denied",
     "noAccessDescription": "You do not have permission to view this page.",
     "loginFailed": "Google sign-in failed. Please try again.",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "profileTitle": "Account Details For This Device",
+    "profileDescription": "Complete the local details used by forms on this device.",
+    "profileDeviceOnly": "This information is stored locally in this browser for convenience only.",
+    "rank": "Rank",
+    "accountNameFallback": "Account",
+    "selectRank": "Select rank",
+    "editProfile": "Account Details",
+    "clearProfile": "Clear Device Account Details",
+    "editSignature": "Edit Signature"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -212,7 +221,14 @@
     "maxQtyExceeded": "Maximum quantity",
     "submitError": "Issuance failed. Please try again.",
     "signaturesSection": "Signatures & Approval",
-    "addRow": "Add Row"
+    "addRow": "Add Row",
+    "addNewSoldier": "Add New Soldier",
+    "addSoldierTitle": "Add New Soldier",
+    "addSoldierDescription": "Create a new soldier directly from the issuance form.",
+    "addSoldierError": "Saving the soldier failed. Please try again.",
+    "companyPlaceholder": "Select company",
+    "noCompaniesFound": "No active companies found",
+    "duplicatePersonalId": "This personal ID already exists"
   },
   "notFound": {
     "title": "Oops, you got lost",

@@ -23,6 +23,7 @@ export const useUpsertSoldier = () => {
 type UpsertSoldierInput = {
   personalId: string
   fullName: string
+  rank: string
   company: string
   platoon?: string
   phone?: string

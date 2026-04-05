@@ -87,3 +87,33 @@ function createSheetWithHeaders_(spreadsheetId, sheetName, headers) {
   sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
   return sheet;
 }
+
+function ensureSheetHeaders_(spreadsheetId, sheetName, requiredHeaders) {
+  var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+  var sheet = spreadsheet.getSheetByName(sheetName);
+
+  if (!sheet) {
+    throw createError_('SHEET_NOT_FOUND', 'Sheet "' + sheetName + '" not found');
+  }
+
+  var lastColumn = sheet.getLastColumn();
+  var headers = lastColumn > 0
+    ? sheet.getRange(1, 1, 1, lastColumn).getValues()[0]
+    : [];
+  var missingHeaders = [];
+
+  for (var i = 0; i < requiredHeaders.length; i++) {
+    if (headers.indexOf(requiredHeaders[i]) === -1) {
+      missingHeaders.push(requiredHeaders[i]);
+    }
+  }
+
+  if (missingHeaders.length === 0) {
+    return;
+  }
+
+  var startColumn = headers.length + 1;
+  sheet.insertColumnsAfter(headers.length || 1, missingHeaders.length);
+  sheet.getRange(1, startColumn, 1, missingHeaders.length).setValues([missingHeaders]);
+  sheet.getRange(1, startColumn, 1, missingHeaders.length).setFontWeight('bold');
+}

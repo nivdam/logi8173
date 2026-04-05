@@ -18,7 +18,16 @@
     "noAccess": "אין הרשאה",
     "noAccessDescription": "אין לך הרשאה לצפות בדף זה.",
     "loginFailed": "התחברות עם Google נכשלה. נסה שוב.",
-    "loading": "טוען..."
+    "loading": "טוען...",
+    "profileTitle": "פרטי החשבון במכשיר זה",
+    "profileDescription": "השלם פרטים מקומיים שישמשו את הטפסים במכשיר הנוכחי.",
+    "profileDeviceOnly": "המידע נשמר מקומית בדפדפן הזה בלבד, לצורכי נוחות שימוש.",
+    "rank": "דרגה",
+    "accountNameFallback": "חשבון",
+    "selectRank": "בחר דרגה",
+    "editProfile": "פרטי החשבון",
+    "clearProfile": "נקה פרטי חשבון מהמכשיר",
+    "editSignature": "ערוך חתימה"
   },
   "dashboard": {
     "title": "לוח בקרה",
@@ -212,7 +221,14 @@
     "maxQtyExceeded": "כמות מקסימלית",
     "submitError": "ההנפקה נכשלה. נסה שוב.",
     "signaturesSection": "חתימות ואישור",
-    "addRow": "הוסף שורה"
+    "addRow": "הוסף שורה",
+    "addNewSoldier": "הוסף חייל חדש",
+    "addSoldierTitle": "הוספת חייל חדש",
+    "addSoldierDescription": "צור חייל חדש ישירות מתוך טופס ההנפקה.",
+    "addSoldierError": "שמירת החייל נכשלה. נסה שוב.",
+    "companyPlaceholder": "בחר פלוגה",
+    "noCompaniesFound": "לא נמצאו פלוגות פעילות",
+    "duplicatePersonalId": "מספר אישי כבר קיים במערכת"
   },
   "notFound": {
     "title": "אופס, הלכת לאיבוד",

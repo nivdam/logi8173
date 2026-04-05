@@ -14,7 +14,7 @@ var SHEET_HEADERS = {
     'saved_signature_url', 'created_at', 'updated_at', 'created_by'
   ],
   'soldiers': [
-    'personal_id', 'full_name', 'company', 'platoon', 'phone',
+    'personal_id', 'full_name', 'rank', 'company', 'platoon', 'phone',
     'created_at', 'updated_at'
   ],
   'companies': [
