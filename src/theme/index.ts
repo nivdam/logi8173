@@ -1,13 +1,12 @@
-import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react"
-import { colors, semanticColors } from "./foundation/colors"
-import { textStyles } from "./foundation/text-styles"
-import { shadows } from "./foundation/shadows"
+import { createSystem, defaultConfig, defineConfig } from "@chakra-ui/react";
+import { colors, semanticColors } from "./foundation/colors";
+import { textStyles } from "./foundation/text-styles";
+import { shadows } from "./foundation/shadows";
 
 const config = defineConfig({
   globalCss: {
     html: {
       colorPalette: "sage",
-      direction: "rtl",
       scrollBehavior: "smooth",
     },
     body: {
@@ -35,6 +34,6 @@ const config = defineConfig({
     },
     textStyles,
   },
-})
+});
 
-export const system = createSystem(defaultConfig, config)
+export const system = createSystem(defaultConfig, config);

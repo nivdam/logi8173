@@ -8,6 +8,8 @@ import { SoldiersPage } from "./features/soldiers/SoldiersPage"
 import { ActivitiesPage } from "./pages/ActivitiesPage"
 import { SettingsPage } from "./pages/SettingsPage"
 import { LoginPage } from "./pages/LoginPage"
+import { IssuanceForm } from "./features/issuance/IssuanceForm"
+import { NotFoundPage } from "./pages/NotFoundPage"
 
 export const App = () => (
   <Routes>
@@ -25,6 +27,7 @@ export const App = () => (
       <Route path="inventory" element={<InventoryPage />} />
       <Route path="activities" element={<ActivitiesPage />} />
       <Route path="soldiers" element={<SoldiersPage />} />
+      <Route path="issue" element={<IssuanceForm />} />
       <Route
         path="settings"
         element={
@@ -34,5 +37,6 @@ export const App = () => (
         }
       />
     </Route>
+    <Route path="*" element={<NotFoundPage />} />
   </Routes>
 )
