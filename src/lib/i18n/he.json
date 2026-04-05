@@ -69,7 +69,9 @@
     "noResultsDescription": "לא נמצאו חיילים התואמים לחיפוש.",
     "clearSearch": "נקה חיפוש",
     "allCompanies": "כל הפלוגות",
-    "allPlatoons": "כל המחלקות"
+    "allPlatoons": "כל המחלקות",
+    "call": "התקשר",
+    "whatsapp": "שלח וואטסאפ"
   },
   "setup": {
     "title": "הגדרת המערכת",

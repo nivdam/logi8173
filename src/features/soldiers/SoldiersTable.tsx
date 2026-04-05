@@ -2,6 +2,7 @@ import { Box, Flex, Grid, Text } from "@chakra-ui/react"
 import { SortableHeader, type SortConfig } from "../../components/SortableHeader"
 import { t } from "../../lib/i18n"
 import { animations } from "../../theme/animations"
+import { PhoneActions } from "./PhoneActions"
 import type { Soldier } from "../../types"
 
 export const SoldiersTable = ({ soldiers, sort, onSort }: Props) => (
@@ -45,7 +46,11 @@ export const SoldiersTable = ({ soldiers, sort, onSort }: Props) => (
           <Text textStyle="sm" color="fg.muted" role="cell">{soldier.personalId}</Text>
           <Text textStyle="sm" color="fg.muted" role="cell">{soldier.company}</Text>
           <Text textStyle="sm" color="fg.muted" role="cell">{soldier.platoon ?? "—"}</Text>
-          <Text textStyle="sm" color="fg.muted" role="cell" dir="ltr">{soldier.phone ?? "—"}</Text>
+          {soldier.phone ? (
+            <PhoneActions phone={soldier.phone} />
+          ) : (
+            <Text textStyle="sm" color="fg.muted" role="cell">—</Text>
+          )}
         </Grid>
       ))}
     </Grid>
@@ -85,7 +90,7 @@ export const SoldiersTable = ({ soldiers, sort, onSort }: Props) => (
             {soldier.phone ? (
               <Flex direction="column">
                 <Text textStyle="xs" color="fg.muted">{t("soldiers.phone")}</Text>
-                <Text textStyle="sm" dir="ltr">{soldier.phone}</Text>
+                <PhoneActions phone={soldier.phone} />
               </Flex>
             ) : null}
           </Flex>

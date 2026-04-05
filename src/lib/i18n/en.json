@@ -69,7 +69,9 @@
     "noResultsDescription": "No soldiers match your search.",
     "clearSearch": "Clear Search",
     "allCompanies": "All Companies",
-    "allPlatoons": "All Platoons"
+    "allPlatoons": "All Platoons",
+    "call": "Call",
+    "whatsapp": "Send WhatsApp"
   },
   "setup": {
     "title": "System Setup",
