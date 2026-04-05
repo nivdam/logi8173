@@ -39,6 +39,7 @@ export const AppLayout = () => {
               <UserAvatar
                 name={operator.fullName}
                 avatarUrl={operator.avatarUrl}
+                email={operator.email}
               />
               <Text textStyle="sm" display={{ base: "none", md: "block" }}>
                 {operator.fullName}

@@ -1,25 +1,20 @@
 import { useState } from "react"
-import { Flex, Image, Text } from "@chakra-ui/react"
+import { Flex, Image, Text, Tooltip } from "@chakra-ui/react"
 
-export const UserAvatar = ({ name, avatarUrl, size = "32px" }: Props) => {
+export const UserAvatar = ({ name, avatarUrl, email, size = "32px" }: Props) => {
   const [imageError, setImageError] = useState(false)
 
-  if (avatarUrl && !imageError) {
-    return (
-      <Image
-        src={avatarUrl}
-        alt={name}
-        boxSize={size}
-        borderRadius="full"
-        referrerPolicy="no-referrer"
-        onError={() => setImageError(true)}
-      />
-    )
-  }
-
-  const initial = name.charAt(0).toUpperCase()
-
-  return (
+  const avatar = avatarUrl && !imageError ? (
+    <Image
+      src={avatarUrl}
+      alt={name}
+      boxSize={size}
+      borderRadius="full"
+      referrerPolicy="no-referrer"
+      onError={() => setImageError(true)}
+      cursor={email ? "pointer" : undefined}
+    />
+  ) : (
     <Flex
       align="center"
       justify="center"
@@ -29,14 +24,29 @@ export const UserAvatar = ({ name, avatarUrl, size = "32px" }: Props) => {
       color="white"
       fontWeight="600"
       textStyle="sm"
+      cursor={email ? "pointer" : undefined}
     >
-      <Text>{initial}</Text>
+      <Text>{name.charAt(0).toUpperCase()}</Text>
     </Flex>
+  )
+
+  if (!email) return avatar
+
+  return (
+    <Tooltip.Root positioning={{ placement: "bottom" }}>
+      <Tooltip.Trigger asChild>
+        {avatar}
+      </Tooltip.Trigger>
+      <Tooltip.Positioner>
+        <Tooltip.Content>{email}</Tooltip.Content>
+      </Tooltip.Positioner>
+    </Tooltip.Root>
   )
 }
 
 type Props = {
   name: string
   avatarUrl: string | undefined
+  email?: string
   size?: string
 }
