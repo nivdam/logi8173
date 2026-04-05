@@ -56,7 +56,8 @@ export const SignatureCanvas = ({ onSign, signatureData }: Props) => {
       >
         <ReactSignatureCanvas
           ref={canvasRef}
-          penColor="var(--chakra-colors-sage-800)"
+          penColor="#1a1a1a"
+          backgroundColor="#ffffff"
           canvasProps={{
             width: 500,
             height: 200,
