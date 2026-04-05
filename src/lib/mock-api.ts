@@ -24,6 +24,14 @@ const mockHandlers: Record<string, () => unknown> = {
     savedSignatureUrl: undefined,
   }),
   "operators.list": () => [],
+  "tx.create": () => ({
+    txId: "tx_mock_" + Date.now(),
+    txType: "issue",
+    performedBy: "dev@mock.local",
+    performedAt: new Date().toISOString(),
+    items: [],
+    signatureUrl: "",
+  }),
 }
 
 export const mockApiRequest = <T>(action: string): Promise<T> => {
