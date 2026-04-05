@@ -1,5 +1,6 @@
-import { Flex, IconButton, Text, Tooltip } from "@chakra-ui/react"
+import { Button, Flex, Text } from "@chakra-ui/react"
 import { Phone, MessageCircle } from "lucide-react"
+import { PopoverArrow, PopoverBody, PopoverContent, PopoverRoot, PopoverTrigger } from "@chakra-ui/react"
 import { t } from "../../lib/i18n"
 
 const formatWhatsAppUrl = (phone: string): string => {
@@ -25,46 +26,60 @@ export const PhoneActions = ({ phone }: Props) => {
     window.open(formatWhatsAppUrl(phone), "_blank")
   }
 
+  const handleTriggerClick = (event: React.MouseEvent) => {
+    event.stopPropagation()
+  }
+
   return (
-    <Flex align="center" gap="1" role="cell">
-      <Text textStyle="sm" color="fg.muted" dir="ltr">{phone}</Text>
-      <Tooltip.Root positioning={{ placement: "top" }}>
-        <Tooltip.Trigger asChild>
-          <IconButton
-            aria-label={t("soldiers.call")}
-            variant="ghost"
-            size="xs"
-            borderRadius="full"
-            color="sage.600"
-            onClick={handleCall}
-            css={{ "&:hover": { color: "sage.700" } }}
-          >
-            <Phone size={14} />
-          </IconButton>
-        </Tooltip.Trigger>
-        <Tooltip.Positioner>
-          <Tooltip.Content>{t("soldiers.call")}</Tooltip.Content>
-        </Tooltip.Positioner>
-      </Tooltip.Root>
-      <Tooltip.Root positioning={{ placement: "top" }}>
-        <Tooltip.Trigger asChild>
-          <IconButton
-            aria-label={t("soldiers.whatsapp")}
-            variant="ghost"
-            size="xs"
-            borderRadius="full"
-            color="green.600"
-            onClick={handleWhatsApp}
-            css={{ "&:hover": { color: "green.700" } }}
-          >
-            <MessageCircle size={14} />
-          </IconButton>
-        </Tooltip.Trigger>
-        <Tooltip.Positioner>
-          <Tooltip.Content>{t("soldiers.whatsapp")}</Tooltip.Content>
-        </Tooltip.Positioner>
-      </Tooltip.Root>
-    </Flex>
+    <PopoverRoot positioning={{ placement: "bottom-start" }}>
+      <PopoverTrigger asChild>
+        <Text
+          textStyle="sm"
+          color="sunburst.500"
+          dir="ltr"
+          cursor="pointer"
+          _hover={{ textDecoration: "underline" }}
+          onClick={handleTriggerClick}
+          role="cell"
+        >
+          {phone}
+        </Text>
+      </PopoverTrigger>
+      <PopoverContent
+        w="auto"
+        borderRadius="xl"
+        shadow="lg"
+        p="1"
+      >
+        <PopoverArrow />
+        <PopoverBody p="1">
+          <Flex direction="column" gap="1">
+            <Button
+              variant="ghost"
+              size="sm"
+              borderRadius="lg"
+              justifyContent="start"
+              gap="2"
+              onClick={handleCall}
+            >
+              <Phone size={15} color="var(--chakra-colors-sage-600)" />
+              <Text textStyle="sm">{t("soldiers.call")}</Text>
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              borderRadius="lg"
+              justifyContent="start"
+              gap="2"
+              onClick={handleWhatsApp}
+            >
+              <MessageCircle size={15} color="var(--chakra-colors-green-600)" />
+              <Text textStyle="sm">{t("soldiers.whatsapp")}</Text>
+            </Button>
+          </Flex>
+        </PopoverBody>
+      </PopoverContent>
+    </PopoverRoot>
   )
 }
 
