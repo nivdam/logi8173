@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Flex, Text, VStack } from "@chakra-ui/react"
+import { Flex, Spinner, Text, VStack } from "@chakra-ui/react"
 import { UserSearch } from "lucide-react"
 import { PageHeader } from "../../components/PageHeader"
 import { SearchInput } from "../../components/SearchInput"
@@ -12,8 +12,9 @@ import { SoldiersTable } from "./SoldiersTable"
 import type { SortConfig } from "../../components/SortableHeader"
 
 export const SoldiersPage = () => {
-  const { data: soldiers = [] } = useSoldiers()
-  const { data: companies = [] } = useCompanies()
+  const { data: soldiers = [], isPending: isSoldiersPending } = useSoldiers()
+  const { data: companies = [], isPending: isCompaniesPending } = useCompanies()
+  const isLoading = isSoldiersPending || isCompaniesPending
   const [searchQuery, setSearchQuery] = useState("")
   const [companyFilter, setCompanyFilter] = useState<string | undefined>(undefined)
   const [platoonFilter, setPlatoonFilter] = useState<string | undefined>(undefined)
@@ -76,7 +77,11 @@ export const SoldiersPage = () => {
         ) : null}
       </Flex>
 
-      {sortedSoldiers.length > 0 ? (
+      {isLoading ? (
+        <Flex justify="center" py="16">
+          <Spinner size="lg" color="sage.400" />
+        </Flex>
+      ) : sortedSoldiers.length > 0 ? (
         <SoldiersTable soldiers={sortedSoldiers} sort={sort} onSort={setSort} />
       ) : (
         <EmptyState

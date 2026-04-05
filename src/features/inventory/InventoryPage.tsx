@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Flex, Text, VStack } from "@chakra-ui/react"
+import { Flex, Spinner, Text, VStack } from "@chakra-ui/react"
 import { PackageSearch } from "lucide-react"
 import { PageHeader } from "../../components/PageHeader"
 import { SearchInput } from "../../components/SearchInput"
@@ -28,7 +28,7 @@ const statusOptions = [
 ]
 
 export const InventoryPage = () => {
-  const { data: inventoryItems = [] } = useInventory()
+  const { data: inventoryItems = [], isPending: isLoading } = useInventory()
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<ItemCategory | undefined>(undefined)
   const [statusFilter, setStatusFilter] = useState<ItemStatus | undefined>(undefined)
@@ -76,7 +76,11 @@ export const InventoryPage = () => {
         ) : null}
       </Flex>
 
-      {sortedItems.length > 0 ? (
+      {isLoading ? (
+        <Flex justify="center" py="16">
+          <Spinner size="lg" color="sage.400" />
+        </Flex>
+      ) : sortedItems.length > 0 ? (
         <InventoryTable items={sortedItems} sort={sort} onSort={setSort} />
       ) : (
         <EmptyState
