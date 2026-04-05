@@ -1,6 +1,6 @@
 import { Button, Flex, Text } from "@chakra-ui/react"
 import { Phone, MessageCircle } from "lucide-react"
-import { HoverCardArrow, HoverCardContent, HoverCardRoot, HoverCardTrigger } from "@chakra-ui/react"
+import { HoverCardArrow, HoverCardContent, HoverCardPositioner, HoverCardRoot, HoverCardTrigger } from "@chakra-ui/react"
 import { t } from "../../lib/i18n"
 
 const formatWhatsAppUrl = (phone: string): string => {
@@ -27,51 +27,52 @@ export const PhoneActions = ({ phone }: Props) => {
   }
 
   return (
-    <HoverCardRoot openDelay={200} closeDelay={300}>
+    <HoverCardRoot openDelay={200} closeDelay={300} positioning={{ placement: "top" }}>
       <HoverCardTrigger asChild>
         <Text
           textStyle="sm"
           color="sunburst.500"
           dir="ltr"
           cursor="pointer"
+          display="inline"
           _hover={{ textDecoration: "underline" }}
           role="cell"
         >
           {phone}
         </Text>
       </HoverCardTrigger>
-      <HoverCardContent
-        w="auto"
-        borderRadius="xl"
-        shadow="lg"
-        p="1"
-      >
-        <HoverCardArrow />
-        <Flex direction="column" gap="1">
-          <Button
-            variant="ghost"
-            size="sm"
-            borderRadius="lg"
-            justifyContent="start"
-            gap="2"
-            onClick={handleCall}
-          >
-            <Phone size={15} color="var(--chakra-colors-sage-600)" />
-            <Text textStyle="sm">{t("soldiers.call")}</Text>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            borderRadius="lg"
-            justifyContent="start"
-            gap="2"
-            onClick={handleWhatsApp}
-          >
-            <MessageCircle size={15} color="var(--chakra-colors-green-600)" />
-            <Text textStyle="sm">{t("soldiers.whatsapp")}</Text>
-          </Button>
-        </Flex>
-      </HoverCardContent>
+      <HoverCardPositioner>
+        <HoverCardContent
+          w="auto"
+          borderRadius="xl"
+          shadow="lg"
+          p="1"
+        >
+          <HoverCardArrow />
+          <Flex gap="1">
+            <Button
+              variant="ghost"
+              size="xs"
+              borderRadius="lg"
+              gap="1.5"
+              onClick={handleCall}
+            >
+              <Phone size={14} color="var(--chakra-colors-sage-600)" />
+              <Text textStyle="xs">{t("soldiers.call")}</Text>
+            </Button>
+            <Button
+              variant="ghost"
+              size="xs"
+              borderRadius="lg"
+              gap="1.5"
+              onClick={handleWhatsApp}
+            >
+              <MessageCircle size={14} color="var(--chakra-colors-green-600)" />
+              <Text textStyle="xs">{t("soldiers.whatsapp")}</Text>
+            </Button>
+          </Flex>
+        </HoverCardContent>
+      </HoverCardPositioner>
     </HoverCardRoot>
   )
 }
