@@ -1,8 +1,8 @@
-import { APPS_SCRIPT_URL } from "./config"
 import { getStoredSession, clearSession } from "./auth-helpers"
 import { mockApiRequest } from "./mock-api"
 
-const USE_MOCK = !APPS_SCRIPT_URL || APPS_SCRIPT_URL === "mock"
+const API_BASE = import.meta.env.VITE_API_BASE || "/api/gas"
+const USE_MOCK = import.meta.env.VITE_API_BASE === "mock"
 
 const getIdToken = (): string => {
   const session = getStoredSession()
@@ -19,14 +19,12 @@ const appsScriptRequest = async <T>(
   }
 
   try {
-    const url = new URL(APPS_SCRIPT_URL)
-    url.searchParams.set("action", action)
+    const url = `${API_BASE}?action=${encodeURIComponent(action)}`
 
-    const response = await fetch(url.toString(), {
+    const response = await fetch(url, {
       method: "POST",
-      headers: { "Content-Type": "text/plain" },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...body, idToken: getIdToken() }),
-      redirect: "follow",
     })
 
     const json = await response.json()
