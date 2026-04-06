@@ -9,9 +9,14 @@ export default async function handler(
     return
   }
 
-  const appsScriptUrl = process.env.APPS_SCRIPT_URL
+  const appsScriptUrl =
+    process.env.APPS_SCRIPT_URL || process.env.VITE_APPS_SCRIPT_URL
   if (!appsScriptUrl) {
-    response.status(500).json({ ok: false, error: "MISSING_CONFIG", message: "APPS_SCRIPT_URL not configured" })
+    response.status(500).json({
+      ok: false,
+      error: "MISSING_CONFIG",
+      message: "APPS_SCRIPT_URL or VITE_APPS_SCRIPT_URL not configured",
+    })
     return
   }
 
@@ -21,20 +26,23 @@ export default async function handler(
     return
   }
 
+  const payload = typeof request.body === "string" ? request.body : JSON.stringify(request.body)
+
   const targetUrl = new URL(appsScriptUrl)
   targetUrl.searchParams.set("action", action)
+  targetUrl.searchParams.set("payload", payload)
 
+  // Apps Script with "Anyone" access redirects POST→GET (losing body).
+  // Send as GET with payload in query param — safe server-to-server.
   const upstream = await fetch(targetUrl.toString(), {
-    method: "POST",
-    headers: { "Content-Type": "text/plain" },
-    body: typeof request.body === "string" ? request.body : JSON.stringify(request.body),
+    method: "GET",
     redirect: "follow",
   })
 
   const data = await upstream.text()
 
   response
-    .status(upstream.status)
+    .status(200)
     .setHeader("Content-Type", "application/json")
     .send(data)
 }
