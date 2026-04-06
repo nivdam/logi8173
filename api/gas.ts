@@ -1,0 +1,40 @@
+import type { VercelRequest, VercelResponse } from "@vercel/node"
+
+export default async function handler(
+  request: VercelRequest,
+  response: VercelResponse,
+) {
+  if (request.method !== "POST") {
+    response.status(405).json({ ok: false, error: "METHOD_NOT_ALLOWED" })
+    return
+  }
+
+  const appsScriptUrl = process.env.APPS_SCRIPT_URL
+  if (!appsScriptUrl) {
+    response.status(500).json({ ok: false, error: "MISSING_CONFIG", message: "APPS_SCRIPT_URL not configured" })
+    return
+  }
+
+  const action = request.query.action
+  if (!action || typeof action !== "string") {
+    response.status(400).json({ ok: false, error: "MISSING_ACTION", message: "action query parameter is required" })
+    return
+  }
+
+  const targetUrl = new URL(appsScriptUrl)
+  targetUrl.searchParams.set("action", action)
+
+  const upstream = await fetch(targetUrl.toString(), {
+    method: "POST",
+    headers: { "Content-Type": "text/plain" },
+    body: typeof request.body === "string" ? request.body : JSON.stringify(request.body),
+    redirect: "follow",
+  })
+
+  const data = await upstream.text()
+
+  response
+    .status(upstream.status)
+    .setHeader("Content-Type", "application/json")
+    .send(data)
+}
