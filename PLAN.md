@@ -17,7 +17,9 @@ Deliver a battalion-usable first version of Logi8173 that supports a small opera
 - Google OAuth login works against the deployed backend.
 - Vercel proxies requests to Apps Script correctly.
 - Dashboard, inventory list, soldiers list, and issue form are present.
-- Activities backend can create dedicated Drive folders and activity-specific files.
+- Activities can be listed, opened, viewed, and closed from the frontend.
+- Activity opening creates a dedicated Drive folder and activity-specific files.
+- Activity opening now creates a partial inventory snapshot from manually selected `master-inventory` items.
 
 ## Priority 1 — Align repo, deployment, and docs
 
