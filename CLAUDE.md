@@ -58,11 +58,13 @@ After setup, the script also stores generated resource IDs such as:
 - The canonical project plan should live inside this repo as `PLAN.md`.
 - If an external copy exists, keep it synchronized from the repo version.
 - Prefer documenting operational setup and rollout details in the repo, not one directory above it.
+- Frontend error handling should preserve the server-returned error message by default.
+- Query failures should prefer a shared inline error-state component.
+- Mutation failures should prefer a shared API error toast helper that includes both the failed action label and the server message.
 
 ## Near-Term Product Priorities
 
-1. Turn Activities into a real workflow with create/open/close UI.
-2. Open activities with a manually selected inventory subset, not a full clone by default.
-3. Keep issuance/returns activity-scoped.
-4. Add a minimal Settings UI for operators and bootstrap administration.
-5. Add import + manual maintenance for master inventory.
+1. Keep issuance/returns activity-scoped and replace the current hardcoded activity usage.
+2. Add a minimal Settings UI for operators and bootstrap administration.
+3. Add import + manual maintenance for master inventory.
+4. Sync any live Apps Script changes back into `apps-script/`.

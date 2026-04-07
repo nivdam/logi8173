@@ -10,8 +10,10 @@ export const activitiesMock: Activity[] = [
     startDate: "2026-04-01",
     endDate: undefined,
     folderId: "mock_folder_act1",
+    folderUrl: "https://drive.google.com/drive/folders/mock_folder_act1",
     createdAt: "2026-03-28",
     closedAt: undefined,
+    selectedItemCount: 12,
   },
   {
     activityId: "act2",
@@ -22,8 +24,10 @@ export const activitiesMock: Activity[] = [
     startDate: "2026-03-10",
     endDate: "2026-03-14",
     folderId: "mock_folder_act2",
+    folderUrl: "https://drive.google.com/drive/folders/mock_folder_act2",
     createdAt: "2026-03-05",
     closedAt: "2026-03-15",
+    selectedItemCount: 8,
   },
   {
     activityId: "act3",
@@ -34,7 +38,9 @@ export const activitiesMock: Activity[] = [
     startDate: "2026-06-01",
     endDate: undefined,
     folderId: "mock_folder_act3",
+    folderUrl: "https://drive.google.com/drive/folders/mock_folder_act3",
     createdAt: "2026-04-01",
     closedAt: undefined,
+    selectedItemCount: 5,
   },
 ]

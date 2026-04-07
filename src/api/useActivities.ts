@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "../lib/api"
-import type { Activity, ActivityType } from "../types"
+import type { Activity, ActivityDetails, ActivityType } from "../types"
 
 export const useActivities = () =>
   useQuery({
@@ -8,12 +8,19 @@ export const useActivities = () =>
     queryFn: () => api.get<Activity[]>("activities.list"),
   })
 
+export const useActivity = (activityId: string | undefined) =>
+  useQuery({
+    queryKey: ["activities", activityId],
+    queryFn: () => api.post<ActivityDetails>("activities.get", { activityId }),
+    enabled: !!activityId,
+  })
+
 export const useOpenActivity = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
     mutationFn: (input: OpenActivityInput) =>
-      api.post<Activity & { folderUrl: string }>("activities.open", input),
+      api.post<Activity>("activities.open", input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["activities"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })
@@ -30,8 +37,9 @@ export const useCloseActivity = () => {
         "activities.close",
         input,
       ),
-    onSuccess: () => {
+    onSuccess: (_result, variables) => {
       queryClient.invalidateQueries({ queryKey: ["activities"] })
+      queryClient.invalidateQueries({ queryKey: ["activities", variables.activityId] })
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })
     },
   })
@@ -41,6 +49,7 @@ type OpenActivityInput = {
   name: string
   activityType: ActivityType
   startDate: string
+  itemIds: string[]
 }
 
 type CloseActivityInput = {

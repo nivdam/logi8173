@@ -15,7 +15,7 @@ const appsScriptRequest = async <T>(
   body: Record<string, unknown> = {},
 ): Promise<T> => {
   if (USE_MOCK) {
-    return mockApiRequest<T>(action)
+    return mockApiRequest<T>(action, body)
   }
 
   try {
@@ -44,7 +44,7 @@ const appsScriptRequest = async <T>(
 
     // API unreachable — fall back to mock data in dev mode
     if (import.meta.env.DEV) {
-      return mockApiRequest<T>(action)
+      return mockApiRequest<T>(action, body)
     }
     throw new ApiError("NETWORK_ERROR", "Could not reach the server")
   }

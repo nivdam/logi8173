@@ -29,6 +29,7 @@ export const App = () => (
       <Route index element={<DashboardPage />} />
       <Route path="inventory" element={<InventoryPage />} />
       <Route path="activities" element={<ActivitiesPage />} />
+      <Route path="activities/:activityId" element={<ActivitiesPage />} />
       <Route path="soldiers" element={<SoldiersPage />} />
       <Route path="issue" element={<IssuanceForm />} />
       <Route

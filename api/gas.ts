@@ -9,14 +9,13 @@ export default async function handler(
     return;
   }
 
-  const appsScriptUrl =
-    process.env.APPS_SCRIPT_URL || process.env.VITE_APPS_SCRIPT_URL;
+  const appsScriptUrl = process.env.APPS_SCRIPT_URL;
 
   if (!appsScriptUrl) {
     response.status(500).json({
       ok: false,
       error: "MISSING_CONFIG",
-      message: "APPS_SCRIPT_URL or VITE_APPS_SCRIPT_URL not configured",
+      message: "APPS_SCRIPT_URL not configured",
     });
     return;
   }
