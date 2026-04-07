@@ -11,8 +11,15 @@ type Activity = {
   startDate: string
   endDate: string | undefined
   folderId: string
+  folderUrl: string
   createdAt: string
   closedAt: string | undefined
+  selectedItemCount: number
 }
 
-export type { Activity, ActivityType, ActivityStatus }
+type ActivityDetails = {
+  activity: Activity
+  snapshotItems: import("./inventory").InventoryItem[]
+}
+
+export type { Activity, ActivityType, ActivityStatus, ActivityDetails }

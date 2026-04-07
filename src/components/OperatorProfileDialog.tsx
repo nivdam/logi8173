@@ -1,6 +1,7 @@
 import { useState } from "react"
 import {
   Button,
+  chakra,
   Dialog,
   Field,
   Flex,
@@ -14,23 +15,8 @@ import {
 import { RefreshCw } from "lucide-react"
 import { SignatureCanvas } from "../features/issuance/SignatureCanvas"
 import { t } from "../lib/i18n"
+import { RANK_OPTIONS } from "../lib/rank-options"
 import type { OperatorProfile } from "../lib/auth.types"
-
-const RANK_OPTIONS = [
-  "טוראי",
-  "רב\"ט",
-  "סמל",
-  "סמ\"ר",
-  "רס\"ל",
-  "רס\"מ",
-  "רס\"ב",
-  "רנ\"ג",
-  "סגן",
-  "סרן",
-  "רס\"ן",
-  "סא\"ל",
-  "אל\"מ",
-]
 
 export const OperatorProfileDialog = ({
   open,
@@ -75,6 +61,26 @@ export const OperatorProfileDialog = ({
     })
   }
 
+  const handleFullNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFullName(event.currentTarget.value)
+  }
+
+  const handleRankChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setRank(event.target.value)
+  }
+
+  const handlePersonalIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPersonalId(event.currentTarget.value)
+  }
+
+  const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPhone(event.currentTarget.value)
+  }
+
+  const handleEditSignature = () => {
+    setIsEditingSignature(true)
+  }
+
   return (
     <Dialog.Root
       open={open}
@@ -87,7 +93,7 @@ export const OperatorProfileDialog = ({
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content mx="4" maxW="2xl" asChild>
-            <form onSubmit={handleSubmit}>
+            <chakra.form onSubmit={handleSubmit}>
               <Dialog.Header>
                 <Dialog.Title>{t("auth.profileTitle")}</Dialog.Title>
                 <Dialog.Description>
@@ -105,7 +111,7 @@ export const OperatorProfileDialog = ({
                     <Field.Label>{t("soldiers.fullName")}</Field.Label>
                     <Input
                       value={fullName}
-                      onChange={(event) => setFullName(event.currentTarget.value)}
+                      onChange={handleFullNameChange}
                     />
                   </Field.Root>
 
@@ -115,7 +121,7 @@ export const OperatorProfileDialog = ({
                       <NativeSelect.Root>
                         <NativeSelect.Field
                           value={rank}
-                          onChange={(event) => setRank(event.target.value)}
+                          onChange={handleRankChange}
                         >
                           <option value="">{t("auth.selectRank")}</option>
                           {RANK_OPTIONS.map((option) => (
@@ -130,10 +136,9 @@ export const OperatorProfileDialog = ({
                     <Field.Root required flex="1">
                       <Field.Label>{t("soldiers.personalId")}</Field.Label>
                       <Input
+                        type="tel"
                         value={personalId}
-                        onChange={(event) =>
-                          setPersonalId(event.currentTarget.value)
-                        }
+                        onChange={handlePersonalIdChange}
                         inputMode="numeric"
                       />
                     </Field.Root>
@@ -142,8 +147,9 @@ export const OperatorProfileDialog = ({
                   <Field.Root required>
                     <Field.Label>{t("soldiers.phone")}</Field.Label>
                     <Input
+                      type="tel"
                       value={phone}
-                      onChange={(event) => setPhone(event.currentTarget.value)}
+                      onChange={handlePhoneChange}
                       inputMode="tel"
                     />
                   </Field.Root>
@@ -177,7 +183,7 @@ export const OperatorProfileDialog = ({
                             variant="ghost"
                             size="xs"
                             color="fg.muted"
-                            onClick={() => setIsEditingSignature(true)}
+                            onClick={handleEditSignature}
                           >
                             <RefreshCw size={12} />
                             {t("auth.editSignature")}
@@ -214,7 +220,7 @@ export const OperatorProfileDialog = ({
                   {t("common.save")}
                 </Button>
               </Dialog.Footer>
-            </form>
+            </chakra.form>
           </Dialog.Content>
         </Dialog.Positioner>
       </Portal>

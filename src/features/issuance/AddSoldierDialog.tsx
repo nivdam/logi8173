@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import {
   Button,
+  chakra,
   Combobox,
   createListCollection,
   Dialog,
@@ -20,23 +21,8 @@ import {
 } from "../../api";
 import { toaster } from "../../lib/toaster";
 import { t } from "../../lib/i18n";
+import { RANK_OPTIONS } from "../../lib/rank-options";
 import type { Soldier } from "../../types";
-
-const RANK_OPTIONS = [
-  "טוראי",
-  'רב"ט',
-  "סמל",
-  'סמ"ר',
-  'רס"ל',
-  'רס"מ',
-  'רס"ב',
-  'רנ"ג',
-  "סגן",
-  "סרן",
-  'רס"ן',
-  'סא"ל',
-  'אל"מ',
-];
 
 const parseInitialQuery = (
   query: string,
@@ -109,17 +95,13 @@ export const AddSoldierDialog = ({
     };
 
     try {
-      if (!existingCompany) {
-        await upsertCompany.mutateAsync({
-          name: normalizedCompanyValue,
-          isActive: true,
-        });
-      } else if (!existingCompany.isActive) {
-        await upsertCompany.mutateAsync({
-          companyId: existingCompany.companyId,
-          name: existingCompany.name,
-          isActive: true,
-        });
+      const companyInput = buildCompanyUpsertInput_(
+        existingCompany,
+        normalizedCompanyValue,
+      );
+
+      if (companyInput) {
+        await upsertCompany.mutateAsync(companyInput);
       }
 
       await createSoldier.mutateAsync({
@@ -151,16 +133,36 @@ export const AddSoldierDialog = ({
     setCompanyInput(selected);
   };
 
+  const handleDialogOpenChange = (details: { open: boolean }) => {
+    onOpenChange(details.open)
+  }
+
+  const handleFullNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setFullName(event.currentTarget.value)
+  }
+
+  const handleRankChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setRank(event.target.value)
+  }
+
+  const handlePersonalIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPersonalId(event.currentTarget.value)
+  }
+
+  const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPhone(event.currentTarget.value)
+  }
+
   return (
     <Dialog.Root
       open={open}
-      onOpenChange={(details) => onOpenChange(details.open)}
+      onOpenChange={handleDialogOpenChange}
     >
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
           <Dialog.Content mx="4" maxW="lg" asChild>
-            <form onSubmit={handleSubmit}>
+            <chakra.form onSubmit={handleSubmit}>
               <Dialog.Header>
                 <Dialog.Title>{t("issuance.addSoldierTitle")}</Dialog.Title>
                 <Dialog.Description>
@@ -174,9 +176,7 @@ export const AddSoldierDialog = ({
                     <Field.Label>{t("soldiers.fullName")}</Field.Label>
                     <Input
                       value={fullName}
-                      onChange={(event) =>
-                        setFullName(event.currentTarget.value)
-                      }
+                      onChange={handleFullNameChange}
                     />
                   </Field.Root>
 
@@ -189,7 +189,7 @@ export const AddSoldierDialog = ({
                       <NativeSelect.Root>
                         <NativeSelect.Field
                           value={rank}
-                          onChange={(event) => setRank(event.target.value)}
+                          onChange={handleRankChange}
                         >
                           <option value="">{t("auth.selectRank")}</option>
                           {RANK_OPTIONS.map((option) => (
@@ -254,10 +254,9 @@ export const AddSoldierDialog = ({
                     <Field.Root required invalid={isDuplicatePersonalId}>
                       <Field.Label>{t("soldiers.personalId")}</Field.Label>
                       <Input
+                        type="tel"
                         value={personalId}
-                        onChange={(event) =>
-                          setPersonalId(event.currentTarget.value)
-                        }
+                        onChange={handlePersonalIdChange}
                         inputMode="numeric"
                       />
                       {isDuplicatePersonalId ? (
@@ -270,10 +269,9 @@ export const AddSoldierDialog = ({
                     <Field.Root>
                       <Field.Label>{t("soldiers.phone")}</Field.Label>
                       <Input
+                        type="tel"
                         value={phone}
-                        onChange={(event) =>
-                          setPhone(event.currentTarget.value)
-                        }
+                        onChange={handlePhoneChange}
                         inputMode="tel"
                       />
                     </Field.Root>
@@ -294,7 +292,7 @@ export const AddSoldierDialog = ({
                   {t("common.save")}
                 </Button>
               </Dialog.Footer>
-            </form>
+            </chakra.form>
           </Dialog.Content>
         </Dialog.Positioner>
       </Portal>
@@ -308,3 +306,29 @@ type AddSoldierDialogProps = {
   onOpenChange: (open: boolean) => void;
   onCreated: (soldier: Soldier) => void;
 };
+
+function buildCompanyUpsertInput_(
+  existingCompany: {
+    companyId: string;
+    name: string;
+    isActive: boolean;
+  } | undefined,
+  normalizedCompanyValue: string,
+) {
+  if (!existingCompany) {
+    return {
+      name: normalizedCompanyValue,
+      isActive: true,
+    };
+  }
+
+  if (!existingCompany.isActive) {
+    return {
+      companyId: existingCompany.companyId,
+      name: existingCompany.name,
+      isActive: true,
+    };
+  }
+
+  return undefined;
+}

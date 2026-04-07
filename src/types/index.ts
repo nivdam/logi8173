@@ -1,7 +1,7 @@
 export type { InventoryItem, ItemCategory, UnitOfMeasure, ItemStatus } from "./inventory"
 export type { Soldier } from "./soldier"
 export type { Company } from "./company"
-export type { Activity, ActivityType, ActivityStatus } from "./activity"
+export type { Activity, ActivityType, ActivityStatus, ActivityDetails } from "./activity"
 export type { Transaction, TransactionType, TransactionLineItem } from "./transaction"
 export type { DashboardSummary, CompanyBreakdown } from "./dashboard"
 export type { SetupStatus, SetupResult } from "./setup"

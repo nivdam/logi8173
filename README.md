@@ -80,7 +80,7 @@ If set to `nivdam@gmail.com`, that account can regain admin access remotely if t
 | --- | --- | --- |
 | `VITE_GOOGLE_CLIENT_ID` | Yes | Google OAuth client ID used by the frontend |
 | `APPS_SCRIPT_URL` | Yes | Apps Script Web App `/exec` URL used by the Vercel proxy |
-| `VITE_APPS_SCRIPT_URL` | Optional | Backward-compatible fallback for the same Apps Script URL |
+| `VITE_APP_PROXY_TARGET` | Local dev only | Apps Script Web App `/exec` URL used by the Vite dev server proxy |
 
 ## Apps Script Configuration
 
@@ -111,10 +111,36 @@ The Apps Script manifest must include:
 
 ## Local Development
 
+Copy `.env.example` to `.env.local` and set the real values:
+
+```bash
+cp .env.example .env.local
+```
+
+Minimal local setup for `pnpm dev`:
+
+```bash
+VITE_GOOGLE_CLIENT_ID=your_google_client_id
+VITE_APP_PROXY_TARGET=https://script.google.com/macros/s/your_deployment_id/exec
+```
+
+Then run:
+
 ```bash
 pnpm install
 pnpm dev
 ```
+
+In local dev, Vite handles `POST /api/gas?action=...` and forwards it to `VITE_APP_PROXY_TARGET` using the same `GET + payload` shape as the Vercel proxy. This lets you work locally against the real Apps Script backend without pushing to Vercel.
+
+### Environment variable usage by mode
+
+- `pnpm dev`:
+  Uses `VITE_APP_PROXY_TARGET` from `.env.local`.
+- `vercel dev`:
+  Uses `APPS_SCRIPT_URL`.
+- Vercel production:
+  Uses `APPS_SCRIPT_URL`.
 
 ### Useful commands
 
@@ -163,15 +189,17 @@ SPA route refreshes depend on [`vercel.json`](/Users/nivdamianovich/BizoDam/Logi
 - dashboard
 - inventory list
 - soldiers list
+- Activities list and activity detail flow
+- open activity with manually selected inventory subset
+- close activity and open activity Drive folder
 - issue form with signatures
 - Apps Script backend for inventory, operators, soldiers, companies, activities, transactions
 - Vercel proxy + SPA rewrites
 
 ### Still needed for handoff-ready rollout
 
-- real Activities UI
-- open activity with selected inventory subset
 - return flow
+- require an explicit active activity context in issuance instead of the current hardcoded activity
 - minimal Settings UI for operator management
 - import + manual maintenance for master inventory
 - cleanup/sync between repo and Apps Script live deployment
