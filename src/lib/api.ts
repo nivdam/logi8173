@@ -37,7 +37,11 @@ const appsScriptRequest = async <T>(
     }
 
     return json.data as T
-  } catch {
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error
+    }
+
     // API unreachable — fall back to mock data in dev mode
     if (import.meta.env.DEV) {
       return mockApiRequest<T>(action)
