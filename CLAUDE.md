@@ -1,86 +1,68 @@
 # CLAUDE.md — Logi8173
 
-Digital Logistics Management for IDF Reserve Engineering Battalion 8173.
-Replaces paper-based equipment management with digital issuance, signatures, and audit trails.
+Logi8173 is a digital logistics system for IDF Reserve Engineering Battalion 8173. It replaces paper issuance and reconciliation with a web app backed by Google Apps Script, Google Sheets, and Google Drive.
 
-## Architecture
+## Current Architecture
 
-- **Frontend**: React + TypeScript + Vite + Chakra UI (v3)
-- **Backend/API**: Google Apps Script (deployed as Web App)
-- **Database**: Google Sheets (append-only ledger, native Google Sheets — not .xlsx)
-- **Storage**: Google Drive (signatures, PDFs)
-- **Auth**: Google OAuth 2.0 (operators only; soldiers sign on operator's device)
-- **AI**: Gemini 2.5 Flash (smart search, anomaly detection)
-- **Hosting**: Vercel (free tier)
+- Frontend: React 19 + TypeScript + Vite + Chakra UI v3
+- Frontend hosting: Vercel
+- Backend: Google Apps Script Web App
+- Data: Google Sheets
+- File storage: Google Drive
+- Auth: Google OAuth 2.0 ID tokens, verified server-side in Apps Script
 
-## Key Principles
+## Important Runtime Notes
 
-- **Append-only**: transactions and audit logs are NEVER edited or deleted
-- **Current stock is computed**: initial_qty + SUM(movements), never stored directly
-- **Soldiers ≠ Users**: operators authenticate via Google; soldiers only sign (personal ID + canvas signature)
-- **Each activity = its own Drive folder** with separate Sheets (snapshot, transactions, incidents, audit)
-- **master-inventory = source of truth** — always exists, updated only through reconciliation
-- **$0 budget** — everything runs on Google free tier + Vercel free tier
+- The frontend does not call Apps Script directly.
+- Vercel proxies requests through [`api/gas.ts`](/Users/nivdamianovich/BizoDam/Logi8173/_logi8173_/api/gas.ts).
+- The proxy sends requests to Apps Script as `GET` with a `payload` query param, because direct `POST` bodies are lost on the Apps Script redirect flow.
+- Vercel SPA routing depends on [`vercel.json`](/Users/nivdamianovich/BizoDam/Logi8173/_logi8173_/vercel.json) rewrites.
 
-## Language & Style
+## System Model
 
-- Hebrew RTL throughout (all user-facing text)
-- `type` only, never `interface`
-- `const` by default
-- Types at bottom of file
-- One component per file
-- No `any` or `as`
-- No native HTML tags — Chakra UI components only
-- No abbreviations in variable names
+- `master-inventory` is the battalion source of truth.
+- Each activity gets its own Drive folder and its own Sheets.
+- Transactions and audit logs are append-only.
+- Operators authenticate with their own Google accounts.
+- Soldiers are not app users; they are participants/receivers inside activity workflows.
 
-## Commands
+## Admin Model
 
-```bash
-pnpm dev          # Start dev server
-pnpm build        # Production build
-pnpm lint         # ESLint
-pnpm type-check   # TypeScript check
-```
+- Initial setup should be run once by a battalion-owned admin Google account.
+- That account becomes the primary system owner and creates the Drive/Sheets structure.
+- A persistent remote support admin can also be configured through the Script Property `BREAK_GLASS_ADMIN_EMAIL`.
+- When `BREAK_GLASS_ADMIN_EMAIL` is set to `nivdam@gmail.com`, that account is always allowed to regain admin access and is auto-seeded as an admin operator during setup if needed.
 
-## Project Structure
+## Required Script Properties
 
-```
-src/
-├── api/           # React Query hooks per entity (useInventory, useSoldiers, etc.)
-├── features/      # Feature modules (inventory, transactions, activities, soldiers, dashboard)
-├── pages/         # Route pages
-├── components/    # Shared UI components
-├── lib/           # Utilities, auth, config, api client
-├── types/         # Shared types (7 entities + setup)
-└── assets/        # Logo, static files
+- `SETUP_ADMIN_EMAIL`
+- `WEB_CLIENT_ID`
+- Optional but recommended: `BREAK_GLASS_ADMIN_EMAIL`
 
-apps-script/       # Google Apps Script backend (deployed separately to script.google.com)
-├── Main.gs        # doGet/doPost entry points
-├── Router.gs      # POST-only routing, 17 endpoints
-├── Auth.gs        # Token verification (cached) + operator lookup
-├── Config.gs      # PropertiesService + CacheService
-├── SheetsRepo.gs  # Low-level Sheets read/write
-├── DriveRepo.gs   # Folder/file/signature operations
-├── AuditLog.gs    # Mandatory audit + sheet protection
-├── *Controller.gs # Domain controllers (Setup, Inventory, Soldiers, etc.)
-└── appsscript.json
-```
+After setup, the script also stores generated resource IDs such as:
 
-## API Pattern
+- `ROOT_FOLDER_ID`
+- `OPERATORS_SHEET_ID`
+- `SOLDIERS_SHEET_ID`
+- `COMPANIES_SHEET_ID`
+- `ACTIVITIES_REGISTRY_ID`
 
-- All requests are POST (idToken in body, never in URL)
-- Response: `{ ok: true, data }` or `{ ok: false, error, message }`
-- Actions routed via `?action=entity.verb` (e.g., `inventory.list`, `tx.create`)
-- LockService on mutations to prevent race conditions
-- Token verification cached via CacheService (5-min TTL)
-- Audit logging is mandatory — operation fails if audit fails
+## Required Apps Script OAuth Scopes
 
-## Deployment
+- `https://www.googleapis.com/auth/script.external_request`
+- `https://www.googleapis.com/auth/drive`
+- `https://www.googleapis.com/auth/spreadsheets`
 
-- **Frontend**: Vercel (auto-deploy from GitHub)
-- **Backend**: Google Apps Script (manual deploy from script.google.com)
-- **Config**: `SETUP_ADMIN_EMAIL` + `WEB_CLIENT_ID` must be set in Script Properties before first use
+## Repo Guidance
 
-## Plan
+- The canonical project plan should live inside this repo as `PLAN.md`.
+- If an external copy exists, keep it synchronized from the repo version.
+- Prefer documenting operational setup and rollout details in the repo, not one directory above it.
 
-Full implementation plan: `../PLAN.md`
+## Near-Term Product Priorities
+
+1. Turn Activities into a real workflow with create/open/close UI.
+2. Open activities with a manually selected inventory subset, not a full clone by default.
+3. Keep issuance/returns activity-scoped.
+4. Add a minimal Settings UI for operators and bootstrap administration.
+5. Add import + manual maintenance for master inventory.
