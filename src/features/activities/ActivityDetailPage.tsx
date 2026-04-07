@@ -1,14 +1,16 @@
 import { useMemo, useState } from "react"
 import { Box, Button, Flex, Grid, Heading, Spinner, Stack, Text } from "@chakra-ui/react"
 import type { SystemStyleObject } from "@chakra-ui/react"
-import { ArrowLeft, CalendarCheck, FolderOpen, PackageSearch } from "lucide-react"
+import { ArrowLeft, FolderOpen, PackageSearch } from "lucide-react"
 import { useNavigate } from "react-router-dom"
+import { ApiErrorState } from "../../components/ApiErrorState"
 import { EmptyState } from "../../components/EmptyState"
 import { FilterSelect } from "../../components/FilterSelect"
 import { PageHeader } from "../../components/PageHeader"
 import { SearchInput } from "../../components/SearchInput"
 import { useActivity, useCloseActivity } from "../../api"
 import { InventoryTable } from "../inventory/InventoryTable"
+import { showApiErrorToast } from "../../lib/api-error"
 import { filterInventory, sortInventory } from "../../lib/filters"
 import { formatDate, formatDateTime, getActivityStatusLabel } from "../../lib/formatters"
 import { t } from "../../lib/i18n"
@@ -31,7 +33,7 @@ const EMPTY_SNAPSHOT_ITEMS: never[] = []
 export const ActivityDetailPage = ({ activityId }: ActivityDetailPageProps) => {
   const navigate = useNavigate()
   const { operator, operatorProfile } = useAuth()
-  const { data, isPending } = useActivity(activityId)
+  const { data, error, isPending, refetch } = useActivity(activityId)
   const closeActivity = useCloseActivity()
 
   const [searchQuery, setSearchQuery] = useState("")
@@ -67,6 +69,10 @@ export const ActivityDetailPage = ({ activityId }: ActivityDetailPageProps) => {
     setCategoryFilter(parseCategory(value, categories))
   }
 
+  const handleRetry = () => {
+    void refetch()
+  }
+
   const handleCloseActivity = () => {
     closeActivity.mutate(
       { activityId },
@@ -78,11 +84,11 @@ export const ActivityDetailPage = ({ activityId }: ActivityDetailPageProps) => {
             type: "success",
           })
         },
-        onError: () => {
-          toaster.create({
-            title: t("common.error"),
-            description: t("activities.closeError"),
-            type: "error",
+        onError: (error) => {
+          showApiErrorToast({
+            actionLabel: t("activities.closeAction"),
+            error,
+            fallbackMessage: t("activities.closeError"),
           })
         },
       },
@@ -97,14 +103,26 @@ export const ActivityDetailPage = ({ activityId }: ActivityDetailPageProps) => {
     )
   }
 
+  if (error) {
+    return (
+      <ApiErrorState
+        error={error}
+        title={t("activities.loadErrorTitle")}
+        fallbackMessage={t("activities.loadErrorDescription")}
+        actionLabel={t("common.retry")}
+        onAction={handleRetry}
+      />
+    )
+  }
+
   if (!data) {
     return (
-      <EmptyState
-        icon={CalendarCheck}
-        title={t("activities.notFoundTitle")}
-        description={t("activities.notFoundDescription")}
-        actionLabel={t("common.back")}
-        onAction={handleBack}
+      <ApiErrorState
+        error={undefined}
+        title={t("activities.loadErrorTitle")}
+        fallbackMessage={t("activities.loadErrorDescription")}
+        actionLabel={t("common.retry")}
+        onAction={handleRetry}
       />
     )
   }

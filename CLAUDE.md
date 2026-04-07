@@ -58,6 +58,9 @@ After setup, the script also stores generated resource IDs such as:
 - The canonical project plan should live inside this repo as `PLAN.md`.
 - If an external copy exists, keep it synchronized from the repo version.
 - Prefer documenting operational setup and rollout details in the repo, not one directory above it.
+- Frontend error handling should preserve the server-returned error message by default.
+- Query failures should prefer a shared inline error-state component.
+- Mutation failures should prefer a shared API error toast helper that includes both the failed action label and the server message.
 
 ## Near-Term Product Priorities
 

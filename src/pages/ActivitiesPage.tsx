@@ -2,6 +2,7 @@ import { useMemo, useState } from "react"
 import { Button, Flex, Grid, Spinner, Stack } from "@chakra-ui/react"
 import { CalendarCheck, Plus } from "lucide-react"
 import { useNavigate, useParams } from "react-router-dom"
+import { ApiErrorState } from "../components/ApiErrorState"
 import { EmptyState } from "../components/EmptyState"
 import { FilterSelect } from "../components/FilterSelect"
 import { PageHeader } from "../components/PageHeader"
@@ -18,6 +19,7 @@ import {
   sortActivities,
 } from "../features/activities/activity-helpers"
 import type { OpenActivityFormValues } from "../features/activities/activity-types"
+import { showApiErrorToast } from "../lib/api-error"
 import { t } from "../lib/i18n"
 import { toaster } from "../lib/toaster"
 import { useAuth } from "../lib/use-auth"
@@ -36,8 +38,18 @@ export const ActivitiesPage = () => {
 const ActivitiesListPage = () => {
   const navigate = useNavigate()
   const { operator, operatorProfile } = useAuth()
-  const { data: activities = [], isPending: isActivitiesPending } = useActivities()
-  const { data: inventoryItems = [], isPending: isInventoryPending } = useInventory()
+  const {
+    data: activities = [],
+    error: activitiesError,
+    isPending: isActivitiesPending,
+    refetch: refetchActivities,
+  } = useActivities()
+  const {
+    data: inventoryItems = [],
+    error: inventoryError,
+    isPending: isInventoryPending,
+    refetch: refetchInventory,
+  } = useInventory()
   const openActivity = useOpenActivity()
 
   const [searchQuery, setSearchQuery] = useState("")
@@ -87,14 +99,31 @@ const ActivitiesListPage = () => {
         setIsOpenDialogOpen(false)
         navigate(`/activities/${activity.activityId}`)
       },
-      onError: () => {
-        toaster.create({
-          title: t("common.error"),
-          description: t("activities.openError"),
-          type: "error",
+      onError: (error) => {
+        showApiErrorToast({
+          actionLabel: t("activities.openAction"),
+          error,
+          fallbackMessage: t("activities.openError"),
         })
       },
     })
+  }
+
+  const handleRetry = () => {
+    void refetchActivities()
+    void refetchInventory()
+  }
+
+  if (activitiesError || inventoryError) {
+    return (
+      <ApiErrorState
+        error={activitiesError || inventoryError}
+        title={t("activities.loadErrorTitle")}
+        fallbackMessage={t("activities.loadErrorDescription")}
+        actionLabel={t("common.retry")}
+        onAction={handleRetry}
+      />
+    )
   }
 
   return (

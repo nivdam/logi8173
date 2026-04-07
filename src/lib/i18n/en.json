@@ -98,6 +98,8 @@
     "noInventoryMatchesDescription": "Try a different search to choose items for the activity.",
     "notFoundTitle": "Activity not found",
     "notFoundDescription": "The activity may have been removed or is not accessible.",
+    "loadErrorTitle": "Could not load activity",
+    "loadErrorDescription": "The server returned an error while loading the activity.",
     "stillOpen": "Still open",
     "summary": {
       "total": "Total activities",
@@ -175,6 +177,7 @@
     "confirm": "Confirm",
     "close": "Close",
     "loading": "Loading...",
+    "retry": "Retry",
     "noResults": "No results found",
     "error": "Error",
     "success": "Success",
