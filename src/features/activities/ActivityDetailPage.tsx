@@ -18,6 +18,8 @@ import {
   activityStatusColor,
   getActivityTypeLabel,
   getInventoryStatusOptions,
+  getOpenedByLabel,
+  getSelectedItemCountLabel,
   parseCategory,
   parseItemStatus,
 } from "./activity-helpers"
@@ -28,7 +30,7 @@ const EMPTY_SNAPSHOT_ITEMS: never[] = []
 
 export const ActivityDetailPage = ({ activityId }: ActivityDetailPageProps) => {
   const navigate = useNavigate()
-  const { operator } = useAuth()
+  const { operator, operatorProfile } = useAuth()
   const { data, isPending } = useActivity(activityId)
   const closeActivity = useCloseActivity()
 
@@ -142,12 +144,15 @@ export const ActivityDetailPage = ({ activityId }: ActivityDetailPageProps) => {
         <DetailCard label={t("activities.fields.type")} value={getActivityTypeLabel(activity.activityType)} />
         <DetailCard label={t("activities.fields.status")} value={getActivityStatusLabel(activity.status)} color={activityStatusColor[activity.status]} />
         <DetailCard label={t("activities.fields.startDate")} value={formatDate(activity.startDate)} />
-        <DetailCard label={t("activities.fields.selectedItems")} value={String(activity.selectedItemCount)} />
+        <DetailCard label={t("activities.fields.selectedItems")} value={getSelectedItemCountLabel(activity.selectedItemCount)} />
       </Grid>
 
       <Box bg="bg.card" borderWidth="1px" borderColor="border" borderRadius="2xl" p={{ base: "5", md: "6" }}>
         <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap="4">
-          <MetaRow label={t("activities.fields.openedBy")} value={activity.openedBy} />
+          <MetaRow
+            label={t("activities.fields.openedBy")}
+            value={getOpenedByLabel(activity.openedBy, operator, operatorProfile)}
+          />
           <MetaRow label={t("activities.fields.createdAt")} value={formatDateTime(activity.createdAt)} />
           <MetaRow
             label={t("activities.fields.closedAt")}

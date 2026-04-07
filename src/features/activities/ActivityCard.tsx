@@ -1,11 +1,12 @@
 import { Badge, Box, Flex, Grid, Heading, Stack, Text } from "@chakra-ui/react"
 import { formatDate, formatDateTime, getActivityStatusLabel } from "../../lib/formatters"
 import { t } from "../../lib/i18n"
-import { getActivityTypeLabel } from "./activity-helpers"
+import { getActivityTypeLabel, getSelectedItemCountLabel } from "./activity-helpers"
 import type { Activity } from "../../types"
 
 export const ActivityCard = ({
   activity,
+  openedByLabel,
   onOpen,
 }: ActivityCardProps) => (
   <Box
@@ -33,8 +34,8 @@ export const ActivityCard = ({
     </Flex>
 
     <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap="4" mt="5">
-      <MetaRow label={t("activities.fields.selectedItems")} value={String(activity.selectedItemCount)} />
-      <MetaRow label={t("activities.fields.openedBy")} value={activity.openedBy} />
+      <MetaRow label={t("activities.fields.selectedItems")} value={getSelectedItemCountLabel(activity.selectedItemCount)} />
+      <MetaRow label={t("activities.fields.openedBy")} value={openedByLabel} />
       <MetaRow label={t("activities.fields.createdAt")} value={formatDateTime(activity.createdAt)} />
     </Grid>
   </Box>
@@ -49,6 +50,7 @@ const MetaRow = ({ label, value }: MetaRowProps) => (
 
 type ActivityCardProps = {
   activity: Activity
+  openedByLabel: string
   onOpen: () => void
 }
 

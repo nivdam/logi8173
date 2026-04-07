@@ -114,6 +114,7 @@
       "createdAt": "Created at",
       "closedAt": "Closed at"
     },
+    "noSelectedItemsYet": "No items selected yet",
     "type": {
       "training": "Training",
       "operation": "Operation",

@@ -12,12 +12,15 @@ import { ActivityDetailPage } from "../features/activities/ActivityDetailPage"
 import { OpenActivityDialog } from "../features/activities/OpenActivityDialog"
 import {
   getActivityStatusOptions,
+  getOpenedByLabel,
+  getSelectedItemCount,
   parseActivityStatus,
   sortActivities,
 } from "../features/activities/activity-helpers"
 import type { OpenActivityFormValues } from "../features/activities/activity-types"
 import { t } from "../lib/i18n"
 import { toaster } from "../lib/toaster"
+import { useAuth } from "../lib/use-auth"
 import type { ActivityStatus } from "../types"
 
 export const ActivitiesPage = () => {
@@ -32,6 +35,7 @@ export const ActivitiesPage = () => {
 
 const ActivitiesListPage = () => {
   const navigate = useNavigate()
+  const { operator, operatorProfile } = useAuth()
   const { data: activities = [], isPending: isActivitiesPending } = useActivities()
   const { data: inventoryItems = [], isPending: isInventoryPending } = useInventory()
   const openActivity = useOpenActivity()
@@ -54,7 +58,10 @@ const ActivitiesListPage = () => {
   }, [activities, searchQuery, statusFilter])
 
   const activeCount = activities.filter((activity) => activity.status === "active").length
-  const totalSelectedItems = activities.reduce((sum, activity) => sum + activity.selectedItemCount, 0)
+  const totalSelectedItems = activities.reduce(
+    (sum, activity) => sum + getSelectedItemCount(activity.selectedItemCount),
+    0,
+  )
 
   const handleOpenDialog = () => {
     setPreviousResetKey((previousValue) => previousValue + 1)
@@ -138,6 +145,7 @@ const ActivitiesListPage = () => {
             <ActivityCard
               key={activity.activityId}
               activity={activity}
+              openedByLabel={getOpenedByLabel(activity.openedBy, operator, operatorProfile)}
               onOpen={() => navigate(`/activities/${activity.activityId}`)}
             />
           ))}

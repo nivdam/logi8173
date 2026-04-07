@@ -114,6 +114,7 @@
       "createdAt": "נוצרה בתאריך",
       "closedAt": "נסגרה בתאריך"
     },
+    "noSelectedItemsYet": "טרם נבחרו פריטים",
     "type": {
       "training": "אימון",
       "operation": "מבצע",

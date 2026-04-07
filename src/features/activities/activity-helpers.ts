@@ -1,5 +1,6 @@
 import type { SystemStyleObject } from "@chakra-ui/react";
 import { t } from "../../lib/i18n";
+import type { AuthenticatedOperator, OperatorProfile } from "../../lib/auth.types";
 import type {
   Activity,
   ActivityStatus,
@@ -87,3 +88,31 @@ export const parseCategory = (
   categories: ItemCategory[],
 ): ItemCategory | undefined =>
   categories.find((category) => category === value);
+
+export const getSelectedItemCount = (selectedItemCount: number | undefined) => {
+  const normalizedCount = Number(selectedItemCount);
+  return Number.isFinite(normalizedCount) ? normalizedCount : 0;
+};
+
+export const getSelectedItemCountLabel = (
+  selectedItemCount: number | undefined,
+) => {
+  const normalizedCount = getSelectedItemCount(selectedItemCount);
+  if (normalizedCount <= 0) {
+    return t("activities.noSelectedItemsYet");
+  }
+
+  return String(normalizedCount);
+};
+
+export const getOpenedByLabel = (
+  openedByEmail: string,
+  operator: AuthenticatedOperator | undefined,
+  operatorProfile: OperatorProfile | undefined,
+) => {
+  if (operator?.email !== openedByEmail) {
+    return openedByEmail;
+  }
+
+  return operatorProfile?.fullName || operator.fullName || openedByEmail;
+};
