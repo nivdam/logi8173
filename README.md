@@ -1,153 +1,186 @@
-# 8173 לוגיסטיקה
+# Logi8173
 
-מערכת לניהול ציוד לוגיסטי עבור גדוד הנדסה 8173 (מילואים).
-מחליפה ניהול נייר בתהליך דיגיטלי: הנפקה → חתימה דיגיטלית → מעקב → התאמה → דוח חוסרים.
+Digital logistics management for IDF Reserve Engineering Battalion 8173.
 
-## Tech Stack
+The system replaces paper-based equipment workflows with a shared battalion system for:
+
+- activity creation
+- battalion inventory management
+- soldier directory management
+- operator access management
+- equipment issue/return with signatures
+- activity audit trail and reconciliation
+
+## Stack
 
 | Layer | Technology |
-|-------|-----------|
+| --- | --- |
 | Frontend | React 19 + TypeScript + Vite 8 |
-| UI | Chakra UI v3 + Lucide Icons |
-| Font | Heebo (Hebrew-optimized) |
-| Backend/API | Google Apps Script |
-| Database | Google Sheets (append-only ledger) |
-| Storage | Google Drive (signatures, PDFs) |
-| Auth | Google OAuth 2.0 (GIS) |
-| Data Fetching | TanStack React Query |
-| Forms | React Hook Form + Zod |
-| Signatures | react-signature-canvas |
-| AI | Gemini 2.5 Flash |
-| Hosting | Vercel (free tier) |
+| UI | Chakra UI v3 |
+| Backend | Google Apps Script Web App |
+| Data | Google Sheets |
+| File storage | Google Drive |
+| Auth | Google OAuth 2.0 ID tokens |
+| Hosting | Vercel |
 
-## Getting Started
+## Runtime Architecture
+
+The frontend does not call Apps Script directly.
+
+Flow:
+
+1. Browser sends `POST /api/gas?action=...` to Vercel.
+2. [`api/gas.ts`](/Users/nivdamianovich/BizoDam/Logi8173/_logi8173_/api/gas.ts) forwards the request to Apps Script.
+3. The Vercel proxy sends Apps Script a `GET` request with a serialized `payload` query param.
+4. Apps Script reads `action` + `payload`, verifies the Google ID token, and executes the controller.
+
+This proxy shape is required because direct `POST` bodies are lost on the Apps Script redirect flow.
+
+## Core Data Model
+
+### Battalion-level data
+
+- `master-inventory`: permanent battalion inventory
+- `operators`: allowed app users and roles
+- `soldiers`: battalion soldier directory
+- `companies`: battalion companies
+- `activities-registry`: registry of all activities
+
+### Activity-level data
+
+Each activity gets its own Google Drive folder and its own Google Sheets:
+
+- `inventory-snapshot`
+- `transactions`
+- `incidents`
+- `audit-log`
+
+Current backend behavior already supports a dedicated folder per activity. The intended product direction is to open each activity with a manually selected inventory subset from `master-inventory`, not a full-clone battalion inventory by default.
+
+## Auth and Admin Model
+
+- Initial setup should be run once by a battalion-owned Google account.
+- That account becomes the primary owner of the Drive structure and Apps Script deployment.
+- After setup, each operator logs in with their own Google account.
+- Access is controlled through the `operators` sheet.
+
+### Remote recovery admin
+
+This repo supports a persistent break-glass admin through the Script Property:
+
+- `BREAK_GLASS_ADMIN_EMAIL`
+
+If set to `nivdam@gmail.com`, that account can regain admin access remotely if the operator sheet or permissions become misconfigured. During setup, that email is also auto-seeded as an admin operator if it is different from the primary setup admin.
+
+## Environment Variables
+
+### Frontend / Vercel
+
+| Variable | Required | Description |
+| --- | --- | --- |
+| `VITE_GOOGLE_CLIENT_ID` | Yes | Google OAuth client ID used by the frontend |
+| `APPS_SCRIPT_URL` | Yes | Apps Script Web App `/exec` URL used by the Vercel proxy |
+| `VITE_APPS_SCRIPT_URL` | Optional | Backward-compatible fallback for the same Apps Script URL |
+
+## Apps Script Configuration
+
+### Required Script Properties before first use
+
+- `SETUP_ADMIN_EMAIL`
+- `WEB_CLIENT_ID`
+- `BREAK_GLASS_ADMIN_EMAIL` (recommended)
+
+### Script Properties created during setup
+
+- `ROOT_FOLDER_ID`
+- `SIGNATURES_FOLDER_ID`
+- `ACTIVITIES_FOLDER_ID`
+- `MASTER_INVENTORY_ID`
+- `OPERATORS_SHEET_ID`
+- `SOLDIERS_SHEET_ID`
+- `COMPANIES_SHEET_ID`
+- `ACTIVITIES_REGISTRY_ID`
+
+### Required OAuth scopes
+
+The Apps Script manifest must include:
+
+- `https://www.googleapis.com/auth/script.external_request`
+- `https://www.googleapis.com/auth/drive`
+- `https://www.googleapis.com/auth/spreadsheets`
+
+## Local Development
 
 ```bash
 pnpm install
-cp .env.example .env.local   # fill in your Google OAuth Client ID
-pnpm dev                      # http://localhost:5173
+pnpm dev
 ```
 
-### Environment Variables
+### Useful commands
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `VITE_GOOGLE_CLIENT_ID` | Yes | Google OAuth Client ID |
-| `VITE_APPS_SCRIPT_URL` | Yes | Google Apps Script Web App URL |
-
-## Project Structure
-
-```
-src/
-├── api/                    ← React Query hooks per entity
-│   ├── useInventory.ts      ← Inventory CRUD hooks
-│   ├── useSoldiers.ts       ← Soldiers CRUD hooks
-│   ├── useActivities.ts     ← Activity lifecycle hooks
-│   ├── useTransactions.ts   ← Transaction hooks (with stock validation)
-│   ├── useOperators.ts      ← Operator management hooks
-│   ├── useCompanies.ts      ← Company CRUD hooks
-│   ├── useDashboard.ts      ← Dashboard summary hook
-│   └── useSetup.ts          ← System initialization hooks
-├── features/               ← Feature modules
-│   ├── dashboard/           ← Bento dashboard with stat cards
-│   ├── inventory/           ← Equipment table with search/filter/sort
-│   └── soldiers/            ← Soldier directory with search/filter
-├── components/             ← Shared UI components
-│   ├── PageHeader.tsx       ← Consistent page title
-│   ├── SearchInput.tsx      ← Debounced search
-│   ├── FilterSelect.tsx     ← Styled dropdown filter
-│   ├── SortableHeader.tsx   ← Table column sort
-│   ├── StatusBadge.tsx      ← Colored status pill
-│   ├── EmptyState.tsx       ← No data state
-│   ├── ErrorBanner.tsx      ← Error modal overlay
-│   ├── UserAvatar.tsx       ← Google avatar + fallback
-│   ├── AppLayout.tsx        ← Header + sidebar + outlet
-│   ├── AppNav.tsx           ← Desktop sidebar
-│   └── BottomNav.tsx        ← Mobile floating bottom nav
-├── types/                  ← TypeScript types per entity
-├── mocks/                  ← Mock data (Hebrew, realistic)
-├── lib/
-│   ├── auth-context.tsx     ← Auth provider + hooks
-│   ├── auth-helpers.ts      ← Session storage, role checks
-│   ├── config.ts            ← Env var validation
-│   ├── api.ts               ← Apps Script API client (POST-only, token retry)
-│   ├── filters.ts           ← Pure filter/sort functions
-│   ├── formatters.ts        ← Date, status, label formatters
-│   └── i18n/                ← Hebrew + English translations
-├── theme/
-│   ├── index.ts             ← Chakra system config
-│   ├── animations.ts        ← Micro-animation helpers
-│   ├── animations.css       ← Global keyframes
-│   └── foundation/          ← Colors, text styles, shadows
-└── pages/                  ← Login, Settings, Activities (stubs)
-
-apps-script/               ← Google Apps Script backend
-├── Main.gs                  ← doGet/doPost entry points
-├── Router.gs                ← Request routing + response helpers
-├── Auth.gs                  ← Token verification (cached) + operator lookup
-├── Config.gs                ← PropertiesService + CacheService
-├── Constants.gs             ← Sheet column headers
-├── SheetsRepo.gs            ← Low-level Sheets read/write
-├── DriveRepo.gs             ← Folder/file/signature operations
-├── AuditLog.gs              ← Mandatory audit logging + sheet protection
-├── SetupController.gs       ← System initialization (creates all Drive resources)
-├── InventoryController.gs   ← Inventory CRUD with computed stock
-├── SoldiersController.gs    ← Soldiers CRUD
-├── CompaniesController.gs   ← Companies CRUD
-├── ActivitiesController.gs  ← Activity lifecycle (open/close with Drive folders)
-├── TransactionsController.gs← Transactions with LockService + stock validation
-├── OperatorsController.gs   ← Operator management + auth.me
-├── DashboardController.gs   ← Aggregated dashboard data
-├── Errors.gs                ← Structured error creation
-└── appsscript.json          ← Apps Script manifest
+```bash
+pnpm build
+pnpm lint
 ```
 
-## Architecture
+## Deployment
 
-```
-React App (Vercel, free)           Google Apps Script (free)
-┌──────────────────────┐           ┌──────────────────────────┐
-│ Static SPA           │           │ API Layer                │
-│ React + Chakra UI    │──POST───▶│ Router → Auth → Controller│
-│ React Query (10s)    │◀──JSON───│ → SheetsRepo / DriveRepo │
-└──────────────────────┘           └──────────────────────────┘
-                                     ↕ read/write
-                                   Google Drive (free)
-                                   ├── master-inventory
-                                   ├── operators / soldiers / companies
-                                   ├── activities-registry
-                                   ├── activities/
-                                   │   └── {name}/
-                                   │       ├── inventory-snapshot
-                                   │       ├── transactions (append-only)
-                                   │       ├── incidents
-                                   │       └── audit-log (protected)
-                                   └── signatures/ (private)
-```
+### Apps Script
 
-## Security
+1. Update the code in `apps-script/` or sync with clasp/manual editor workflow.
+2. Ensure `appsscript.json` contains the required OAuth scopes.
+3. Set Script Properties:
+   - `SETUP_ADMIN_EMAIL`
+   - `WEB_CLIENT_ID`
+   - `BREAK_GLASS_ADMIN_EMAIL`
+4. Deploy as a Web App:
+   - Execute as: `USER_DEPLOYING`
+   - Access: `ANYONE`
+5. Authorize all required scopes once.
 
-- **All requests are POST** — ID tokens never exposed in URLs
-- **Token verification cached** — Google tokeninfo + CacheService (5-min TTL)
-- **LockService** on mutations — prevents race conditions and stock overselling
-- **Audit logs are mandatory** — if logging fails, the operation fails
-- **Audit sheets are protected** — only the script owner can edit
-- **Signatures are private** — not shared via public URLs
-- **Setup restricted** — only pre-configured admin email can initialize
+### Vercel
 
-## Key Principles
+1. Set `VITE_GOOGLE_CLIENT_ID`
+2. Set `APPS_SCRIPT_URL`
+3. Deploy
 
-- **Append-only** — transactions and audit logs are never edited or deleted
-- **Current stock is computed** — initial_qty + SUM(movements)
-- **Soldiers are not users** — operators authenticate via Google; soldiers sign on operator's device
-- **$0 budget** — Google free tier + Vercel free tier, no paid services
-- **Hebrew RTL** — Heebo font, semantic RTL tokens throughout
-- **Mobile first** — floating bottom nav, card layouts, 44px touch targets
+SPA route refreshes depend on [`vercel.json`](/Users/nivdamianovich/BizoDam/Logi8173/_logi8173_/vercel.json).
 
-## Design
+## First-Time Initialization Flow
 
-See [DESIGN_SYSTEM.md](DESIGN_SYSTEM.md) for colors, typography, components, animations, and patterns.
+1. Open the deployed app with the battalion-owned admin account.
+2. Run the setup flow once.
+3. The system creates the shared Google Drive/Sheets structure.
+4. Add additional operators.
+5. Each operator then uses their own Google account.
+
+## Current Product Status
+
+### Working foundation
+
+- setup flow
+- Google login
+- dashboard
+- inventory list
+- soldiers list
+- issue form with signatures
+- Apps Script backend for inventory, operators, soldiers, companies, activities, transactions
+- Vercel proxy + SPA rewrites
+
+### Still needed for handoff-ready rollout
+
+- real Activities UI
+- open activity with selected inventory subset
+- return flow
+- minimal Settings UI for operator management
+- import + manual maintenance for master inventory
+- cleanup/sync between repo and Apps Script live deployment
+
+## Repo Notes
+
+- The canonical implementation plan should live in this repo as `PLAN.md`.
+- [`CLAUDE.md`](/Users/nivdamianovich/BizoDam/Logi8173/_logi8173_/CLAUDE.md) should stay aligned with the actual runtime architecture and operational model.
 
 ## License
 
-Private — for internal IDF reserve unit use only.
+Private internal-use project.

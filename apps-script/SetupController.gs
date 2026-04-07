@@ -72,6 +72,21 @@ var SetupController = {
       created_by: operator.email
     });
 
+    // 6b. Optionally seed a persistent remote support admin.
+    var breakGlassAdminEmail = getConfigProperty_('BREAK_GLASS_ADMIN_EMAIL');
+    if (breakGlassAdminEmail && breakGlassAdminEmail !== operator.email) {
+      appendRow_(operatorsSheet.getId(), 'operators', {
+        email: breakGlassAdminEmail,
+        full_name: 'Niv Dam',
+        role: 'admin',
+        google_sub: '',
+        saved_signature_url: '',
+        created_at: now,
+        updated_at: now,
+        created_by: operator.email
+      });
+    }
+
     // 7. Create soldiers spreadsheet
     var soldiersSheet = createSpreadsheetInFolder_(
       rootFolder, 'soldiers', 'soldiers',
