@@ -30,6 +30,7 @@ function getRoutes_() {
 
     // Activities
     'activities.list':    { handler: ActivitiesController.list,  roles: null },
+    'activities.get':     { handler: ActivitiesController.get,   roles: null },
     'activities.open':    { handler: ActivitiesController.open,  roles: ['admin', 'warehouse_operator'] },
     'activities.close':   { handler: ActivitiesController.close, roles: ['admin'] },
 
@@ -77,24 +78,16 @@ function parseRequest_(event) {
 
   // Try POST body first (direct POST without redirect)
   if (event.postData && event.postData.contents) {
-    try {
-      body = JSON.parse(event.postData.contents);
-      idToken = body.idToken || '';
-      delete body.idToken;
-    } catch (parseError) {
-      throw createError_('INVALID_BODY', 'Could not parse request body as JSON');
-    }
+    var parsedPost = parsePayloadJson_(event.postData.contents, 'Could not parse request body as JSON');
+    body = parsedPost.body;
+    idToken = parsedPost.idToken;
   }
 
   // Fallback: read payload from query parameter (POST→GET redirect loses body)
   if (!idToken && event.parameter && event.parameter.payload) {
-    try {
-      body = JSON.parse(event.parameter.payload);
-      idToken = body.idToken || '';
-      delete body.idToken;
-    } catch (parseError) {
-      throw createError_('INVALID_BODY', 'Could not parse payload parameter as JSON');
-    }
+    var parsedPayload = parsePayloadJson_(event.parameter.payload, 'Could not parse payload parameter as JSON');
+    body = parsedPayload.body;
+    idToken = parsedPayload.idToken;
   }
 
   if (!idToken) {
@@ -106,6 +99,21 @@ function parseRequest_(event) {
     body: body,
     idToken: idToken
   };
+}
+
+function parsePayloadJson_(rawPayload, errorMessage) {
+  try {
+    var parsedBody = JSON.parse(rawPayload);
+    var parsedToken = parsedBody.idToken || '';
+    delete parsedBody.idToken;
+
+    return {
+      body: parsedBody,
+      idToken: parsedToken
+    };
+  } catch (parseError) {
+    throw createError_('INVALID_BODY', errorMessage);
+  }
 }
 
 function jsonSuccess_(data) {
