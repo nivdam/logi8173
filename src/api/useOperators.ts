@@ -24,8 +24,20 @@ export const useUpsertOperator = () => {
         "operators.upsert",
         input,
       ),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["operators"] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["operators"] })
+    },
+  })
+}
+
+export const useDeleteOperator = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (email: string) =>
+      api.post<{ email: string }>("operators.delete", { email }),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["operators"] })
     },
   })
 }

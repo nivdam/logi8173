@@ -4,16 +4,29 @@ import { companiesMock } from "../mocks/companies.mock"
 import { activitiesMock } from "../mocks/activities.mock"
 import { transactionsMock } from "../mocks/transactions.mock"
 import { dashboardMock } from "../mocks/dashboard.mock"
+import type { AuthenticatedOperator, OperatorRole } from "./auth.types"
 
 const MOCK_DELAY_MS = 400
 
 type MockBody = Record<string, unknown>
 
+const mockCompanies = [...companiesMock]
+const mockOperators: AuthenticatedOperator[] = [
+  {
+    email: "dev@mock.local",
+    fullName: "Dev User",
+    role: "admin",
+    googleSub: "mock_sub",
+    avatarUrl: undefined,
+    savedSignatureUrl: undefined,
+  },
+]
+
 const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
   "setup.status": () => ({ initialized: true, folderUrl: "https://drive.google.com/mock" }),
   "inventory.list": () => inventoryMock,
   "soldiers.list": () => soldiersMock,
-  "companies.list": () => companiesMock,
+  "companies.list": () => mockCompanies,
   "activities.list": () => activitiesMock,
   "activities.get": (body) => {
     const activityId = String(body?.activityId || activitiesMock[0]?.activityId || "")
@@ -26,14 +39,63 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
   "tx.list": () => transactionsMock,
   "dashboard.summary": () => dashboardMock,
   "auth.me": () => ({
-    email: "dev@mock.local",
-    fullName: "Dev User",
-    role: "admin",
-    googleSub: "mock_sub",
-    avatarUrl: undefined,
-    savedSignatureUrl: undefined,
+    ...mockOperators[0],
   }),
-  "operators.list": () => [],
+  "operators.list": () => mockOperators,
+  "operators.upsert": (body) => {
+    const nextOperator = {
+      email: String(body?.email || "").toLowerCase(),
+      fullName: String(body?.fullName || ""),
+      role: String(body?.role || "viewer") as OperatorRole,
+      googleSub: "",
+      avatarUrl: undefined,
+      savedSignatureUrl: body?.savedSignatureUrl ? String(body.savedSignatureUrl) : undefined,
+    }
+    const existingIndex = mockOperators.findIndex((operator) => operator.email === nextOperator.email)
+
+    if (existingIndex >= 0) {
+      mockOperators[existingIndex] = {
+        ...mockOperators[existingIndex],
+        ...nextOperator,
+      }
+    } else {
+      mockOperators.push(nextOperator)
+    }
+
+    return {
+      email: nextOperator.email,
+      fullName: nextOperator.fullName,
+      role: nextOperator.role,
+    }
+  },
+  "operators.delete": (body) => {
+    const targetEmail = String(body?.email || "").toLowerCase()
+    const existingIndex = mockOperators.findIndex((operator) => operator.email === targetEmail)
+
+    if (existingIndex === -1) {
+      throw new Error("Operator not found")
+    }
+
+    mockOperators.splice(existingIndex, 1)
+    return { email: targetEmail }
+  },
+  "companies.upsert": (body) => {
+    const companyId = body?.companyId ? String(body.companyId) : "comp_mock_" + Date.now()
+    const nextCompany = {
+      companyId,
+      name: String(body?.name || ""),
+      isActive: body?.isActive !== false,
+    }
+    const existingIndex = mockCompanies.findIndex((company) => company.companyId === companyId)
+
+    if (existingIndex >= 0) {
+      mockCompanies[existingIndex] = nextCompany
+    } else {
+      mockCompanies.push(nextCompany)
+    }
+
+    return { companyId: nextCompany.companyId, name: nextCompany.name }
+  },
   "tx.create": () => ({
     txId: "tx_mock_" + Date.now(),
     txType: "issue",
