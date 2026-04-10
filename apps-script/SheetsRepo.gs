@@ -28,6 +28,28 @@ function readAllRows_(spreadsheetId, sheetName) {
   return rows;
 }
 
+function readAllRowsFromFirstAvailableSheet_(spreadsheetId, preferredSheetNames) {
+  var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+  var sheet = null;
+
+  for (var i = 0; i < preferredSheetNames.length; i++) {
+    sheet = spreadsheet.getSheetByName(preferredSheetNames[i]);
+    if (sheet) {
+      return mapSheetRows_(sheet);
+    }
+  }
+
+  var sheets = spreadsheet.getSheets();
+  if (sheets.length === 1) {
+    return mapSheetRows_(sheets[0]);
+  }
+
+  throw createError_(
+    'SHEET_NOT_FOUND',
+    'Sheet "' + preferredSheetNames[0] + '" not found'
+  );
+}
+
 function appendRow_(spreadsheetId, sheetName, rowObject) {
   var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
   var sheet = spreadsheet.getSheetByName(sheetName);
@@ -116,4 +138,22 @@ function ensureSheetHeaders_(spreadsheetId, sheetName, requiredHeaders) {
   sheet.insertColumnsAfter(headers.length || 1, missingHeaders.length);
   sheet.getRange(1, startColumn, 1, missingHeaders.length).setValues([missingHeaders]);
   sheet.getRange(1, startColumn, 1, missingHeaders.length).setFontWeight('bold');
+}
+
+function mapSheetRows_(sheet) {
+  var data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return [];
+
+  var headers = data[0];
+  var rows = [];
+
+  for (var i = 1; i < data.length; i++) {
+    var row = {};
+    for (var j = 0; j < headers.length; j++) {
+      row[headers[j]] = data[i][j];
+    }
+    rows.push(row);
+  }
+
+  return rows;
 }

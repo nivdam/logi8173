@@ -14,7 +14,7 @@ type AuthenticatedOperator = {
   role: OperatorRole
   avatarUrl: string | undefined
   googleSub: string
-  savedSignatureUrl?: string
+  savedSignatureUrl: string | undefined
 }
 
 type AuthState = {
