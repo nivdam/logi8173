@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Flex, Spinner, Text, VStack } from "@chakra-ui/react"
 import { UserSearch } from "lucide-react"
 import { PageHeader } from "../../components/PageHeader"
+import { ApiErrorState } from "../../components/ApiErrorState"
 import { SearchInput } from "../../components/SearchInput"
 import { FilterSelect } from "../../components/FilterSelect"
 import { EmptyState } from "../../components/EmptyState"
@@ -12,8 +13,18 @@ import { SoldiersTable } from "./SoldiersTable"
 import type { SortConfig } from "../../components/SortableHeader"
 
 export const SoldiersPage = () => {
-  const { data: soldiers = [], isPending: isSoldiersPending } = useSoldiers()
-  const { data: companies = [], isPending: isCompaniesPending } = useCompanies()
+  const {
+    data: soldiers = [],
+    error: soldiersError,
+    isPending: isSoldiersPending,
+    refetch: refetchSoldiers,
+  } = useSoldiers()
+  const {
+    data: companies = [],
+    error: companiesError,
+    isPending: isCompaniesPending,
+    refetch: refetchCompanies,
+  } = useCompanies()
   const isLoading = isSoldiersPending || isCompaniesPending
   const [searchQuery, setSearchQuery] = useState("")
   const [companyFilter, setCompanyFilter] = useState<string | undefined>(undefined)
@@ -81,6 +92,17 @@ export const SoldiersPage = () => {
         <Flex justify="center" py="16">
           <Spinner size="lg" color="sage.400" />
         </Flex>
+      ) : soldiersError || companiesError ? (
+        <ApiErrorState
+          title={t("soldiers.title")}
+          error={soldiersError ?? companiesError}
+          fallbackMessage={t("common.error")}
+          actionLabel={t("common.retry")}
+          onAction={() => {
+            void refetchSoldiers()
+            void refetchCompanies()
+          }}
+        />
       ) : sortedSoldiers.length > 0 ? (
         <SoldiersTable soldiers={sortedSoldiers} sort={sort} onSort={setSort} />
       ) : (

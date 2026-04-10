@@ -4,6 +4,7 @@ import {
   Plus, Search, ChevronLeft,
 } from "lucide-react"
 import { PageHeader } from "../../components/PageHeader"
+import { ApiErrorState } from "../../components/ApiErrorState"
 import { t } from "../../lib/i18n"
 import { useDashboard, useActivities } from "../../api"
 import { formatDateTime, getTransactionTypeLabel, getActivityStatusLabel } from "../../lib/formatters"
@@ -25,8 +26,18 @@ const activityStatusColor: Record<ActivityStatus, string> = {
 }
 
 export const DashboardPage = () => {
-  const { data: dashboard, isPending: isDashboardPending } = useDashboard()
-  const { data: activities, isPending: isActivitiesPending } = useActivities()
+  const {
+    data: dashboard,
+    error: dashboardError,
+    isPending: isDashboardPending,
+    refetch: refetchDashboard,
+  } = useDashboard()
+  const {
+    data: activities,
+    error: activitiesError,
+    isPending: isActivitiesPending,
+    refetch: refetchActivities,
+  } = useActivities()
   const isLoading = isDashboardPending || isActivitiesPending
 
   if (isLoading) {
@@ -34,6 +45,21 @@ export const DashboardPage = () => {
       <Flex justify="center" align="center" py="24">
         <Spinner size="lg" color="sage.400" />
       </Flex>
+    )
+  }
+
+  if (dashboardError || activitiesError) {
+    return (
+      <ApiErrorState
+        title={t("dashboard.title")}
+        error={dashboardError ?? activitiesError}
+        fallbackMessage={t("common.error")}
+        actionLabel={t("common.retry")}
+        onAction={() => {
+          void refetchDashboard()
+          void refetchActivities()
+        }}
+      />
     )
   }
 

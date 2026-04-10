@@ -161,7 +161,7 @@ function validateStockSufficiency_(activityId, requestedItems) {
   var snapshotId = getConfigProperty_('ACTIVITY_' + activityId + '_SNAPSHOT_ID');
   if (!snapshotId) return;
 
-  var inventoryRows = readAllRows_(snapshotId, 'inventory-snapshot');
+  var inventoryRows = readActivitySnapshotRows_(snapshotId);
   var transactionsId = getConfigProperty_('ACTIVITY_' + activityId + '_TRANSACTIONS_ID');
   var transactions = transactionsId ? readAllRows_(transactionsId, 'transactions') : [];
 

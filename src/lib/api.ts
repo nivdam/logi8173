@@ -3,6 +3,7 @@ import { mockApiRequest } from "./mock-api"
 
 const API_BASE = import.meta.env.VITE_API_BASE || "/api/gas"
 const USE_MOCK = import.meta.env.VITE_API_BASE === "mock"
+const REQUEST_TIMEOUT_MS = 15_000
 
 const getIdToken = (): string => {
   const session = getStoredSession()
@@ -20,11 +21,16 @@ const appsScriptRequest = async <T>(
 
   try {
     const url = `${API_BASE}?action=${encodeURIComponent(action)}`
+    const controller = new AbortController()
+    const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...body, idToken: getIdToken() }),
+      signal: controller.signal,
+    }).finally(() => {
+      window.clearTimeout(timeoutId)
     })
 
     const json = await response.json()
@@ -40,6 +46,10 @@ const appsScriptRequest = async <T>(
   } catch (error) {
     if (error instanceof ApiError) {
       throw error
+    }
+
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new ApiError("NETWORK_TIMEOUT", "The server took too long to respond")
     }
 
     // API unreachable — fall back to mock data in dev mode

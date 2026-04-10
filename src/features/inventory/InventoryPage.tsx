@@ -2,6 +2,7 @@ import { useState } from "react"
 import { Flex, Spinner, Text, VStack } from "@chakra-ui/react"
 import { PackageSearch } from "lucide-react"
 import { PageHeader } from "../../components/PageHeader"
+import { ApiErrorState } from "../../components/ApiErrorState"
 import { SearchInput } from "../../components/SearchInput"
 import { FilterSelect } from "../../components/FilterSelect"
 import { EmptyState } from "../../components/EmptyState"
@@ -28,7 +29,12 @@ const statusOptions = [
 ]
 
 export const InventoryPage = () => {
-  const { data: inventoryItems = [], isPending: isLoading } = useInventory()
+  const {
+    data: inventoryItems = [],
+    error,
+    isPending: isLoading,
+    refetch,
+  } = useInventory()
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<ItemCategory | undefined>(undefined)
   const [statusFilter, setStatusFilter] = useState<ItemStatus | undefined>(undefined)
@@ -80,6 +86,16 @@ export const InventoryPage = () => {
         <Flex justify="center" py="16">
           <Spinner size="lg" color="sage.400" />
         </Flex>
+      ) : error ? (
+        <ApiErrorState
+          title={t("inventory.title")}
+          error={error}
+          fallbackMessage={t("common.error")}
+          actionLabel={t("common.retry")}
+          onAction={() => {
+            void refetch()
+          }}
+        />
       ) : sortedItems.length > 0 ? (
         <InventoryTable items={sortedItems} sort={sort} onSort={setSort} />
       ) : (
