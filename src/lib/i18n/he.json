@@ -27,7 +27,8 @@
     "selectRank": "בחר דרגה",
     "editProfile": "פרטי החשבון",
     "clearProfile": "נקה פרטי חשבון מהמכשיר",
-    "editSignature": "ערוך חתימה"
+    "editSignature": "ערוך חתימה",
+    "resetSession": "נקה session מקומי"
   },
   "dashboard": {
     "title": "לוח בקרה",
@@ -159,7 +160,9 @@
     "openDrive": "פתח ב-Google Drive",
     "continueToApp": "המשך לאפליקציה",
     "errorTitle": "שגיאה באתחול",
-    "checking": "בודק מצב מערכת..."
+    "checking": "בודק מצב מערכת...",
+    "backendCheckFailed": "בדיקת ה-backend נכשלה",
+    "invalidSessionHelp": "נראה שה-session השמור במכשיר כבר לא תקף. אפשר לנקות את ה-session המקומי ולהתחבר מחדש."
   },
   "settings": {
     "title": "הגדרות",

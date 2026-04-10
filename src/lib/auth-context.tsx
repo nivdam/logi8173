@@ -51,13 +51,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setOperatorProfile(undefined)
   }, [operator])
 
-  const logout = useCallback(() => {
+  const resetSession = useCallback(() => {
     clearSession()
-    googleLogout()
     setOperator(undefined)
     setOperatorProfile(undefined)
     setStatus("unauthenticated")
   }, [])
+
+  const logout = useCallback(() => {
+    resetSession()
+    googleLogout()
+  }, [resetSession])
 
   return (
     <AuthContext.Provider
@@ -67,6 +71,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         operatorProfile,
         saveOperatorProfile,
         clearOperatorProfile,
+        resetSession,
         logout,
       }}
     >

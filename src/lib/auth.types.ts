@@ -23,6 +23,7 @@ type AuthState = {
   operatorProfile: OperatorProfile | undefined
   saveOperatorProfile: (profile: OperatorProfile) => void
   clearOperatorProfile: () => void
+  resetSession: () => void
   logout: () => void
 }
 

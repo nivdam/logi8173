@@ -27,7 +27,8 @@
     "selectRank": "Select rank",
     "editProfile": "Account Details",
     "clearProfile": "Clear Device Account Details",
-    "editSignature": "Edit Signature"
+    "editSignature": "Edit Signature",
+    "resetSession": "Reset local session"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -159,7 +160,9 @@
     "openDrive": "Open in Google Drive",
     "continueToApp": "Continue to App",
     "errorTitle": "Initialization Error",
-    "checking": "Checking system status..."
+    "checking": "Checking system status...",
+    "backendCheckFailed": "Backend setup check failed",
+    "invalidSessionHelp": "Your saved login session appears invalid. You can reset the local session on this device and sign in again."
   },
   "settings": {
     "title": "Settings",
