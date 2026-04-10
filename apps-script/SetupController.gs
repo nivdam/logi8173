@@ -67,6 +67,7 @@ var SetupController = {
       role: 'admin',
       google_sub: operator.googleSub,
       saved_signature_url: '',
+      is_active: true,
       created_at: now,
       updated_at: now,
       created_by: operator.email
@@ -81,6 +82,7 @@ var SetupController = {
         role: 'admin',
         google_sub: '',
         saved_signature_url: '',
+        is_active: true,
         created_at: now,
         updated_at: now,
         created_by: operator.email

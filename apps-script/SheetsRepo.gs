@@ -102,6 +102,17 @@ function updateRow_(spreadsheetId, sheetName, rowIndex, rowObject) {
   return rowObject;
 }
 
+function deleteRow_(spreadsheetId, sheetName, rowIndex) {
+  var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+  var sheet = spreadsheet.getSheetByName(sheetName);
+
+  if (!sheet) {
+    throw createError_('SHEET_NOT_FOUND', 'Sheet "' + sheetName + '" not found');
+  }
+
+  sheet.deleteRow(rowIndex);
+}
+
 function createSheetWithHeaders_(spreadsheetId, sheetName, headers) {
   var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
   var sheet = spreadsheet.insertSheet(sheetName);

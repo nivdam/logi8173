@@ -11,7 +11,7 @@ var SHEET_HEADERS = {
   ],
   'operators': [
     'email', 'full_name', 'role', 'google_sub',
-    'saved_signature_url', 'created_at', 'updated_at', 'created_by'
+    'saved_signature_url', 'is_active', 'created_at', 'updated_at', 'created_by'
   ],
   'soldiers': [
     'personal_id', 'full_name', 'rank', 'company', 'platoon', 'phone',
