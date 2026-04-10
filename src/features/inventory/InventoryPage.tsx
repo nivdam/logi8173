@@ -69,26 +69,6 @@ export const InventoryPage = () => {
     setStatusFilter(undefined)
   }
 
-  if (isLoading) {
-    return (
-      <Flex justify="center" py="16">
-        <Spinner size="lg" color="sage.400" />
-      </Flex>
-    )
-  }
-
-  if (error) {
-    return (
-      <ApiErrorState
-        title={t("inventory.title")}
-        error={error}
-        fallbackMessage={t("common.error")}
-        actionLabel={t("common.retry")}
-        onAction={handleRetry}
-      />
-    )
-  }
-
   return (
     <VStack align="stretch" gap={{ base: "5", md: "7" }}>
       <PageHeader title={t("inventory.title")} description={t("inventory.description")} />
@@ -120,7 +100,19 @@ export const InventoryPage = () => {
         ) : null}
       </Flex>
 
-      {sortedItems.length > 0 ? (
+      {isLoading ? (
+        <Flex justify="center" py="16">
+          <Spinner size="lg" color="sage.400" />
+        </Flex>
+      ) : error ? (
+        <ApiErrorState
+          title={t("inventory.title")}
+          error={error}
+          fallbackMessage={t("common.error")}
+          actionLabel={t("common.retry")}
+          onAction={handleRetry}
+        />
+      ) : sortedItems.length > 0 ? (
         <InventoryTable items={sortedItems} sort={sort} onSort={setSort} />
       ) : (
         <EmptyState

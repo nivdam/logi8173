@@ -62,26 +62,6 @@ export const SoldiersPage = () => {
     setPlatoonFilter(undefined)
   }
 
-  if (isLoading) {
-    return (
-      <Flex justify="center" py="16">
-        <Spinner size="lg" color="sage.400" />
-      </Flex>
-    )
-  }
-
-  if (soldiersError || companiesError) {
-    return (
-      <ApiErrorState
-        title={t("soldiers.title")}
-        error={soldiersError ?? companiesError}
-        fallbackMessage={t("common.error")}
-        actionLabel={t("common.retry")}
-        onAction={handleRetry}
-      />
-    )
-  }
-
   return (
     <VStack align="stretch" gap={{ base: "5", md: "7" }}>
       <PageHeader title={t("soldiers.title")} description={t("soldiers.description")} />
@@ -113,7 +93,19 @@ export const SoldiersPage = () => {
         ) : null}
       </Flex>
 
-      {sortedSoldiers.length > 0 ? (
+      {isLoading ? (
+        <Flex justify="center" py="16">
+          <Spinner size="lg" color="sage.400" />
+        </Flex>
+      ) : soldiersError || companiesError ? (
+        <ApiErrorState
+          title={t("soldiers.title")}
+          error={soldiersError ?? companiesError}
+          fallbackMessage={t("common.error")}
+          actionLabel={t("common.retry")}
+          onAction={handleRetry}
+        />
+      ) : sortedSoldiers.length > 0 ? (
         <SoldiersTable soldiers={sortedSoldiers} sort={sort} onSort={setSort} />
       ) : (
         <EmptyState

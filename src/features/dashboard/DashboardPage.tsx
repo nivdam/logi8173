@@ -13,10 +13,7 @@ import { activityStatusColor } from "../activities/activity-helpers"
 import type { Transaction } from "../../types"
 
 const formatItemsSummary = (transaction: Transaction): string => {
-  let totalQty = 0
-  for (const item of transaction.items) {
-    totalQty += Math.abs(item.qty)
-  }
+  const totalQty = transaction.items.reduce((sum, item) => sum + Math.abs(item.qty), 0)
   if (transaction.items.length === 1) return `${transaction.items[0].name} (${totalQty})`
   return `${transaction.items.length} ${t("dashboard.txItems")} (${totalQty})`
 }
@@ -63,7 +60,7 @@ export const DashboardPage = () => {
 
   if (!dashboard || !activities) return null
 
-  const maxIssuedCount = Math.max(...dashboard.companyBreakdown.map((breakdown) => breakdown.issuedCount))
+  const maxIssuedCount = Math.max(1, ...dashboard.companyBreakdown.map((breakdown) => breakdown.issuedCount))
 
   return (
   <Flex direction="column" gap={{ base: "6", md: "8" }}>
