@@ -2,6 +2,8 @@
  * Activities lifecycle — list, get, open with selected inventory, close.
  */
 
+var ACTIVITY_SNAPSHOT_SHEET_NAMES = ['inventory-snapshot', 'master-inventory'];
+
 var ActivitiesController = {
   list: function() {
     var registryId = getConfigProperty_('ACTIVITIES_REGISTRY_ID');
@@ -142,7 +144,7 @@ function mapActivityRow_(row, overrides) {
     folderUrl: buildActivityFolderUrl_(row.folder_id),
     createdAt: row.created_at,
     closedAt: row.closed_at || '',
-    selectedItemCount: snapshotId ? readAllRows_(snapshotId, 'inventory-snapshot').length : 0
+    selectedItemCount: snapshotId ? readActivitySnapshotRows_(snapshotId).length : 0
   };
 
   if (!overrides) {
@@ -335,7 +337,7 @@ function getActivitySnapshotItems_(activityId) {
     throw createError_('NOT_FOUND', 'Activity inventory snapshot not found: ' + activityId);
   }
 
-  var inventoryRows = readAllRows_(snapshotId, 'inventory-snapshot');
+  var inventoryRows = readActivitySnapshotRows_(snapshotId);
   var stockMap = buildActivityStockMap_(activityId, inventoryRows);
   var items = [];
 
@@ -344,6 +346,10 @@ function getActivitySnapshotItems_(activityId) {
   }
 
   return items;
+}
+
+function readActivitySnapshotRows_(snapshotId) {
+  return readAllRowsFromFirstAvailableSheet_(snapshotId, ACTIVITY_SNAPSHOT_SHEET_NAMES);
 }
 
 function buildActivityStockMap_(activityId, inventoryRows) {

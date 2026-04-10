@@ -1,3 +1,4 @@
+import type { SystemStyleObject } from "@chakra-ui/react"
 import type { ActivityStatus, ItemStatus, TransactionType } from "../types"
 
 export const formatDate = (isoDate: string): string => {
@@ -28,6 +29,16 @@ export const getActivityStatusLabel = (status: ActivityStatus): string => {
   if (status === "credit") return "זיכוי"
   if (status === "reconciliation") return "התאמה"
   return "סגור"
+}
+
+export const getActivityStatusColor = (
+  status: ActivityStatus,
+): SystemStyleObject["color"] => {
+  if (status === "active") return "green.600"
+  if (status === "draft") return "gray.500"
+  if (status === "closed") return "sky.600"
+  if (status === "credit") return "yellow.600"
+  return "orange.500"
 }
 
 export const getTransactionTypeLabel = (txType: TransactionType): string => {

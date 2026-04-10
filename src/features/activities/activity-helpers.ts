@@ -1,4 +1,3 @@
-import type { SystemStyleObject } from "@chakra-ui/react";
 import { t } from "../../lib/i18n";
 import type { AuthenticatedOperator, OperatorProfile } from "../../lib/auth.types";
 import type {
@@ -8,17 +7,6 @@ import type {
   ItemCategory,
   ItemStatus,
 } from "../../types";
-
-export const activityStatusColor: Record<
-  ActivityStatus,
-  SystemStyleObject["color"]
-> = {
-  active: "green.600",
-  draft: "gray.500",
-  closed: "sky.600",
-  credit: "yellow.600",
-  reconciliation: "orange.500",
-};
 
 const ACTIVITY_TYPES: ActivityType[] = [
   "training",

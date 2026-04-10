@@ -14,7 +14,7 @@ type AuthenticatedOperator = {
   role: OperatorRole
   avatarUrl: string | undefined
   googleSub: string
-  savedSignatureUrl?: string
+  savedSignatureUrl: string | undefined
 }
 
 type AuthState = {
@@ -23,6 +23,7 @@ type AuthState = {
   operatorProfile: OperatorProfile | undefined
   saveOperatorProfile: (profile: OperatorProfile) => void
   clearOperatorProfile: () => void
+  resetSession: () => void
   logout: () => void
 }
 

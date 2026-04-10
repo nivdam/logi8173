@@ -1,8 +1,8 @@
-# Logi8173 — Delivery Plan
+# Logi8173 — Day-1 Unit Rollout Plan
 
 ## Goal
 
-Deliver a battalion-usable first version of Logi8173 that supports a small operator team, shared battalion data, activity-specific inventory workflows, and reliable remote administration.
+Deliver a battalion-usable system where a small operator team can set up, import data, open activities, and perform full issuance and return workflows — all without developer intervention.
 
 ## Delivery Model
 
@@ -13,78 +13,131 @@ Deliver a battalion-usable first version of Logi8173 that supports a small opera
 
 ## What already works
 
-- Setup flow creates the shared Drive/Sheets structure.
-- Google OAuth login works against the deployed backend.
-- Vercel proxies requests to Apps Script correctly.
-- Dashboard, inventory list, soldiers list, and issue form are present.
-- Activities can be listed, opened, viewed, and closed from the frontend.
-- Activity opening creates a dedicated Drive folder and activity-specific files.
-- Activity opening now creates a partial inventory snapshot from manually selected `master-inventory` items.
+### Infrastructure
+- React 19 + Vite + Chakra UI v3 frontend, hosted on Vercel
+- Google Apps Script backend with 17 endpoints
+- Vercel proxy (`api/gas.ts`) forwarding requests to Apps Script
+- SPA routing via `vercel.json` rewrites
+- Google OAuth 2.0 login with token refresh and session recovery
 
-## Priority 1 — Align repo, deployment, and docs
+### Setup & Auth
+- Setup wizard creates the full Drive/Sheets structure from scratch
+- Break-glass admin (`BREAK_GLASS_ADMIN_EMAIL`) for remote recovery
+- Invalid session recovery with re-auth flow
+- Role-based access control (admin, warehouse_operator, commander, viewer)
 
-- Keep the Vercel proxy implementation in `api/gas.ts`.
-- Keep SPA rewrites in `vercel.json`.
-- Keep `README.md`, `CLAUDE.md`, and this `PLAN.md` aligned with the real architecture.
-- Sync any manual Apps Script fixes back into `apps-script/`.
-- Keep production Apps Script free of temporary debug functions and stack-leaking error handlers.
+### Activities
+- List, open, view detail, close activities
+- Activity opening creates a dedicated Drive folder + inventory snapshot
+- Partial inventory snapshot from manually selected master-inventory items
+- Activity detail page with metadata, snapshot items, search/filter
 
-## Priority 2 — Make Activities the operational core
+### Issuance
+- Full issuance form (IDF 1008 layout) with:
+  - Soldier selection (combobox autocomplete)
+  - Line items with inventory binding
+  - Dual signature capture (receiver + giver)
+  - Date/time picker
+- Transaction creation with stock validation and audit logging
 
-- Replace the current activities stub page with a real activity management screen.
-- Support:
-  - list activities
-  - open activity
-  - close activity
-  - view activity folder link
-- Open activity with:
-  - name
-  - type
-  - start date
-  - manually selected inventory items from `master-inventory`
-- Do not default to cloning the entire battalion inventory into every activity.
+### Data Management
+- Dashboard with stat cards, recent transactions, activity list, company breakdown
+- Inventory list with search, filter by category/status, sort
+- Soldiers list with search, filter by company/platoon, sort
+- Backend CRUD for all entities (inventory, soldiers, companies, operators)
 
-## Priority 3 — Make issuance activity-aware
+### Code Quality (recent)
+- Activity detail page split into focused sub-components (orchestrator pattern)
+- Named handlers, no `as` casts, flat control flow across pages
+- Composition architecture documented in frontend rules
 
-- Require an active activity context for issue/return operations.
-- Read available inventory from the selected activity snapshot, not directly from `master-inventory`.
-- Complete the return flow alongside the existing issue flow.
-- Preserve signature capture and audit trail requirements.
+## What's next — Rollout Milestones
 
-## Priority 4 — Minimum admin tooling for first rollout
+### Milestone 0 — Go-Live Validation Gate
 
-- Build a basic Settings area for operator management.
-- Support:
-  - list operators
-  - add operator
-  - edit operator role
-- Keep company management minimal unless blocked by operational workflows.
-- Target first rollout for a small team of 2–5 operators.
+Validate before rollout that critical flows are reliable end-to-end:
 
-## Priority 5 — Inventory bootstrap
+- Setup, operator management, company management, activity creation, issuance, return, and transaction writing all work against real Sheets.
+- Import of inventory and soldiers can ingest a real unit dataset without manual one-by-one entry.
+- Establish official import format: paste from Excel/Google Sheets as TSV/CSV.
+- Define clear fallback for partial import failure: error summary, retry, clarity on what was saved.
 
-- Add inventory import support for existing Excel/CSV data.
-- Keep manual add/edit available as a fallback and for ongoing maintenance.
-- Scope first import to battalion `master-inventory`.
-- Keep activity inventory selection manual at activity-open time.
+This gate fails if:
+- Cannot ingest realistic data volume for day 1
+- Critical writes to Sheets are unreliable
 
-## Acceptance criteria for unit handoff
+### Milestone 1 — Settings for Admin Onboarding
+
+Build basic but usable admin UI:
+
+- Operators: list, add, edit role
+- Companies: list, add, edit
+- Use existing `/settings` route as entry point
+- Don't expand beyond what blocks go-live
+
+Backend already exists: `operators.list`, `operators.upsert`, `companies.list`, `companies.upsert`.
+API hooks already exist: `useOperators()`, `useUpsertOperator()`, `useCompanies()`, `useUpsertCompany()`.
+
+### Milestone 2 — Inventory + Soldiers Import
+
+Import is a go-live requirement, not a post-rollout enhancement.
+
+Add import flow for:
+- `master-inventory`
+- `soldiers`
+
+Approach:
+- Paste from Excel / Google Sheets into textarea
+- Parse TSV → preview rows → confirm → bulk create
+- Validation per row with error summary
+- Write through existing backend endpoints
+- If per-row write proves too slow on real datasets, add bulk endpoint
+
+### Milestone 3 — Activity-Aware Issuance + Full Return Flow
+
+Complete the operational workflow:
+
+- Remove hardcoded `activityId: "act1"` from issuance
+- Add activity selector (active activities only) at top of form
+- Load inventory from selected activity's snapshot
+- Block issuance/return without activity context
+
+Return flow must be operationally complete:
+- Select activity → select soldier's issued equipment → mark returned
+- Update stock/transactions correctly
+- Audit trail
+- Clear UX for operators
+- Basic validation for expected failure modes
+
+Assumption: no go-live without both issuance and return working end-to-end.
+
+### Milestone 4 — Rollout Readiness
+
+Before handoff to the unit:
+
+- Short admin checklist: setup, add operators, add companies, import inventory, import soldiers, open activity
+- Short operator checklist: login, select activity, issue, return, error recovery
+- Full dry-run with realistic scenario: setup → operators → import → open activity → issue → return
+- Test with 2+ different users
+- Test on mobile
+
+## Acceptance Criteria for Unit Handoff
 
 - A battalion admin can initialize the system from scratch.
 - `nivdam@gmail.com` can recover admin access remotely through `BREAK_GLASS_ADMIN_EMAIL`.
-- An admin can onboard a small operator team.
+- An admin can onboard operators and companies through Settings UI.
+- An admin can import inventory and soldiers from Excel/Sheets data.
 - Operators can open an activity with only relevant inventory items.
 - Operators can issue and return gear within that activity.
 - Each activity stores its own Drive folder and Sheets.
 - Refreshing any frontend route works in production.
-- Operational documentation is sufficient for another battalion operator to continue using the system.
+- System works on mobile devices.
+- Operational checklists exist for admin and operator workflows.
 
-## Immediate implementation order
+## Key Implementation Notes
 
-1. Sync and clean Apps Script production code in the repo.
-2. Add/verify break-glass admin support.
-3. Build the real Activities UI and selected-inventory activity creation flow.
-4. Make issuance/returns activity-scoped.
-5. Add operator management UI.
-6. Add inventory import.
-7. Final cleanup, validation, and rollout documentation.
+- Import is part of go-live scope, not post-rollout.
+- Settings for first wave includes operators + companies.
+- No separate gate to "prove Sheets work" — the backend already uses Sheets; the gate is flow reliability.
+- If paste-to-backend import is too slow on real data, switch to bulk endpoint.
+- Return flow is part of the first operational milestone, not a follow-up.
