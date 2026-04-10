@@ -1,10 +1,12 @@
-import { Box, Button, Flex, Spinner, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Flex, HStack, Spinner, Text, VStack } from "@chakra-ui/react"
 import { ApiError } from "../lib/api"
 import { useSetupStatus } from "../api"
 import { SetupPage } from "../pages/SetupPage"
 import { t } from "../lib/i18n"
+import { useAuth } from "../lib/use-auth"
 
 export const RequireSetup = ({ children }: Props) => {
+  const { resetSession } = useAuth()
   const { data, isPending, error, refetch } = useSetupStatus()
 
   // First load only — full-screen spinner
@@ -26,6 +28,9 @@ export const RequireSetup = ({ children }: Props) => {
       error instanceof ApiError
         ? `${error.code}: ${error.message}`
         : t("common.error")
+    const isTokenError =
+      error instanceof ApiError &&
+      ["INVALID_ID_TOKEN", "UNAUTHORIZED", "FORBIDDEN"].includes(error.code)
 
     return (
       <Flex align="center" justify="center" minH="100dvh" bg="bg" p="6">
@@ -40,12 +45,22 @@ export const RequireSetup = ({ children }: Props) => {
         >
           <VStack gap="4" align="stretch">
             <Text fontWeight="700" textStyle="lg" color="red.600">
-              Backend setup check failed
+              {t("setup.backendCheckFailed")}
             </Text>
             <Text color="fg.muted">{message}</Text>
-            <Button alignSelf="start" onClick={() => refetch()}>
-              Retry
-            </Button>
+            {isTokenError ? (
+              <Text color="fg.muted" textStyle="sm">
+                {t("setup.invalidSessionHelp")}
+              </Text>
+            ) : null}
+            <HStack wrap="wrap" gap="3">
+              <Button onClick={() => refetch()}>{t("common.retry")}</Button>
+              {isTokenError ? (
+                <Button variant="outline" onClick={resetSession}>
+                  {t("auth.resetSession")}
+                </Button>
+              ) : null}
+            </HStack>
           </VStack>
         </Box>
       </Flex>
