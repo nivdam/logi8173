@@ -9,6 +9,10 @@ export const RequireSetup = ({ children }: Props) => {
   const { resetSession } = useAuth()
   const { data, isPending, error, refetch } = useSetupStatus()
 
+  const handleRetry = () => {
+    void refetch()
+  }
+
   // First load only — full-screen spinner
   if (isPending) {
     return (
@@ -54,7 +58,7 @@ export const RequireSetup = ({ children }: Props) => {
               </Text>
             ) : null}
             <HStack wrap="wrap" gap="3">
-              <Button onClick={() => refetch()}>{t("common.retry")}</Button>
+              <Button onClick={handleRetry}>{t("common.retry")}</Button>
               {isTokenError ? (
                 <Button variant="outline" onClick={resetSession}>
                   {t("auth.resetSession")}
@@ -69,7 +73,7 @@ export const RequireSetup = ({ children }: Props) => {
 
   // System not initialized — show setup wizard
   if (data && !data.initialized) {
-    return <SetupPage onComplete={() => refetch()} />
+    return <SetupPage onComplete={handleRetry} />
   }
 
   return children

@@ -9,20 +9,16 @@ import { t } from "../../lib/i18n"
 import { useDashboard, useActivities } from "../../api"
 import { formatDateTime, getTransactionTypeLabel, getActivityStatusLabel } from "../../lib/formatters"
 import { animations } from "../../theme/animations"
-import type { Transaction, ActivityStatus } from "../../types"
+import { activityStatusColor } from "../activities/activity-helpers"
+import type { Transaction } from "../../types"
 
 const formatItemsSummary = (transaction: Transaction): string => {
-  const totalQty = transaction.items.reduce((sum, item) => sum + Math.abs(item.qty), 0)
+  let totalQty = 0
+  for (const item of transaction.items) {
+    totalQty += Math.abs(item.qty)
+  }
   if (transaction.items.length === 1) return `${transaction.items[0].name} (${totalQty})`
   return `${transaction.items.length} ${t("dashboard.txItems")} (${totalQty})`
-}
-
-const activityStatusColor: Record<ActivityStatus, string> = {
-  active: "green.600",
-  draft: "gray.500",
-  closed: "sky.600",
-  credit: "yellow.600",
-  reconciliation: "sunburst.400",
 }
 
 export const DashboardPage = () => {
@@ -40,6 +36,11 @@ export const DashboardPage = () => {
   } = useActivities()
   const isLoading = isDashboardPending || isActivitiesPending
 
+  const handleRetry = () => {
+    void refetchDashboard()
+    void refetchActivities()
+  }
+
   if (isLoading) {
     return (
       <Flex justify="center" align="center" py="24">
@@ -55,15 +56,14 @@ export const DashboardPage = () => {
         error={dashboardError ?? activitiesError}
         fallbackMessage={t("common.error")}
         actionLabel={t("common.retry")}
-        onAction={() => {
-          void refetchDashboard()
-          void refetchActivities()
-        }}
+        onAction={handleRetry}
       />
     )
   }
 
   if (!dashboard || !activities) return null
+
+  const maxIssuedCount = Math.max(...dashboard.companyBreakdown.map((breakdown) => breakdown.issuedCount))
 
   return (
   <Flex direction="column" gap={{ base: "6", md: "8" }}>
@@ -275,9 +275,7 @@ export const DashboardPage = () => {
         >
           <Heading size="md" fontWeight="600" mb="5">{t("dashboard.companyBreakdown")}</Heading>
           <Flex direction="column" gap="4">
-            {dashboard.companyBreakdown.map((company, index) => {
-              const maxCount = Math.max(...dashboard.companyBreakdown.map((c) => c.issuedCount))
-              return (
+            {dashboard.companyBreakdown.map((company, index) => (
                 <Flex
                   key={company.companyName}
                   direction="column"
@@ -297,14 +295,13 @@ export const DashboardPage = () => {
                       bg={["sage.400", "sky.400", "sunburst.400", "rose.300", "sage.600"][index % 5]}
                       borderRadius="full"
                       css={{
-                        width: `${(company.issuedCount / maxCount) * 100}%`,
+                        width: `${(company.issuedCount / maxIssuedCount) * 100}%`,
                         transition: "width 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
                       }}
                     />
                   </Box>
                 </Flex>
-              )
-            })}
+            ))}
           </Flex>
         </Box>
       </Flex>

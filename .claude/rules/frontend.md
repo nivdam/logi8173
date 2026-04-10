@@ -15,6 +15,13 @@
 - Named exports (`export const X`)
 - No `useEffect` unless genuine side effect — prefer derived state, event handlers
 
+## Component Composition
+- Don't leave components that do data loading + state + rendering of multiple sections — split them
+- When a component contains multiple logical sections, extract each into a focused sub-component with a clear name
+- The main (page-level) component stays an orchestrator: wires data, state, and actions — minimal JSX
+- Prefer explicit names, simple props, and clear reading flow over clever patterns
+- Before adding logic to an existing file, check if it should be a small extracted component or hook
+
 ## Mobile-First
 - Operators use phones in the field — all layouts must work on mobile
 - Touch targets minimum 44px

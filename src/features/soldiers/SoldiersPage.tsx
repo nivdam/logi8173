@@ -51,10 +51,35 @@ export const SoldiersPage = () => {
     setPlatoonFilter(undefined)
   }
 
+  const handleRetry = () => {
+    void refetchSoldiers()
+    void refetchCompanies()
+  }
+
   const clearAll = () => {
     setSearchQuery("")
     setCompanyFilter(undefined)
     setPlatoonFilter(undefined)
+  }
+
+  if (isLoading) {
+    return (
+      <Flex justify="center" py="16">
+        <Spinner size="lg" color="sage.400" />
+      </Flex>
+    )
+  }
+
+  if (soldiersError || companiesError) {
+    return (
+      <ApiErrorState
+        title={t("soldiers.title")}
+        error={soldiersError ?? companiesError}
+        fallbackMessage={t("common.error")}
+        actionLabel={t("common.retry")}
+        onAction={handleRetry}
+      />
+    )
   }
 
   return (
@@ -88,22 +113,7 @@ export const SoldiersPage = () => {
         ) : null}
       </Flex>
 
-      {isLoading ? (
-        <Flex justify="center" py="16">
-          <Spinner size="lg" color="sage.400" />
-        </Flex>
-      ) : soldiersError || companiesError ? (
-        <ApiErrorState
-          title={t("soldiers.title")}
-          error={soldiersError ?? companiesError}
-          fallbackMessage={t("common.error")}
-          actionLabel={t("common.retry")}
-          onAction={() => {
-            void refetchSoldiers()
-            void refetchCompanies()
-          }}
-        />
-      ) : sortedSoldiers.length > 0 ? (
+      {sortedSoldiers.length > 0 ? (
         <SoldiersTable soldiers={sortedSoldiers} sort={sort} onSort={setSort} />
       ) : (
         <EmptyState

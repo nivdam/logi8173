@@ -13,20 +13,26 @@ import { InventoryTable } from "./InventoryTable"
 import type { SortConfig } from "../../components/SortableHeader"
 import type { ItemCategory, ItemStatus } from "../../types"
 
-const categoryOptions = [
+const CATEGORY_OPTIONS = [
   { value: "רספאי", label: "רספאי" },
   { value: "קבלר_קרביות", label: "קבלר קרביות" },
   { value: "ציוד_אישי", label: "ציוד אישי" },
   { value: "אנרגיה", label: "אנרגיה" },
   { value: "תקשורת", label: "תקשורת" },
   { value: "כללי", label: "כללי" },
-]
+] as const
 
-const statusOptions = [
+const STATUS_OPTIONS = [
   { value: "ok", label: "תקין" },
   { value: "low", label: "מלאי נמוך" },
   { value: "gap", label: "חוסר" },
-]
+] as const
+
+const parseCategory = (value: string | undefined): ItemCategory | undefined =>
+  CATEGORY_OPTIONS.find((option) => option.value === value)?.value
+
+const parseStatus = (value: string | undefined): ItemStatus | undefined =>
+  STATUS_OPTIONS.find((option) => option.value === value)?.value
 
 export const InventoryPage = () => {
   const {
@@ -45,10 +51,42 @@ export const InventoryPage = () => {
 
   const hasActiveFilters = searchQuery || categoryFilter || statusFilter
 
+  const handleCategoryChange = (value: string | undefined) => {
+    setCategoryFilter(parseCategory(value))
+  }
+
+  const handleStatusChange = (value: string | undefined) => {
+    setStatusFilter(parseStatus(value))
+  }
+
+  const handleRetry = () => {
+    void refetch()
+  }
+
   const clearAll = () => {
     setSearchQuery("")
     setCategoryFilter(undefined)
     setStatusFilter(undefined)
+  }
+
+  if (isLoading) {
+    return (
+      <Flex justify="center" py="16">
+        <Spinner size="lg" color="sage.400" />
+      </Flex>
+    )
+  }
+
+  if (error) {
+    return (
+      <ApiErrorState
+        title={t("inventory.title")}
+        error={error}
+        fallbackMessage={t("common.error")}
+        actionLabel={t("common.retry")}
+        onAction={handleRetry}
+      />
+    )
   }
 
   return (
@@ -60,14 +98,14 @@ export const InventoryPage = () => {
         <FilterSelect
           label={t("inventory.allCategories")}
           value={categoryFilter}
-          options={categoryOptions}
-          onChange={(value) => setCategoryFilter(value as ItemCategory | undefined)}
+          options={[...CATEGORY_OPTIONS]}
+          onChange={handleCategoryChange}
         />
         <FilterSelect
           label={t("inventory.allStatuses")}
           value={statusFilter}
-          options={statusOptions}
-          onChange={(value) => setStatusFilter(value as ItemStatus | undefined)}
+          options={[...STATUS_OPTIONS]}
+          onChange={handleStatusChange}
         />
         {hasActiveFilters ? (
           <Text
@@ -82,21 +120,7 @@ export const InventoryPage = () => {
         ) : null}
       </Flex>
 
-      {isLoading ? (
-        <Flex justify="center" py="16">
-          <Spinner size="lg" color="sage.400" />
-        </Flex>
-      ) : error ? (
-        <ApiErrorState
-          title={t("inventory.title")}
-          error={error}
-          fallbackMessage={t("common.error")}
-          actionLabel={t("common.retry")}
-          onAction={() => {
-            void refetch()
-          }}
-        />
-      ) : sortedItems.length > 0 ? (
+      {sortedItems.length > 0 ? (
         <InventoryTable items={sortedItems} sort={sort} onSort={setSort} />
       ) : (
         <EmptyState
