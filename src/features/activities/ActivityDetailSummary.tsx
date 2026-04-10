@@ -1,11 +1,15 @@
 import { Box, Grid, Stack, Text } from "@chakra-ui/react"
 import type { SystemStyleObject } from "@chakra-ui/react"
-import { formatDate, formatDateTime, getActivityStatusLabel } from "../../lib/formatters"
+import {
+  formatDate,
+  formatDateTime,
+  getActivityStatusColor,
+  getActivityStatusLabel,
+} from "../../lib/formatters"
 import { t } from "../../lib/i18n"
 import type { AuthenticatedOperator, OperatorProfile } from "../../lib/auth.types"
 import type { Activity } from "../../types"
 import {
-  activityStatusColor,
   getActivityTypeLabel,
   getOpenedByLabel,
   getSelectedItemCountLabel,
@@ -28,7 +32,7 @@ export const ActivityDetailSummary = ({
       <DetailCard
         label={t("activities.fields.status")}
         value={getActivityStatusLabel(activity.status)}
-        color={activityStatusColor[activity.status]}
+        color={getActivityStatusColor(activity.status)}
       />
       <DetailCard
         label={t("activities.fields.startDate")}

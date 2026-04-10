@@ -7,9 +7,13 @@ import { PageHeader } from "../../components/PageHeader"
 import { ApiErrorState } from "../../components/ApiErrorState"
 import { t } from "../../lib/i18n"
 import { useDashboard, useActivities } from "../../api"
-import { formatDateTime, getTransactionTypeLabel, getActivityStatusLabel } from "../../lib/formatters"
+import {
+  formatDateTime,
+  getTransactionTypeLabel,
+  getActivityStatusColor,
+  getActivityStatusLabel,
+} from "../../lib/formatters"
 import { animations } from "../../theme/animations"
-import { activityStatusColor } from "../activities/activity-helpers"
 import type { Transaction } from "../../types"
 
 const formatItemsSummary = (transaction: Transaction): string => {
@@ -246,16 +250,16 @@ export const DashboardPage = () => {
                   <Text textStyle="sm" fontWeight="500">{activity.name}</Text>
                   <Text textStyle="xs" color="fg.muted">{activity.startDate}</Text>
                 </Flex>
-                <Flex
-                  px="2.5"
-                  py="1"
-                  borderRadius="full"
-                  bg={`${activityStatusColor[activity.status]}/10`}
-                >
-                  <Text textStyle="xs" fontWeight="500" color={activityStatusColor[activity.status]}>
-                    {getActivityStatusLabel(activity.status)}
-                  </Text>
-                </Flex>
+	                <Flex
+	                  px="2.5"
+	                  py="1"
+	                  borderRadius="full"
+	                  bg={`${getActivityStatusColor(activity.status)}/10`}
+	                >
+	                  <Text textStyle="xs" fontWeight="500" color={getActivityStatusColor(activity.status)}>
+	                    {getActivityStatusLabel(activity.status)}
+	                  </Text>
+	                </Flex>
               </Flex>
             ))}
           </Flex>
