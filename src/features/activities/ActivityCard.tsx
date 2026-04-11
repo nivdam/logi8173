@@ -10,6 +10,7 @@ export const ActivityCard = ({
   onOpen,
 }: ActivityCardProps) => (
   <Box
+    data-testid="activity-card"
     bg="bg.card"
     borderWidth="1px"
     borderColor="border"
