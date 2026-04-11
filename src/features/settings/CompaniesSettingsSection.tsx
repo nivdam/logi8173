@@ -129,6 +129,8 @@ export const CompaniesSettingsSection = ({
             {sortedCompanies.map((company, index) => (
               <Flex
                 key={company.companyId}
+                data-testid="company-card"
+                data-company-id={company.companyId}
                 align="center"
                 gap={{ base: "2", md: "3" }}
                 borderWidth="1px"
