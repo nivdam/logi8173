@@ -9,12 +9,13 @@ import type { InventoryItem } from "../../types/inventory"
 export const ItemCardMobile = ({
   line,
   rowNumber,
+  inventoryItems,
   onUpdateField,
   onBindToItem,
   onDuplicate,
   onRemove,
 }: ItemCardMobileProps) => {
-  const editor = useLineItemEditor(line, onUpdateField, onBindToItem)
+  const editor = useLineItemEditor(line, onUpdateField, onBindToItem, inventoryItems)
 
   const handleNotesChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     onUpdateField(line.lineId, "notes", event.target.value)
@@ -170,6 +171,7 @@ export const ItemCardMobile = ({
 type ItemCardMobileProps = {
   line: IssuanceLineItem
   rowNumber: number
+  inventoryItems: InventoryItem[]
   onUpdateField: (lineId: string, field: keyof IssuanceLineItem, value: string | number | boolean) => void
   onBindToItem: (lineId: string, item: InventoryItem) => void
   onDuplicate: (lineId: string) => void

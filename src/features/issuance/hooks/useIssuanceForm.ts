@@ -18,6 +18,7 @@ import type { InventoryItem } from "../../../types/inventory"
 import type { IssuanceLineItem } from "../issuance.types"
 
 const createInitialState = (): IssuanceFormState => ({
+  activityId: undefined,
   formId: undefined,
   receiver: undefined,
   performedAt: new Date().toISOString(),
@@ -37,6 +38,18 @@ const appendLine = (state: IssuanceFormState, line: IssuanceLineItem): IssuanceF
 
 const reducer = (state: IssuanceFormState, action: IssuanceFormAction): IssuanceFormState => {
   switch (action.type) {
+    case "SET_ACTIVITY":
+      return {
+        ...state,
+        activityId: action.payload,
+        receiver: undefined,
+        lines: [createEmptyLine()],
+        expandedLineIds: [],
+        globalNotes: "",
+        receiverSignature: "",
+        giverSignature: "",
+      }
+
     case "SET_RECEIVER":
       return { ...state, receiver: action.payload }
 
@@ -95,10 +108,9 @@ const reducer = (state: IssuanceFormState, action: IssuanceFormAction): Issuance
 
     case "REMOVE_LINE": {
       const remaining = state.lines.filter((line) => line.lineId !== action.payload)
-      if (remaining.length === 0) return createInitialState()
       return {
         ...state,
-        lines: remaining,
+        lines: remaining.length === 0 ? [createEmptyLine()] : remaining,
         expandedLineIds: state.expandedLineIds.filter((id) => id !== action.payload),
       }
     }
@@ -135,11 +147,19 @@ export const useIssuanceForm = () => {
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState)
 
   const savedSignature = operatorProfile?.savedSignature || operator?.savedSignatureUrl
-  const hasGiverSignature = state.giverSignature !== "" || (savedSignature !== undefined && savedSignature !== "")
+  const hasGiverSignature = state.giverSignature !== "" || !!savedSignature
   const filledLines = getFilledLines(state.lines)
   const hasValidLines = filledLines.length > 0 && !filledLines.some(hasLineErrors)
 
+  const isFormDirty =
+    state.receiver !== undefined ||
+    filledLines.length > 0 ||
+    state.globalNotes !== "" ||
+    state.receiverSignature !== "" ||
+    state.giverSignature !== ""
+
   const isFormValid =
+    state.activityId !== undefined &&
     state.receiver !== undefined &&
     hasValidLines &&
     state.receiverSignature !== "" &&
@@ -195,9 +215,13 @@ export const useIssuanceForm = () => {
     dispatch({ type: "SET_GIVER_SIGNATURE", payload: base64 })
   }
 
+  const handleSelectActivity = (activityId: string) => {
+    dispatch({ type: "SET_ACTIVITY", payload: activityId })
+  }
+
   const handleSubmit = useCallback(() => {
     if (createTransaction.isPending) return
-    if (!state.receiver || !operator) return
+    if (!state.activityId || !state.receiver || !operator) return
 
     const transactionItems = mapLinesToTransactionItems(state.lines)
     if (transactionItems.length === 0) return
@@ -206,7 +230,7 @@ export const useIssuanceForm = () => {
 
     createTransaction.mutate(
       {
-        activityId: "act1",
+        activityId: state.activityId,
         txType: "issue",
         performedAt: state.performedAt,
         giverPersonalId: operatorProfile?.personalId || operator.email,
@@ -233,7 +257,7 @@ export const useIssuanceForm = () => {
         },
       },
     )
-  }, [state.receiver, state.performedAt, state.lines, state.globalNotes, state.receiverSignature, state.giverSignature, savedSignature, operator, operatorProfile, createTransaction, setSearchParams])
+  }, [state.activityId, state.receiver, state.performedAt, state.lines, state.globalNotes, state.receiverSignature, state.giverSignature, savedSignature, operator, operatorProfile, createTransaction, setSearchParams])
 
   const handleNewIssuance = () => {
     setSearchParams({}, { replace: true })
@@ -247,8 +271,10 @@ export const useIssuanceForm = () => {
   return {
     state,
     isFormValid,
+    isFormDirty,
     totalItemCount,
     isSubmitting: createTransaction.isPending,
+    handleSelectActivity,
     handleSelectReceiver,
     handleClearReceiver,
     handleSetPerformedAt,
@@ -268,6 +294,7 @@ export const useIssuanceForm = () => {
 }
 
 type IssuanceFormState = {
+  activityId: string | undefined
   formId: string | undefined
   receiver: Soldier | undefined
   performedAt: string
@@ -280,6 +307,7 @@ type IssuanceFormState = {
 }
 
 type IssuanceFormAction =
+  | { type: "SET_ACTIVITY"; payload: string }
   | { type: "SET_RECEIVER"; payload: Soldier | undefined }
   | { type: "SET_PERFORMED_AT"; payload: string }
   | { type: "ADD_LINE_FROM_INVENTORY"; payload: InventoryItem }

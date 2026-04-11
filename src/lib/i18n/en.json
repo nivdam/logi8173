@@ -61,7 +61,24 @@
     "noResultsDescription": "No items match your search.",
     "clearFilters": "Clear Filters",
     "allCategories": "All Categories",
-    "allStatuses": "All Statuses"
+    "allStatuses": "All Statuses",
+    "addItem": "Add item",
+    "addItemTitle": "Add inventory item",
+    "addItemDescription": "The item will be added to the battalion master inventory.",
+    "addItemAction": "Add item",
+    "addItemSuccess": "Item added successfully",
+    "addItemError": "Failed to add item. Try again.",
+    "fields": {
+      "name": "Item name",
+      "namePlaceholder": "e.g. Combat vest...",
+      "itemNumber": "Item number",
+      "itemNumberPlaceholder": "Item number...",
+      "category": "Category",
+      "initialQty": "Initial quantity",
+      "unit": "Unit of measure",
+      "notes": "Notes",
+      "notesPlaceholder": "Notes (optional)..."
+    }
   },
   "activities": {
     "title": "Activities",
@@ -315,7 +332,7 @@
     "changeSoldier": "Change Soldier",
     "date": "Date",
     "time": "Time",
-    "itemsSection": "Items",
+    "itemsSection": "Items from activity inventory",
     "searchItemPlaceholder": "Search item by name or catalog number...",
     "addCustomItem": "Add custom item",
     "didYouMean": "Did you mean ",
@@ -347,7 +364,22 @@
     "addSoldierError": "Saving the soldier failed. Please try again.",
     "companyPlaceholder": "Select company",
     "noCompaniesFound": "No active companies found",
-    "duplicatePersonalId": "This personal ID already exists"
+    "duplicatePersonalId": "This personal ID already exists",
+    "activity": "Activity",
+    "selectActivity": "Select activity",
+    "noActiveActivities": "No active activities",
+    "noActiveActivitiesHelper": "Cannot issue equipment without an active activity",
+    "goToActivities": "Go to activities",
+    "loadingSnapshot": "Loading activity inventory...",
+    "emptySnapshot": "This activity has no available inventory",
+    "chooseAnother": "Choose another activity",
+    "changeActivity": "Change",
+    "switchActivityTitle": "Switch activity?",
+    "switchActivityBody": "Switching will reset the selected soldier, items, notes, and signatures.",
+    "switchActivityConfirm": "Switch and reset",
+    "selectActivityPrompt": "Select an active activity before issuing equipment",
+    "snapshotItems": "inventory items",
+    "snapshotLoadError": "Failed to load activity inventory"
   },
   "notFound": {
     "title": "Oops, you got lost",
