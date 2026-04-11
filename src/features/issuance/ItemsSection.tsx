@@ -8,6 +8,7 @@ import type { IssuanceLineItem } from "./issuance.types"
 
 export const ItemsSection = ({
   lines,
+  inventoryItems,
   onAddEmptyLine,
   onUpdateField,
   onBindToItem,
@@ -56,6 +57,7 @@ export const ItemsSection = ({
                 key={line.lineId}
                 line={line}
                 rowNumber={index + 1}
+                inventoryItems={inventoryItems}
                 onUpdateField={onUpdateField}
                 onBindToItem={onBindToItem}
                 onDuplicate={onDuplicate}
@@ -82,6 +84,7 @@ export const ItemsSection = ({
               key={line.lineId}
               line={line}
               rowNumber={index + 1}
+              inventoryItems={inventoryItems}
               onUpdateField={onUpdateField}
               onBindToItem={onBindToItem}
               onDuplicate={onDuplicate}
@@ -111,6 +114,7 @@ export const ItemsSection = ({
 
 type ItemsSectionProps = {
   lines: IssuanceLineItem[]
+  inventoryItems: InventoryItem[]
   onAddEmptyLine: () => void
   onUpdateField: (lineId: string, field: keyof IssuanceLineItem, value: string | number | boolean) => void
   onBindToItem: (lineId: string, item: InventoryItem) => void

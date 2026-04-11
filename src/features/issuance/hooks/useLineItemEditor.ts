@@ -1,6 +1,5 @@
 import { useMemo, useRef, useState } from "react"
 import { createListCollection } from "@chakra-ui/react"
-import { useInventory } from "../../../api"
 import { validateLine } from "../issuance.utils"
 import type { IssuanceLineItem } from "../issuance.types"
 import type { InventoryItem } from "../../../types/inventory"
@@ -11,20 +10,20 @@ export const useLineItemEditor = (
   line: IssuanceLineItem,
   onUpdateField: (lineId: string, field: keyof IssuanceLineItem, value: string | number | boolean) => void,
   onBindToItem: (lineId: string, item: InventoryItem) => void,
+  inventoryItems: InventoryItem[],
 ) => {
-  const { data: inventory = [] } = useInventory()
   const [nameInput, setNameInput] = useState(line.name)
   const [debouncedQuery, setDebouncedQuery] = useState(line.name)
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   const filtered = useMemo(() => {
-    if (!debouncedQuery) return inventory
+    if (!debouncedQuery) return inventoryItems
     const query = debouncedQuery.toLowerCase()
-    return inventory.filter((item) =>
+    return inventoryItems.filter((item) =>
       item.name.toLowerCase().includes(query) ||
       item.itemNumber.toLowerCase().includes(query),
     )
-  }, [debouncedQuery, inventory])
+  }, [debouncedQuery, inventoryItems])
 
   const collection = useMemo(
     () =>
@@ -50,9 +49,9 @@ export const useLineItemEditor = (
   }
 
   const handleItemSelect = (details: { value: string[] }) => {
-    const selectedId = details.value[0]
-    if (!selectedId) return
-    const item = inventory.find((inventoryItem) => inventoryItem.itemId === selectedId)
+    const selectedItemId = details.value[0]
+    if (!selectedItemId) return
+    const item = inventoryItems.find((inventoryItem) => inventoryItem.itemId === selectedItemId)
     if (!item) return
     onBindToItem(line.lineId, item)
     setNameInput(item.name)

@@ -10,12 +10,13 @@ import type { InventoryItem } from "../../types/inventory"
 export const ItemRow = ({
   line,
   rowNumber,
+  inventoryItems,
   onUpdateField,
   onBindToItem,
   onDuplicate,
   onRemove,
 }: ItemRowProps) => {
-  const editor = useLineItemEditor(line, onUpdateField, onBindToItem)
+  const editor = useLineItemEditor(line, onUpdateField, onBindToItem, inventoryItems)
 
   const handleDuplicate = () => {
     onDuplicate(line.lineId)
@@ -147,6 +148,7 @@ export const ItemRow = ({
 type ItemRowProps = {
   line: IssuanceLineItem
   rowNumber: number
+  inventoryItems: InventoryItem[]
   onUpdateField: (lineId: string, field: keyof IssuanceLineItem, value: string | number | boolean) => void
   onBindToItem: (lineId: string, item: InventoryItem) => void
   onDuplicate: (lineId: string) => void

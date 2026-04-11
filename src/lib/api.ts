@@ -4,7 +4,7 @@ import type { AuthenticatedOperator } from "./auth.types"
 
 const API_BASE = import.meta.env.VITE_API_BASE || "/api/gas"
 const USE_MOCK = import.meta.env.VITE_API_BASE === "mock"
-const REQUEST_TIMEOUT_MS = 15_000
+const REQUEST_TIMEOUT_MS = 60_000
 
 const getIdToken = (): string => {
   const session = getStoredSession()

@@ -164,6 +164,8 @@ export const OperatorsSettingsSection = ({
               return (
                 <Flex
                   key={operator.email}
+                  data-testid="operator-card"
+                  data-operator-email={operator.email}
                   align="center"
                   gap={{ base: "2", md: "3" }}
                   borderWidth="1px"
