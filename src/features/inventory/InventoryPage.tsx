@@ -1,15 +1,17 @@
 import { useState } from "react"
-import { Flex, Spinner, Text, VStack } from "@chakra-ui/react"
-import { PackageSearch } from "lucide-react"
+import { Button, Flex, Spinner, Text, VStack } from "@chakra-ui/react"
+import { PackageSearch, Plus } from "lucide-react"
 import { PageHeader } from "../../components/PageHeader"
 import { ApiErrorState } from "../../components/ApiErrorState"
 import { SearchInput } from "../../components/SearchInput"
 import { FilterSelect } from "../../components/FilterSelect"
 import { EmptyState } from "../../components/EmptyState"
 import { t } from "../../lib/i18n"
+import { toaster } from "../../lib/toaster"
 import { filterInventory, sortInventory } from "../../lib/filters"
-import { useInventory } from "../../api"
+import { useInventory, useUpsertInventoryItem } from "../../api"
 import { InventoryTable } from "./InventoryTable"
+import { AddInventoryItemDialog } from "./AddInventoryItemDialog"
 import type { SortConfig } from "../../components/SortableHeader"
 import type { ItemCategory, ItemStatus } from "../../types"
 
@@ -41,10 +43,12 @@ export const InventoryPage = () => {
     isPending: isLoading,
     refetch,
   } = useInventory()
+  const upsertItem = useUpsertInventoryItem()
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<ItemCategory | undefined>(undefined)
   const [statusFilter, setStatusFilter] = useState<ItemStatus | undefined>(undefined)
   const [sort, setSort] = useState<SortConfig>({ key: "name", direction: "asc" })
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
   const filtered = filterInventory(inventoryItems, searchQuery, categoryFilter, statusFilter)
   const sortedItems = sortInventory(filtered, sort)
@@ -69,9 +73,52 @@ export const InventoryPage = () => {
     setStatusFilter(undefined)
   }
 
+  const handleOpenAddDialog = () => {
+    setIsAddDialogOpen(true)
+  }
+
+  const handleAddDialogOpenChange = (details: { open: boolean }) => {
+    setIsAddDialogOpen(details.open)
+  }
+
+  const handleAddItem = (values: Parameters<typeof upsertItem.mutate>[0]) => {
+    upsertItem.mutate(values, {
+      onSuccess: (result) => {
+        setIsAddDialogOpen(false)
+        toaster.create({
+          title: t("inventory.addItemSuccess"),
+          description: result.name,
+          type: "success",
+          duration: 3000,
+        })
+      },
+      onError: () => {
+        toaster.create({
+          title: t("common.error"),
+          description: t("inventory.addItemError"),
+          type: "error",
+          duration: 5000,
+        })
+      },
+    })
+  }
+
   return (
     <VStack align="stretch" gap={{ base: "5", md: "7" }}>
-      <PageHeader title={t("inventory.title")} description={t("inventory.description")} />
+      <Flex justify="space-between" align="start">
+        <PageHeader title={t("inventory.title")} description={t("inventory.description")} />
+        <Button
+          size="sm"
+          borderRadius="lg"
+          bg="sage.600"
+          color="white"
+          _hover={{ bg: "sage.700" }}
+          onClick={handleOpenAddDialog}
+        >
+          <Plus size={16} />
+          {t("inventory.addItem")}
+        </Button>
+      </Flex>
 
       <Flex gap="3" flexWrap="wrap" align="center">
         <SearchInput placeholder={t("inventory.searchPlaceholder")} onSearch={setSearchQuery} />
@@ -123,6 +170,13 @@ export const InventoryPage = () => {
           onAction={clearAll}
         />
       )}
+
+      <AddInventoryItemDialog
+        open={isAddDialogOpen}
+        isSaving={upsertItem.isPending}
+        onOpenChange={handleAddDialogOpenChange}
+        onSubmit={handleAddItem}
+      />
     </VStack>
   )
 }

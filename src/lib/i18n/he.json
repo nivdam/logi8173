@@ -61,7 +61,24 @@
     "noResultsDescription": "לא נמצאו פריטים התואמים לחיפוש.",
     "clearFilters": "נקה סינון",
     "allCategories": "כל הקטגוריות",
-    "allStatuses": "כל הסטטוסים"
+    "allStatuses": "כל הסטטוסים",
+    "addItem": "הוסף פריט",
+    "addItemTitle": "הוספת פריט למלאי",
+    "addItemDescription": "הפריט יתווסף למלאי הראשי של הגדוד.",
+    "addItemAction": "הוסף פריט",
+    "addItemSuccess": "הפריט נוסף בהצלחה",
+    "addItemError": "הוספת הפריט נכשלה. נסה שוב.",
+    "fields": {
+      "name": "שם הפריט",
+      "namePlaceholder": "לדוגמה: אפוד קרבי...",
+      "itemNumber": "מק\"ט / מסט\"ב",
+      "itemNumberPlaceholder": "מספר פריט...",
+      "category": "קטגוריה",
+      "initialQty": "כמות התחלתית",
+      "unit": "יחידת מידה",
+      "notes": "הערות",
+      "notesPlaceholder": "הערות לפריט (אופציונלי)..."
+    }
   },
   "activities": {
     "title": "פעילויות",
@@ -315,7 +332,7 @@
     "changeSoldier": "שנה חייל",
     "date": "תאריך",
     "time": "שעה",
-    "itemsSection": "פריטים",
+    "itemsSection": "פריטים מתוך מלאי הפעילות",
     "searchItemPlaceholder": "חיפוש פריט לפי שם או מק\"ט...",
     "addCustomItem": "הוסף פריט מותאם אישית",
     "didYouMean": "האם התכוונת ל-",
@@ -347,7 +364,22 @@
     "addSoldierError": "שמירת החייל נכשלה. נסה שוב.",
     "companyPlaceholder": "בחר פלוגה",
     "noCompaniesFound": "לא נמצאו פלוגות פעילות",
-    "duplicatePersonalId": "מספר אישי כבר קיים במערכת"
+    "duplicatePersonalId": "מספר אישי כבר קיים במערכת",
+    "activity": "פעילות",
+    "selectActivity": "בחר פעילות",
+    "noActiveActivities": "אין פעילויות פעילות כרגע",
+    "noActiveActivitiesHelper": "לא ניתן להנפיק ציוד עד לפתיחת פעילות",
+    "goToActivities": "לרשימת הפעילויות",
+    "loadingSnapshot": "טוען מלאי פעילות...",
+    "emptySnapshot": "לפעילות זו אין מלאי זמין להנפקה",
+    "chooseAnother": "בחר פעילות אחרת",
+    "changeActivity": "שנה",
+    "switchActivityTitle": "להחליף פעילות?",
+    "switchActivityBody": "החלפת פעילות תאפס את החייל הנבחר, הפריטים, ההערות והחתימות.",
+    "switchActivityConfirm": "החלף ואפס",
+    "selectActivityPrompt": "יש לבחור פעילות פעילה לפני הנפקת ציוד",
+    "snapshotItems": "פריטים במלאי",
+    "snapshotLoadError": "טעינת מלאי הפעילות נכשלה"
   },
   "notFound": {
     "title": "אופס, הלכת לאיבוד",

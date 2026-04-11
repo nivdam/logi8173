@@ -1,92 +1,94 @@
-import { useMemo, useState } from "react"
-import { Button, Flex, Grid, Spinner, Stack } from "@chakra-ui/react"
-import { CalendarCheck, Plus } from "lucide-react"
-import { useNavigate, useParams } from "react-router-dom"
-import { ApiErrorState } from "../components/ApiErrorState"
-import { EmptyState } from "../components/EmptyState"
-import { FilterSelect } from "../components/FilterSelect"
-import { PageHeader } from "../components/PageHeader"
-import { SearchInput } from "../components/SearchInput"
-import { useActivities, useInventory, useOpenActivity } from "../api"
-import { ActivityCard } from "../features/activities/ActivityCard"
-import { ActivityDetailPage } from "../features/activities/ActivityDetailPage"
-import { OpenActivityDialog } from "../features/activities/OpenActivityDialog"
+import { useMemo, useState } from "react";
+import { Button, Flex, Grid, Spinner, Stack } from "@chakra-ui/react";
+import { CalendarCheck, Plus } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ApiErrorState } from "../components/ApiErrorState";
+import { EmptyState } from "../components/EmptyState";
+import { FilterSelect } from "../components/FilterSelect";
+import { PageHeader } from "../components/PageHeader";
+import { SearchInput } from "../components/SearchInput";
+import { useActivities, useInventory, useOpenActivity } from "../api";
+import { ActivityCard } from "../features/activities/ActivityCard";
+import { ActivityDetailPage } from "../features/activities/ActivityDetailPage";
+import { OpenActivityDialog } from "../features/activities/OpenActivityDialog";
 import {
   getActivityStatusOptions,
   getOpenedByLabel,
   getSelectedItemCount,
   parseActivityStatus,
   sortActivities,
-} from "../features/activities/activity-helpers"
-import type { OpenActivityFormValues } from "../features/activities/activity-types"
-import { showApiErrorToast } from "../lib/api-error"
-import { t } from "../lib/i18n"
-import { toaster } from "../lib/toaster"
-import { useAuth } from "../lib/use-auth"
-import type { ActivityStatus } from "../types"
+} from "../features/activities/activity-helpers";
+import type { OpenActivityFormValues } from "../features/activities/activity-types";
+import { showApiErrorToast } from "../lib/api-error";
+import { t } from "../lib/i18n";
+import { toaster } from "../lib/toaster";
+import { useAuth } from "../lib/use-auth";
+import type { ActivityStatus } from "../types";
 
 export const ActivitiesPage = () => {
-  const { activityId } = useParams()
+  const { activityId } = useParams();
 
   if (activityId) {
-    return <ActivityDetailPage activityId={activityId} />
+    return <ActivityDetailPage activityId={activityId} />;
   }
 
-  return <ActivitiesListPage />
-}
+  return <ActivitiesListPage />;
+};
 
 const ActivitiesListPage = () => {
-  const navigate = useNavigate()
-  const { operator, operatorProfile } = useAuth()
+  const navigate = useNavigate();
+  const { operator, operatorProfile } = useAuth();
   const {
     data: activities = [],
     error: activitiesError,
     isPending: isActivitiesPending,
     refetch: refetchActivities,
-  } = useActivities()
+  } = useActivities();
   const {
     data: inventoryItems = [],
     error: inventoryError,
     isPending: isInventoryPending,
     refetch: refetchInventory,
-  } = useInventory()
-  const openActivity = useOpenActivity()
+  } = useInventory();
+  const openActivity = useOpenActivity();
 
-  const [searchQuery, setSearchQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState<ActivityStatus | undefined>(undefined)
-  const [isOpenDialogOpen, setIsOpenDialogOpen] = useState(false)
-  const [previousResetKey, setPreviousResetKey] = useState(0)
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<ActivityStatus | undefined>(
+    undefined,
+  );
+  const [isOpenDialogOpen, setIsOpenDialogOpen] = useState(false);
 
   const filteredActivities = useMemo(() => {
-    const lowerQuery = searchQuery.trim().toLowerCase()
+    const lowerQuery = searchQuery.trim().toLowerCase();
     return sortActivities(activities).filter((activity) => {
-      if (statusFilter && activity.status !== statusFilter) return false
-      if (!lowerQuery) return true
+      if (statusFilter && activity.status !== statusFilter) return false;
+      if (!lowerQuery) return true;
       return (
         activity.name.toLowerCase().includes(lowerQuery) ||
         activity.openedBy.toLowerCase().includes(lowerQuery)
-      )
-    })
-  }, [activities, searchQuery, statusFilter])
+      );
+    });
+  }, [activities, searchQuery, statusFilter]);
 
-  const activeCount = activities.filter((activity) => activity.status === "active").length
+  const activeCount = activities.filter(
+    (activity) => activity.status === "active",
+  ).length;
   const totalSelectedItems = activities.reduce(
     (sum, activity) => sum + getSelectedItemCount(activity.selectedItemCount),
     0,
-  )
+  );
 
   const handleOpenDialog = () => {
-    setPreviousResetKey((previousValue) => previousValue + 1)
-    setIsOpenDialogOpen(true)
-  }
+    setIsOpenDialogOpen(true);
+  };
 
   const handleStatusChange = (value: string | undefined) => {
-    setStatusFilter(parseActivityStatus(value))
-  }
+    setStatusFilter(parseActivityStatus(value));
+  };
 
   const handleDialogOpenChange = (details: { open: boolean }) => {
-    setIsOpenDialogOpen(details.open)
-  }
+    setIsOpenDialogOpen(details.open);
+  };
 
   const handleOpenActivity = (input: OpenActivityFormValues) => {
     openActivity.mutate(input, {
@@ -95,24 +97,24 @@ const ActivitiesListPage = () => {
           title: t("common.success"),
           description: t("activities.openSuccess"),
           type: "success",
-        })
-        setIsOpenDialogOpen(false)
-        navigate(`/activities/${activity.activityId}`)
+        });
+        setIsOpenDialogOpen(false);
+        navigate(`/activities/${activity.activityId}`);
       },
       onError: (error) => {
         showApiErrorToast({
           actionLabel: t("activities.openAction"),
           error,
           fallbackMessage: t("activities.openError"),
-        })
+        });
       },
-    })
-  }
+    });
+  };
 
   const handleRetry = () => {
-    void refetchActivities()
-    void refetchInventory()
-  }
+    void refetchActivities();
+    void refetchInventory();
+  };
 
   if (activitiesError || inventoryError) {
     return (
@@ -123,7 +125,7 @@ const ActivitiesListPage = () => {
         actionLabel={t("common.retry")}
         onAction={handleRetry}
       />
-    )
+    );
   }
 
   return (
@@ -134,7 +136,10 @@ const ActivitiesListPage = () => {
         direction={{ base: "column", md: "row" }}
         gap="4"
       >
-        <PageHeader title={t("activities.title")} description={t("activities.description")} />
+        <PageHeader
+          title={t("activities.title")}
+          description={t("activities.description")}
+        />
         <Button
           alignSelf={{ base: "stretch", md: "flex-start" }}
           colorPalette="sage"
@@ -146,9 +151,18 @@ const ActivitiesListPage = () => {
       </Flex>
 
       <Grid templateColumns={{ base: "1fr", md: "repeat(3, 1fr)" }} gap="4">
-        <SummaryCard label={t("activities.summary.total")} value={activities.length} />
-        <SummaryCard label={t("activities.summary.active")} value={activeCount} />
-        <SummaryCard label={t("activities.summary.items")} value={totalSelectedItems} />
+        <SummaryCard
+          label={t("activities.summary.total")}
+          value={activities.length}
+        />
+        <SummaryCard
+          label={t("activities.summary.active")}
+          value={activeCount}
+        />
+        <SummaryCard
+          label={t("activities.summary.items")}
+          value={totalSelectedItems}
+        />
       </Grid>
 
       <Flex gap="3" flexWrap="wrap" align="center">
@@ -174,7 +188,11 @@ const ActivitiesListPage = () => {
             <ActivityCard
               key={activity.activityId}
               activity={activity}
-              openedByLabel={getOpenedByLabel(activity.openedBy, operator, operatorProfile)}
+              openedByLabel={getOpenedByLabel(
+                activity.openedBy,
+                operator,
+                operatorProfile,
+              )}
               onOpen={() => navigate(`/activities/${activity.activityId}`)}
             />
           ))}
@@ -190,7 +208,6 @@ const ActivitiesListPage = () => {
       )}
 
       <OpenActivityDialog
-        key={previousResetKey}
         open={isOpenDialogOpen}
         inventoryItems={inventoryItems}
         isInventoryLoading={isInventoryPending}
@@ -199,8 +216,8 @@ const ActivitiesListPage = () => {
         onSubmit={handleOpenActivity}
       />
     </Stack>
-  )
-}
+  );
+};
 
 const SummaryCard = ({ label, value }: SummaryCardProps) => (
   <Flex
@@ -211,12 +228,16 @@ const SummaryCard = ({ label, value }: SummaryCardProps) => (
     borderRadius="2xl"
     p="5"
   >
-    <Flex as="span" textStyle="sm" color="fg.muted">{label}</Flex>
-    <Flex as="strong" fontSize="2xl" fontWeight="600" mt="2">{value}</Flex>
+    <Flex as="span" textStyle="sm" color="fg.muted">
+      {label}
+    </Flex>
+    <Flex as="strong" fontSize="2xl" fontWeight="600" mt="2">
+      {value}
+    </Flex>
   </Flex>
-)
+);
 
 type SummaryCardProps = {
-  label: string
-  value: number
-}
+  label: string;
+  value: number;
+};

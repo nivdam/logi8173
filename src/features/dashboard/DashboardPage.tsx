@@ -3,6 +3,7 @@ import {
   Package, AlertTriangle, XCircle, CalendarCheck,
   Plus, Search, ChevronLeft,
 } from "lucide-react"
+import { useNavigate } from "react-router-dom"
 import { PageHeader } from "../../components/PageHeader"
 import { ApiErrorState } from "../../components/ApiErrorState"
 import { t } from "../../lib/i18n"
@@ -23,6 +24,7 @@ const formatItemsSummary = (transaction: Transaction): string => {
 }
 
 export const DashboardPage = () => {
+  const navigate = useNavigate()
   const {
     data: dashboard,
     error: dashboardError,
@@ -76,7 +78,7 @@ export const DashboardPage = () => {
           <Search size={16} />
           {t("common.search")}
         </Button>
-        <Button size="sm" borderRadius="lg" bg="sage.600" color="white" _hover={{ bg: "sage.700" }} css={animations.cardHover}>
+        <Button size="sm" borderRadius="lg" bg="sage.600" color="white" _hover={{ bg: "sage.700" }} css={animations.cardHover} onClick={() => navigate("/issue")}>
           <Plus size={16} />
           {t("dashboard.newIssuance")}
         </Button>
