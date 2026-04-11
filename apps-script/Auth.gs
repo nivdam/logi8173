@@ -26,6 +26,7 @@ function buildOperatorResponse_(operator, tokenData, forcedRole) {
 }
 
 function ensureBreakGlassOperator_(operatorsSheetId, tokenData) {
+  ensureSheetHeaders_(operatorsSheetId, 'operators', SHEET_HEADERS['operators']);
   var now = new Date().toISOString();
   var existing = findRow_(operatorsSheetId, 'operators', 'email', tokenData.email);
 
@@ -36,6 +37,7 @@ function ensureBreakGlassOperator_(operatorsSheetId, tokenData) {
       role: 'admin',
       google_sub: tokenData.googleSub,
       saved_signature_url: existing.row.saved_signature_url || '',
+      is_active: true,
       created_at: existing.row.created_at || now,
       updated_at: now,
       created_by: existing.row.created_by || tokenData.email
@@ -50,6 +52,7 @@ function ensureBreakGlassOperator_(operatorsSheetId, tokenData) {
     role: 'admin',
     google_sub: tokenData.googleSub,
     saved_signature_url: '',
+    is_active: true,
     created_at: now,
     updated_at: now,
     created_by: tokenData.email
@@ -135,6 +138,7 @@ function requireOperator_(request) {
   }
 
   var operatorsSheetId = getConfigProperty_('OPERATORS_SHEET_ID');
+  ensureSheetHeaders_(operatorsSheetId, 'operators', SHEET_HEADERS['operators']);
   var operators = readAllRows_(operatorsSheetId, 'operators');
   var operator = null;
 
@@ -148,7 +152,11 @@ function requireOperator_(request) {
 
   // Look up by email, then verify google_sub matches
   for (var i = 0; i < operators.length; i++) {
-    if (operators[i].email === tokenData.email) {
+    if (
+      operators[i].email === tokenData.email &&
+      operators[i].is_active !== false &&
+      operators[i].is_active !== 'false'
+    ) {
       operator = operators[i];
       break;
     }

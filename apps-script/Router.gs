@@ -15,6 +15,7 @@ function getRoutes_() {
     // Operators
     'operators.list':     { handler: OperatorsController.list,   roles: ['admin'] },
     'operators.upsert':   { handler: OperatorsController.upsert, roles: ['admin'] },
+    'operators.delete':   { handler: OperatorsController.remove, roles: ['admin'] },
 
     // Inventory
     'inventory.list':     { handler: InventoryController.list,   roles: null },

@@ -1,5 +1,6 @@
 import { getStoredSession, clearSession } from "./auth-helpers"
 import { mockApiRequest } from "./mock-api"
+import type { AuthenticatedOperator } from "./auth.types"
 
 const API_BASE = import.meta.env.VITE_API_BASE || "/api/gas"
 const USE_MOCK = import.meta.env.VITE_API_BASE === "mock"
@@ -14,6 +15,7 @@ const getIdToken = (): string => {
 const appsScriptRequest = async <T>(
   action: string,
   body: Record<string, unknown> = {},
+  idToken?: string,
 ): Promise<T> => {
   if (USE_MOCK) {
     return mockApiRequest<T>(action, body)
@@ -27,7 +29,7 @@ const appsScriptRequest = async <T>(
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...body, idToken: getIdToken() }),
+      body: JSON.stringify({ ...body, idToken: idToken ?? getIdToken() }),
       signal: controller.signal,
     }).finally(() => {
       window.clearTimeout(timeoutId)
@@ -113,6 +115,8 @@ export const api = {
   get: <T>(action: string, params?: Record<string, unknown>) =>
     appsScriptRequest<T>(action, params ?? {}),
   post: appsScriptRequest,
+  authenticateWithGoogleToken: (idToken: string) =>
+    appsScriptRequest<AuthenticatedOperator>("auth.me", {}, idToken),
 }
 
 class ApiError extends Error {

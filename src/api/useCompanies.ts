@@ -14,8 +14,8 @@ export const useUpsertCompany = () => {
   return useMutation({
     mutationFn: (company: UpsertCompanyInput) =>
       api.post<{ companyId: string; name: string }>("companies.upsert", company),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["companies"] })
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["companies"] })
     },
   })
 }

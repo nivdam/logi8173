@@ -5,9 +5,9 @@ import { jwtDecode } from "./login-helpers"
 import { useAuthLogin } from "../lib/use-auth"
 import { ErrorBanner } from "../components/ErrorBanner"
 import { useErrorBanner } from "../components/use-error-banner"
-import { DEV_ADMIN_EMAIL } from "../lib/config"
+import { api } from "../lib/api"
+import { getApiErrorMessage } from "../lib/api-error"
 import { t } from "../lib/i18n"
-import type { OperatorRole } from "../lib/auth.types"
 import logo from "../assets/logo-with-text.png"
 
 export const LoginPage = () => {
@@ -15,68 +15,67 @@ export const LoginPage = () => {
   const onLoginSuccess = useAuthLogin()
   const { error, showError, clearError } = useErrorBanner()
 
-  const handleGoogleSuccess = (credentialResponse: CredentialResponse) => {
+  const handleGoogleError = () => {
+    showError(t("auth.loginFailed"))
+  }
+
+  const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
     const idToken = credentialResponse.credential
     if (!idToken) return
 
-    const decoded = jwtDecode(idToken)
+    try {
+      const decoded = jwtDecode(idToken)
+      const operator = await api.authenticateWithGoogleToken(idToken)
 
-    const operator = {
-      email: decoded.email,
-      fullName: decoded.name,
-      role: resolveRole(decoded.email),
-      avatarUrl: decoded.picture,
-      googleSub: decoded.sub,
-      savedSignatureUrl: undefined,
+      onLoginSuccess({
+        operator: {
+          ...operator,
+          avatarUrl: operator.avatarUrl || decoded.picture,
+        },
+        idToken,
+      })
+      navigate("/", { replace: true })
+    } catch (loginError) {
+      showError(getApiErrorMessage(loginError, t("auth.loginFailed")))
     }
-
-    onLoginSuccess({ operator, idToken })
-    navigate("/", { replace: true })
   }
 
   return (
     <>
-    <ErrorBanner message={error} onDismiss={clearError} />
-    <Flex
-      direction="column"
-      align="center"
-      justify="center"
-      minH="100dvh"
-      bg="bg"
-      px="4"
-    >
-      <VStack gap="8">
-        <VStack gap="4">
-          <Image src={logo} alt={t("app.battalion")} w="140px" h="auto" />
-          <Heading size="2xl" fontWeight="700">
-            {t("app.tagline")}
-          </Heading>
-          <Text textStyle="lg" color="fg.muted">
-            {t("auth.loginPrompt")}
+      <ErrorBanner message={error} onDismiss={clearError} />
+      <Flex
+        direction="column"
+        align="center"
+        justify="center"
+        minH="100dvh"
+        bg="bg"
+        px="4"
+      >
+        <VStack gap="8">
+          <VStack gap="4">
+            <Image src={logo} alt={t("app.battalion")} w="140px" h="auto" />
+            <Heading size="2xl" fontWeight="700">
+              {t("app.tagline")}
+            </Heading>
+            <Text textStyle="lg" color="fg.muted">
+              {t("auth.loginPrompt")}
+            </Text>
+          </VStack>
+
+          <GoogleLogin
+            onSuccess={handleGoogleSuccess}
+            onError={handleGoogleError}
+            theme="outline"
+            size="large"
+            text="signin_with"
+            width="300"
+          />
+
+          <Text textStyle="xs" color="fg.muted">
+            {t("app.battalion")}
           </Text>
         </VStack>
-
-        <GoogleLogin
-          onSuccess={handleGoogleSuccess}
-          onError={() => {
-            showError(t("auth.loginFailed"))
-          }}
-          theme="outline"
-          size="large"
-          text="signin_with"
-          width="300"
-        />
-
-        <Text textStyle="xs" color="fg.muted">
-          {t("app.battalion")}
-        </Text>
-      </VStack>
-    </Flex>
+      </Flex>
     </>
   )
-}
-
-const resolveRole = (email: string): OperatorRole => {
-  if (DEV_ADMIN_EMAIL && email === DEV_ADMIN_EMAIL) return "admin"
-  return "viewer"
 }
