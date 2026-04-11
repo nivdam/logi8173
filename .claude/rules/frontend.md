@@ -5,6 +5,7 @@
 - No native HTML tags (`<div>`, `<label>`, `<span>`) — use Chakra components
 - No `style={{}}` — use Chakra props or `css={{}}`
 - Use semantic tokens from theme, not raw hex values
+- **Dialog/Drawer: NEVER use `key` prop, conditional render, or resetKey pattern** — always mounted, control via `open` prop only. Reset state in `onOpenChange`. Violating this leaves backdrop frozen in DOM.
 
 ## React Patterns
 - `type` only, never `interface`
