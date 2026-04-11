@@ -1,5 +1,8 @@
-import { Box, Button, Flex, HStack, Image, Separator, Spinner, Text, VStack } from "@chakra-ui/react"
+import { Accordion, Box, Button, Flex, Image, Spinner, Text, VStack } from "@chakra-ui/react"
+import { ChevronDown } from "lucide-react"
 import { ApiError } from "../lib/api"
+
+const TOKEN_ERROR_CODES = ["INVALID_ID_TOKEN", "UNAUTHORIZED", "FORBIDDEN"]
 import { useSetupStatus } from "../api"
 import { SetupPage } from "../pages/SetupPage"
 import { t } from "../lib/i18n"
@@ -33,7 +36,7 @@ export const RequireSetup = ({ children }: Props) => {
       error instanceof ApiError ? `${error.code}: ${error.message}` : t("common.error")
     const isTokenError =
       error instanceof ApiError &&
-      ["INVALID_ID_TOKEN", "UNAUTHORIZED", "FORBIDDEN"].includes(error.code)
+      TOKEN_ERROR_CODES.includes(error.code)
 
     return (
       <Flex
@@ -44,76 +47,78 @@ export const RequireSetup = ({ children }: Props) => {
         p={{ base: "4", md: "6" }}
       >
         <Box
-          maxW="2xl"
+          maxW="sm"
           w="100%"
           bg="white"
           borderWidth="1px"
           borderColor="sage.200"
-          borderRadius="3xl"
-          boxShadow="0 18px 48px rgba(30, 41, 32, 0.08)"
+          borderRadius="2xl"
+          boxShadow="0 14px 36px rgba(30, 41, 32, 0.08)"
           overflow="hidden"
+          px={{ base: "6", md: "8" }}
+          py={{ base: "8", md: "10" }}
         >
-          <VStack gap="0" align="stretch">
-            <Box px={{ base: "5", md: "8" }} pt={{ base: "6", md: "8" }}>
-              <VStack gap="4" align="stretch">
-                <Image src={logo} alt={t("app.battalion")} w={{ base: "112px", md: "136px" }} h="auto" />
-                <VStack gap="2" align="stretch">
-                  <Text fontWeight="700" textStyle={{ base: "xl", md: "2xl" }} color="fg.default">
-                    {t("setup.backendErrorTitle")}
-                  </Text>
-                  <Text color="fg.muted" lineHeight="tall">
-                    {t("setup.backendErrorDescription")}
-                  </Text>
-                </VStack>
-              </VStack>
-            </Box>
+          <VStack gap="6" align="center">
+            <Image src={logo} alt={t("app.battalion")} w="72px" h="auto" />
 
-            <Box px={{ base: "5", md: "8" }} py={{ base: "5", md: "6" }}>
-              <VStack gap="3" align="stretch">
-                <Text fontWeight="600" color="fg.default">
-                  {t("setup.backendErrorActionsTitle")}
-                </Text>
-                <VStack gap="2" align="stretch" color="fg.muted">
-                  <Text>{t("setup.backendErrorActionRetry")}</Text>
-                  <Text>{t("setup.backendErrorActionCheck")}</Text>
-                  {isTokenError ? <Text>{t("setup.invalidSessionHelp")}</Text> : null}
-                </VStack>
-              </VStack>
-            </Box>
+            <VStack gap="2" align="center" textAlign="center">
+              <Text fontWeight="700" textStyle={{ base: "xl", md: "2xl" }} color="fg.default">
+                {isTokenError ? t("setup.tokenErrorTitle") : t("setup.genericErrorTitle")}
+              </Text>
+              <Text color="fg.muted" textStyle="sm">
+                {isTokenError ? t("setup.tokenErrorDescription") : t("setup.genericErrorDescription")}
+              </Text>
+            </VStack>
 
-            <Box bg="gray.50" px={{ base: "5", md: "8" }} py={{ base: "4", md: "5" }}>
-              <VStack gap="3" align="stretch">
-                <Text fontWeight="600" textStyle="sm" color="fg.default">
-                  {t("setup.backendErrorDetailsTitle")}
-                </Text>
-                <Text
-                  color="fg.muted"
-                  textStyle="sm"
-                  wordBreak="break-word"
-                  fontFamily="mono"
-                  direction="ltr"
-                  textAlign="left"
-                >
-                  {technicalMessage}
-                </Text>
-              </VStack>
-            </Box>
-
-            <Separator />
-
-            <Box px={{ base: "5", md: "8" }} py={{ base: "4", md: "5" }}>
-              <HStack wrap="wrap" gap="3">
-                <Button onClick={handleRetry}>{t("common.retry")}</Button>
-                <Button variant="outline" onClick={() => window.location.reload()}>
-                  {t("common.refreshData")}
-                </Button>
-                {isTokenError ? (
-                  <Button variant="subtle" onClick={resetSession}>
-                    {t("auth.resetSession")}
+            <Flex gap="3" w="100%" direction={{ base: "column", sm: "row" }}>
+              {isTokenError ? (
+                <>
+                  <Button colorPalette="sage" variant="solid" flex="1" size="lg" onClick={resetSession}>
+                    {t("setup.backendErrorReloginAction")}
                   </Button>
-                ) : null}
-              </HStack>
-            </Box>
+                  <Button colorPalette="sage" variant="outline" flex="1" size="lg" onClick={handleRetry}>
+                    {t("setup.backendErrorRetrySecondary")}
+                  </Button>
+                </>
+              ) : (
+                <Button colorPalette="sage" variant="solid" w="100%" size="lg" onClick={handleRetry}>
+                  {t("setup.backendErrorRetryAction")}
+                </Button>
+              )}
+            </Flex>
+
+            <Accordion.Root collapsible variant="plain" size="sm" w="100%">
+              <Accordion.Item value="details">
+                <Accordion.ItemTrigger cursor="pointer" px="0" justifyContent="center">
+                  <Text textStyle="xs" color="fg.muted">
+                    {t("setup.backendErrorDetailsTitle")}
+                  </Text>
+                  <Accordion.ItemIndicator>
+                    <ChevronDown size={14} />
+                  </Accordion.ItemIndicator>
+                </Accordion.ItemTrigger>
+                <Accordion.ItemContent>
+                  <Box
+                    bg="gray.50"
+                    borderRadius="lg"
+                    px="4"
+                    py="3"
+                    mt="1"
+                  >
+                    <Text
+                      color="fg.muted"
+                      textStyle="xs"
+                      wordBreak="break-word"
+                      fontFamily="mono"
+                      direction="ltr"
+                      textAlign="left"
+                    >
+                      {technicalMessage}
+                    </Text>
+                  </Box>
+                </Accordion.ItemContent>
+              </Accordion.Item>
+            </Accordion.Root>
           </VStack>
         </Box>
       </Flex>
