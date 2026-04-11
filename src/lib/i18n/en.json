@@ -162,7 +162,14 @@
     "errorTitle": "Initialization Error",
     "checking": "Checking system status...",
     "backendCheckFailed": "Backend setup check failed",
-    "invalidSessionHelp": "Your saved login session appears invalid. You can reset the local session on this device and sign in again."
+    "tokenErrorTitle": "The system forgot who you are",
+    "tokenErrorDescription": "Happens to the best of us. Just sign in again and we'll carry on.",
+    "genericErrorTitle": "The server took a break",
+    "genericErrorDescription": "Probably temporary. Let's try again and hope it's back from coffee.",
+    "backendErrorDetailsTitle": "For the tech-curious",
+    "backendErrorRetryAction": "Let's go again",
+    "backendErrorReloginAction": "Sign in again",
+    "backendErrorRetrySecondary": "Try again without signing out"
   },
   "settings": {
     "title": "Settings",

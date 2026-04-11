@@ -5,6 +5,21 @@
 
 var TOKEN_CACHE_TTL_SECONDS = 300; // 5 minutes
 
+function buildTokenCacheKey_(idToken) {
+  var digest = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    idToken
+  );
+  var parts = [];
+
+  for (var i = 0; i < digest.length; i++) {
+    var byteValue = digest[i];
+    parts.push(('0' + ((byteValue + 256) % 256).toString(16)).slice(-2));
+  }
+
+  return 'token_' + parts.join('');
+}
+
 function getBreakGlassAdminEmail_() {
   return getConfigProperty_('BREAK_GLASS_ADMIN_EMAIL');
 }
@@ -66,57 +81,66 @@ function verifyIdToken_(idToken) {
     throw createError_('MISSING_TOKEN', 'No ID token provided');
   }
 
-  // Check cache first to avoid network call on every request
-  var cache = CacheService.getScriptCache();
-  var cacheKey = 'token_' + Utilities.computeDigest(
-    Utilities.DigestAlgorithm.SHA_256, idToken
-  ).map(function(b) { return ('0' + (b & 0xFF).toString(16)).slice(-2); }).join('');
+  try {
+    // Check cache first to avoid network call on every request
+    var cache = CacheService.getScriptCache();
+    var cacheKey = buildTokenCacheKey_(idToken);
 
-  var cached = cache.get(cacheKey);
-  if (cached) {
-    return JSON.parse(cached);
+    var cached = cache.get(cacheKey);
+    if (cached) {
+      return JSON.parse(cached);
+    }
+
+    var response = UrlFetchApp.fetch(
+      'https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken),
+      { muteHttpExceptions: true }
+    );
+
+    if (response.getResponseCode() !== 200) {
+      throw createError_('INVALID_ID_TOKEN', 'Token verification failed');
+    }
+
+    var payload = JSON.parse(response.getContentText());
+
+    var expectedClientId = getConfigProperty_('WEB_CLIENT_ID');
+    if (expectedClientId && payload.aud !== expectedClientId) {
+      throw createError_('INVALID_AUDIENCE', 'Token audience does not match');
+    }
+
+    var validIssuers = ['accounts.google.com', 'https://accounts.google.com'];
+    if (validIssuers.indexOf(payload.iss) === -1) {
+      throw createError_('INVALID_ISSUER', 'Token issuer is not valid');
+    }
+
+    if (Number(payload.exp) * 1000 < Date.now()) {
+      throw createError_('TOKEN_EXPIRED', 'Token has expired');
+    }
+
+    if (payload.email_verified !== 'true' && payload.email_verified !== true) {
+      throw createError_('EMAIL_NOT_VERIFIED', 'Email is not verified');
+    }
+
+    var tokenData = {
+      googleSub: payload.sub,
+      email: payload.email,
+      fullName: payload.name || '',
+      avatarUrl: payload.picture || ''
+    };
+
+    // Cache the verified token data
+    cache.put(cacheKey, JSON.stringify(tokenData), TOKEN_CACHE_TTL_SECONDS);
+
+    return tokenData;
+  } catch (error) {
+    if (error && error.code) {
+      throw error;
+    }
+
+    throw createError_(
+      'TOKEN_VERIFICATION_ERROR',
+      String((error && error.message) || error || 'Unexpected token verification error')
+    );
   }
-
-  var response = UrlFetchApp.fetch(
-    'https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(idToken),
-    { muteHttpExceptions: true }
-  );
-
-  if (response.getResponseCode() !== 200) {
-    throw createError_('INVALID_ID_TOKEN', 'Token verification failed');
-  }
-
-  var payload = JSON.parse(response.getContentText());
-
-  var expectedClientId = getConfigProperty_('WEB_CLIENT_ID');
-  if (expectedClientId && payload.aud !== expectedClientId) {
-    throw createError_('INVALID_AUDIENCE', 'Token audience does not match');
-  }
-
-  var validIssuers = ['accounts.google.com', 'https://accounts.google.com'];
-  if (validIssuers.indexOf(payload.iss) === -1) {
-    throw createError_('INVALID_ISSUER', 'Token issuer is not valid');
-  }
-
-  if (Number(payload.exp) * 1000 < Date.now()) {
-    throw createError_('TOKEN_EXPIRED', 'Token has expired');
-  }
-
-  if (payload.email_verified !== 'true' && payload.email_verified !== true) {
-    throw createError_('EMAIL_NOT_VERIFIED', 'Email is not verified');
-  }
-
-  var tokenData = {
-    googleSub: payload.sub,
-    email: payload.email,
-    fullName: payload.name || '',
-    avatarUrl: payload.picture || ''
-  };
-
-  // Cache the verified token data
-  cache.put(cacheKey, JSON.stringify(tokenData), TOKEN_CACHE_TTL_SECONDS);
-
-  return tokenData;
 }
 
 function requireOperator_(request) {
