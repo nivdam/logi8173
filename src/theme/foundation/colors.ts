@@ -12,6 +12,10 @@ export const colors = defineTokens.colors({
     700: { value: "#465752" },
     800: { value: "#34403d" },
     900: { value: "#222a28" },
+    solid: { value: "#586e68" },
+    contrast: { value: "#ffffff" },
+    fg: { value: "#465752" },
+    focusRing: { value: "#7C9A92" },
   },
   rose: {
     50: { value: "#fef5f5" },

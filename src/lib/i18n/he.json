@@ -162,7 +162,14 @@
     "errorTitle": "שגיאה באתחול",
     "checking": "בודק מצב מערכת...",
     "backendCheckFailed": "בדיקת ה-backend נכשלה",
-    "invalidSessionHelp": "נראה שה-session השמור במכשיר כבר לא תקף. אפשר לנקות את ה-session המקומי ולהתחבר מחדש."
+    "tokenErrorTitle": "רגע, משהו התבלבל בזיהוי",
+    "tokenErrorDescription": "לא דרמה. בדרך כלל התחברות מחדש סוגרת את זה.",
+    "genericErrorTitle": "השרת לקח הפסקה",
+    "genericErrorDescription": "כנראה זמני. ננסה שוב ונקווה שחזר מהקפה.",
+    "backendErrorDetailsTitle": "פרטים טכניים",
+    "backendErrorRetryAction": "יאללה עוד פעם",
+    "backendErrorReloginAction": "התחבר מחדש",
+    "backendErrorRetrySecondary": "נסה שוב בלי להתנתק"
   },
   "settings": {
     "title": "הגדרות",
