@@ -68,10 +68,11 @@ const createDevAppsScriptProxyPlugin = (targetUrl: string | undefined) => ({
         const body = await readRequestBody(req)
         const target = new URL(targetUrl)
         target.searchParams.set("action", action)
-        target.searchParams.set("payload", body || "{}")
 
         const upstream = await fetch(target.toString(), {
-          method: "GET",
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: body || "{}",
           redirect: "follow",
         })
 
