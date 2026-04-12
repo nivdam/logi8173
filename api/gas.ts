@@ -37,10 +37,11 @@ export default async function handler(
 
   const targetUrl = new URL(appsScriptUrl);
   targetUrl.searchParams.set("action", action);
-  targetUrl.searchParams.set("payload", payload);
 
   const upstream = await fetch(targetUrl.toString(), {
-    method: "GET",
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: payload,
     redirect: "follow",
   });
 

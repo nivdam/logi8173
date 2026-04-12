@@ -5,12 +5,28 @@ import { activitiesMock } from "../mocks/activities.mock"
 import { transactionsMock } from "../mocks/transactions.mock"
 import { dashboardMock } from "../mocks/dashboard.mock"
 import type { AuthenticatedOperator, OperatorRole } from "./auth.types"
+import type {
+  Activity,
+  ActivityType,
+  ActivityDetails,
+  Transaction,
+  TransactionLineItem,
+  TransactionType,
+} from "../types"
 
 const MOCK_DELAY_MS = 400
 
 type MockBody = Record<string, unknown>
 
 const mockCompanies = [...companiesMock]
+const mockActivities: Activity[] = activitiesMock.map((activity) => ({ ...activity }))
+const mockTransactions = [...transactionsMock]
+const activityItemIdsById = Object.fromEntries(
+  activitiesMock.map((activity) => [
+    activity.activityId,
+    inventoryMock.slice(0, activity.selectedItemCount).map((item) => item.itemId),
+  ]),
+) as Record<string, string[]>
 const mockOperators: AuthenticatedOperator[] = [
   {
     email: "dev@mock.local",
@@ -27,16 +43,22 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
   "inventory.list": () => inventoryMock,
   "soldiers.list": () => soldiersMock,
   "companies.list": () => mockCompanies,
-  "activities.list": () => activitiesMock,
+  "activities.list": () => mockActivities,
   "activities.get": (body) => {
-    const activityId = String(body?.activityId || activitiesMock[0]?.activityId || "")
-    const activity = activitiesMock.find((item) => item.activityId === activityId) ?? activitiesMock[0]
+    const activityId = String(body?.activityId || mockActivities[0]?.activityId || "")
+    const activity = mockActivities.find((item) => item.activityId === activityId) ?? mockActivities[0]
+    const snapshotItemIds = activity ? activityItemIdsById[activity.activityId] ?? [] : []
+
     return {
       activity,
-      snapshotItems: inventoryMock.slice(0, activity?.selectedItemCount || 0),
+      snapshotItems: inventoryMock.filter((item) => snapshotItemIds.includes(item.itemId)),
     }
   },
-  "tx.list": () => transactionsMock,
+  "tx.list": (body) => {
+    const activityId = body?.activityId ? String(body.activityId) : undefined
+    if (!activityId) return mockTransactions
+    return mockTransactions
+  },
   "dashboard.summary": () => dashboardMock,
   "auth.me": () => ({
     ...mockOperators[0],
@@ -96,28 +118,84 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
 
     return { companyId: nextCompany.companyId, name: nextCompany.name }
   },
-  "tx.create": () => ({
-    txId: "tx_mock_" + Date.now(),
-    txType: "issue",
-    performedBy: "dev@mock.local",
-    performedAt: new Date().toISOString(),
-    items: [],
-    signatureUrl: "",
-  }),
-  "activities.open": (body) => ({
-    activityId: "act_mock_" + Date.now(),
-    name: String(body?.name || "פעילות חדשה"),
-    activityType: body?.activityType || "training",
-    status: "active",
-    openedBy: "dev@mock.local",
-    startDate: String(body?.startDate || new Date().toISOString().slice(0, 10)),
-    endDate: "",
-    folderId: "mock_folder_new",
-    folderUrl: "https://drive.google.com/drive/folders/mock_folder_new",
-    createdAt: new Date().toISOString(),
-    closedAt: "",
-    selectedItemCount: Array.isArray(body?.itemIds) ? body.itemIds.length : 0,
-  }),
+  "tx.create": (body) => {
+    const nextTransaction: Transaction = {
+      txId: "tx_mock_" + Date.now(),
+      txType: String(body?.txType || "issue") as TransactionType,
+      giverName: String(body?.giverName || ""),
+      giverPersonalId: String(body?.giverPersonalId || ""),
+      receiverName: String(body?.receiverName || ""),
+      receiverPersonalId: String(body?.receiverPersonalId || ""),
+      performedBy: "dev@mock.local",
+      performedAt: String(body?.performedAt || new Date().toISOString()),
+      items: (Array.isArray(body?.items) ? body.items : []) as TransactionLineItem[],
+      notes: String(body?.notes || ""),
+      signatureUrl: "",
+    }
+
+    mockTransactions.unshift(nextTransaction)
+
+    return {
+      txId: nextTransaction.txId,
+      txType: nextTransaction.txType,
+      performedBy: nextTransaction.performedBy,
+      performedAt: nextTransaction.performedAt,
+      items: nextTransaction.items,
+      signatureUrl: nextTransaction.signatureUrl,
+    }
+  },
+  "activities.open": (body) => {
+    const activityId = "act_mock_" + Date.now()
+    const itemIds = Array.isArray(body?.itemIds)
+      ? body.itemIds
+          .map((itemId) => String(itemId))
+          .filter((itemId) => inventoryMock.some((item) => item.itemId === itemId))
+      : []
+    const nextActivity: Activity = {
+      activityId,
+      name: String(body?.name || "פעילות חדשה"),
+      activityType: String(body?.activityType || "training") as ActivityType,
+      status: "active",
+      openedBy: "dev@mock.local",
+      startDate: String(body?.startDate || new Date().toISOString().slice(0, 10)),
+      endDate: undefined,
+      folderId: "mock_folder_" + activityId,
+      folderUrl: "https://drive.google.com/drive/folders/mock_folder_" + activityId,
+      createdAt: new Date().toISOString(),
+      closedAt: undefined,
+      selectedItemCount: itemIds.length,
+    }
+
+    mockActivities.unshift(nextActivity)
+    activityItemIdsById[activityId] = itemIds
+
+    return nextActivity
+  },
+  "activities.addItems": (body) => {
+    const activityId = String(body?.activityId || "")
+    const activity = mockActivities.find((item) => item.activityId === activityId)
+
+    if (!activity) {
+      throw new Error("Activity not found")
+    }
+
+    const nextItemIds = Array.isArray(body?.itemIds)
+      ? body.itemIds
+          .map((itemId) => String(itemId))
+          .filter((itemId) => inventoryMock.some((item) => item.itemId === itemId))
+      : []
+    const mergedIds = [...new Set([...(activityItemIdsById[activityId] ?? []), ...nextItemIds])]
+
+    activityItemIdsById[activityId] = mergedIds
+    activity.selectedItemCount = mergedIds.length
+
+    const snapshotItems = inventoryMock.filter((item) => mergedIds.includes(item.itemId))
+
+    return {
+      activity,
+      snapshotItems,
+    } satisfies ActivityDetails
+  },
   "activities.close": (body) => ({
     activityId: String(body?.activityId || "act1"),
     status: "closed",

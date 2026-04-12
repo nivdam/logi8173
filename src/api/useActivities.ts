@@ -20,9 +20,25 @@ export const useOpenActivity = () => {
 
   return useMutation({
     mutationFn: (input: OpenActivityInput) =>
-      api.post<Activity>("activities.open", input),
+      api
+        .post<Activity | Activity[]>("activities.open", input)
+        .then(normalizeSingleActivityResponse),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["activities"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+    },
+  })
+}
+
+export const useAddItemsToActivity = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (input: AddItemsToActivityInput) =>
+      api.post<ActivityDetails>("activities.addItems", input),
+    onSuccess: (_result, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["activities"] })
+      queryClient.invalidateQueries({ queryKey: ["activities", variables.activityId] })
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })
     },
   })
@@ -55,4 +71,22 @@ type OpenActivityInput = {
 type CloseActivityInput = {
   activityId: string
   endDate?: string
+}
+
+type AddItemsToActivityInput = {
+  activityId: string
+  itemIds: string[]
+}
+
+const normalizeSingleActivityResponse = (
+  response: Activity | Activity[],
+): Activity => {
+  if (Array.isArray(response)) {
+    if (response.length === 0) {
+      throw new Error("activities.open returned an empty activity list")
+    }
+    return response[0]
+  }
+
+  return response
 }
