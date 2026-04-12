@@ -1,7 +1,7 @@
 import { Box, Button, Flex, Grid, Heading, Spinner, Text } from "@chakra-ui/react"
 import {
   Package, AlertTriangle, XCircle, CalendarCheck,
-  Plus, Search, ChevronLeft,
+  Plus, RotateCcw, ChevronLeft,
 } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { PageHeader } from "../../components/PageHeader"
@@ -74,9 +74,9 @@ export const DashboardPage = () => {
     <Flex justify="space-between" align={{ base: "start", md: "center" }} direction={{ base: "column", md: "row" }} gap="4">
       <PageHeader title={t("dashboard.title")} description={t("dashboard.description")} />
       <Flex gap="3">
-        <Button size="sm" variant="outline" borderRadius="lg" css={animations.cardHover}>
-          <Search size={16} />
-          {t("common.search")}
+        <Button size="sm" variant="outline" borderRadius="lg" css={animations.cardHover} onClick={() => navigate("/return")}>
+          <RotateCcw size={16} />
+          {t("dashboard.newReturn")}
         </Button>
         <Button size="sm" borderRadius="lg" bg="sage.600" color="white" _hover={{ bg: "sage.700" }} css={animations.cardHover} onClick={() => navigate("/issue")}>
           <Plus size={16} />

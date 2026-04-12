@@ -14,6 +14,7 @@ export const createLineFromInventoryItem = (item: InventoryItem): IssuanceLineIt
   notes: "",
   isCustom: false,
   availableQty: item.currentQty,
+  maxQty: item.currentQty,
 })
 
 export const createEmptyLine = (): IssuanceLineItem => ({
@@ -27,6 +28,7 @@ export const createEmptyLine = (): IssuanceLineItem => ({
   notes: "",
   isCustom: false,
   availableQty: 0,
+  maxQty: undefined,
 })
 
 export const createCustomLine = (name: string): IssuanceLineItem => ({
@@ -40,6 +42,7 @@ export const createCustomLine = (name: string): IssuanceLineItem => ({
   notes: "",
   isCustom: true,
   availableQty: 0,
+  maxQty: undefined,
 })
 
 export const duplicateLine = (source: IssuanceLineItem): IssuanceLineItem => ({
@@ -75,8 +78,8 @@ export const validateLine = (
 ): Array<{ field: string; message: string }> => {
   const errors: Array<{ field: string; message: string }> = []
 
-  if (!line.isCustom && line.availableQty > 0 && line.qty > line.availableQty) {
-    errors.push({ field: "qty", message: `כמות מקסימלית: ${line.availableQty}` })
+  if (!line.isCustom && line.maxQty !== undefined && line.qty > line.maxQty) {
+    errors.push({ field: "qty", message: `כמות מקסימלית: ${line.maxQty}` })
   }
 
   if (line.name === "") {

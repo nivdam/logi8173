@@ -12,7 +12,6 @@ export const useLineItemEditor = (
   onBindToItem: (lineId: string, item: InventoryItem) => void,
   inventoryItems: InventoryItem[],
 ) => {
-  const [nameInput, setNameInput] = useState(line.name)
   const [debouncedQuery, setDebouncedQuery] = useState(line.name)
   const debounceTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
@@ -39,7 +38,6 @@ export const useLineItemEditor = (
   const qtyError = errors.find((error) => error.field === "qty")
 
   const handleItemInputChange = (details: { inputValue: string }) => {
-    setNameInput(details.inputValue)
     onUpdateField(line.lineId, "name", details.inputValue)
 
     clearTimeout(debounceTimerRef.current)
@@ -54,7 +52,6 @@ export const useLineItemEditor = (
     const item = inventoryItems.find((inventoryItem) => inventoryItem.itemId === selectedItemId)
     if (!item) return
     onBindToItem(line.lineId, item)
-    setNameInput(item.name)
     setDebouncedQuery(item.name)
   }
 
@@ -75,7 +72,7 @@ export const useLineItemEditor = (
   }
 
   return {
-    nameInput,
+    nameInput: line.name,
     filtered,
     collection,
     qtyError,
