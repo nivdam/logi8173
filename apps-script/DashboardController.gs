@@ -78,11 +78,30 @@ var DashboardController = {
         companyIssuedCounts[companies[c].name] = 0;
       }
 
-      // Count from recent transactions
+      // Build soldier → company lookup
+      var soldiersSheetId = getConfigProperty_('SOLDIERS_SHEET_ID');
+      var soldierCompanyMap = {};
+      if (soldiersSheetId) {
+        var soldiers = readAllRows_(soldiersSheetId, 'soldiers');
+        for (var s = 0; s < soldiers.length; s++) {
+          if (soldiers[s].personal_id && soldiers[s].company) {
+            soldierCompanyMap[soldiers[s].personal_id] = soldiers[s].company;
+          }
+        }
+      }
+
+      // Count issued items per company from recent transactions
       for (var d = 0; d < recentTransactions.length; d++) {
-        if (recentTransactions[d].txType === 'issue') {
-          // Would need soldier → company lookup for accurate counts
-          // For now, count total issued items
+        var tx = recentTransactions[d];
+        if (tx.txType === 'issue' && tx.receiverPersonalId) {
+          var soldierCompany = soldierCompanyMap[tx.receiverPersonalId];
+          if (soldierCompany && companyIssuedCounts[soldierCompany] !== undefined) {
+            var txItemCount = 0;
+            for (var e = 0; e < tx.items.length; e++) {
+              txItemCount += Math.abs(Number(tx.items[e].qty) || 0);
+            }
+            companyIssuedCounts[soldierCompany] += txItemCount;
+          }
         }
       }
 
