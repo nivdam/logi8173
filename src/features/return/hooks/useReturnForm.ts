@@ -5,59 +5,51 @@ import { useCreateTransaction } from "../../../api"
 import { toaster } from "../../../lib/toaster"
 import { t } from "../../../lib/i18n"
 import {
-  createLineFromInventoryItem,
-  createCustomLine,
   createEmptyLine,
   duplicateLine,
-  mapLinesToTransactionItems,
   getFilledLines,
   hasLineErrors,
-} from "../issuance.utils"
+  mapLinesToTransactionItems,
+} from "../../issuance/issuance.utils"
 import type { Soldier } from "../../../types"
 import type { InventoryItem } from "../../../types/inventory"
-import type { IssuanceLineItem } from "../issuance.types"
+import type { IssuanceLineItem } from "../../issuance/issuance.types"
 
-const createInitialState = (): IssuanceFormState => ({
+const createInitialState = (): ReturnFormState => ({
   activityId: undefined,
   formId: undefined,
-  receiver: undefined,
+  giver: undefined,
   performedAt: new Date().toISOString(),
   lines: [createEmptyLine()],
   expandedLineIds: [],
   globalNotes: "",
-  receiverSignature: "",
   giverSignature: "",
+  receiverSignature: "",
   showSuccess: false,
 })
 
-const appendLine = (state: IssuanceFormState, line: IssuanceLineItem): IssuanceFormState => ({
+const appendLine = (state: ReturnFormState, line: IssuanceLineItem): ReturnFormState => ({
   ...state,
   lines: [...state.lines, line],
   expandedLineIds: [...state.expandedLineIds, line.lineId],
 })
 
-const reducer = (state: IssuanceFormState, action: IssuanceFormAction): IssuanceFormState => {
+const reducer = (state: ReturnFormState, action: ReturnFormAction): ReturnFormState => {
   switch (action.type) {
     case "SET_ACTIVITY":
       return {
         ...state,
         activityId: action.payload,
-        receiver: undefined,
+        giver: undefined,
         lines: [createEmptyLine()],
         expandedLineIds: [],
         globalNotes: "",
-        receiverSignature: "",
         giverSignature: "",
+        receiverSignature: "",
       }
 
-    case "SET_RECEIVER":
-      return { ...state, receiver: action.payload }
-
-    case "ADD_LINE_FROM_INVENTORY":
-      return appendLine(state, createLineFromInventoryItem(action.payload))
-
-    case "ADD_CUSTOM_LINE":
-      return appendLine(state, createCustomLine(action.payload))
+    case "SET_GIVER":
+      return { ...state, giver: action.payload }
 
     case "ADD_EMPTY_LINE":
       return appendLine(state, createEmptyLine())
@@ -125,11 +117,11 @@ const reducer = (state: IssuanceFormState, action: IssuanceFormAction): Issuance
     case "SET_GLOBAL_NOTES":
       return { ...state, globalNotes: action.payload }
 
-    case "SET_RECEIVER_SIGNATURE":
-      return { ...state, receiverSignature: action.payload }
-
     case "SET_GIVER_SIGNATURE":
       return { ...state, giverSignature: action.payload }
+
+    case "SET_RECEIVER_SIGNATURE":
+      return { ...state, receiverSignature: action.payload }
 
     case "SHOW_SUCCESS":
       return { ...state, showSuccess: true, formId: action.payload }
@@ -139,7 +131,7 @@ const reducer = (state: IssuanceFormState, action: IssuanceFormAction): Issuance
   }
 }
 
-export const useIssuanceForm = () => {
+export const useReturnForm = () => {
   const { operator, operatorProfile } = useAuth()
   const navigate = useNavigate()
   const [, setSearchParams] = useSearchParams()
@@ -148,32 +140,32 @@ export const useIssuanceForm = () => {
   const [state, dispatch] = useReducer(reducer, undefined, createInitialState)
 
   const savedSignature = operatorProfile?.savedSignature || operator?.savedSignatureUrl
-  const hasGiverSignature = state.giverSignature !== "" || !!savedSignature
+  const hasReceiverSignature = state.receiverSignature !== "" || !!savedSignature
   const filledLines = getFilledLines(state.lines)
   const hasValidLines = filledLines.length > 0 && !filledLines.some(hasLineErrors)
 
   const isFormDirty =
-    state.receiver !== undefined ||
+    state.giver !== undefined ||
     filledLines.length > 0 ||
     state.globalNotes !== "" ||
-    state.receiverSignature !== "" ||
-    state.giverSignature !== ""
+    state.giverSignature !== "" ||
+    state.receiverSignature !== ""
 
   const isFormValid =
     state.activityId !== undefined &&
-    state.receiver !== undefined &&
+    state.giver !== undefined &&
     hasValidLines &&
-    state.receiverSignature !== "" &&
-    hasGiverSignature
+    state.giverSignature !== "" &&
+    hasReceiverSignature
 
   const totalItemCount = filledLines.reduce((sum, line) => sum + line.qty, 0)
 
-  const handleSelectReceiver = (soldier: Soldier) => {
-    dispatch({ type: "SET_RECEIVER", payload: soldier })
+  const handleSelectGiver = (soldier: Soldier) => {
+    dispatch({ type: "SET_GIVER", payload: soldier })
   }
 
-  const handleClearReceiver = () => {
-    dispatch({ type: "SET_RECEIVER", payload: undefined })
+  const handleClearGiver = () => {
+    dispatch({ type: "SET_GIVER", payload: undefined })
   }
 
   const handleSetPerformedAt = (iso: string) => {
@@ -208,12 +200,12 @@ export const useIssuanceForm = () => {
     dispatch({ type: "SET_EXPANDED_LINE_IDS", payload: expandedLineIds })
   }
 
-  const handleSetReceiverSignature = (base64: string) => {
-    dispatch({ type: "SET_RECEIVER_SIGNATURE", payload: base64 })
-  }
-
   const handleSetGiverSignature = (base64: string) => {
     dispatch({ type: "SET_GIVER_SIGNATURE", payload: base64 })
+  }
+
+  const handleSetReceiverSignature = (base64: string) => {
+    dispatch({ type: "SET_RECEIVER_SIGNATURE", payload: base64 })
   }
 
   const handleSelectActivity = (activityId: string) => {
@@ -222,26 +214,26 @@ export const useIssuanceForm = () => {
 
   const handleSubmit = useCallback(() => {
     if (createTransaction.isPending) return
-    if (!state.activityId || !state.receiver || !operator) return
+    if (!state.activityId || !state.giver || !operator) return
 
     const transactionItems = mapLinesToTransactionItems(state.lines)
     if (transactionItems.length === 0) return
 
-    const giverSignatureValue = state.giverSignature || savedSignature || ""
+    const receiverSignatureValue = state.receiverSignature || savedSignature || ""
 
     createTransaction.mutate(
       {
         activityId: state.activityId,
-        txType: "issue",
+        txType: "return",
         performedAt: state.performedAt,
-        giverPersonalId: operatorProfile?.personalId || operator.email,
-        giverName: operatorProfile?.fullName || operator.fullName,
-        receiverPersonalId: state.receiver.personalId,
-        receiverName: state.receiver.fullName,
+        giverPersonalId: state.giver.personalId,
+        giverName: state.giver.fullName,
+        receiverPersonalId: operatorProfile?.personalId || operator.email,
+        receiverName: operatorProfile?.fullName || operator.fullName,
         items: transactionItems,
         notes: state.globalNotes || undefined,
-        signatureBase64: state.receiverSignature,
-        giverSignatureBase64: giverSignatureValue || undefined,
+        signatureBase64: state.giverSignature,
+        giverSignatureBase64: receiverSignatureValue || undefined,
       },
       {
         onSuccess: (result) => {
@@ -251,16 +243,16 @@ export const useIssuanceForm = () => {
         onError: () => {
           toaster.create({
             title: t("common.error"),
-            description: t("issuance.submitError"),
+            description: t("returns.submitError"),
             type: "error",
             duration: 5000,
           })
         },
       },
     )
-  }, [state.activityId, state.receiver, state.performedAt, state.lines, state.globalNotes, state.receiverSignature, state.giverSignature, savedSignature, operator, operatorProfile, createTransaction, setSearchParams])
+  }, [state.activityId, state.giver, state.performedAt, state.lines, state.globalNotes, state.giverSignature, state.receiverSignature, savedSignature, operator, operatorProfile, createTransaction, setSearchParams])
 
-  const handleNewIssuance = () => {
+  const handleNewReturn = () => {
     setSearchParams({}, { replace: true })
     dispatch({ type: "RESET" })
   }
@@ -276,8 +268,8 @@ export const useIssuanceForm = () => {
     totalItemCount,
     isSubmitting: createTransaction.isPending,
     handleSelectActivity,
-    handleSelectReceiver,
-    handleClearReceiver,
+    handleSelectGiver,
+    handleClearGiver,
     handleSetPerformedAt,
     handleAddEmptyLine,
     handleBindLineToItem,
@@ -286,33 +278,31 @@ export const useIssuanceForm = () => {
     handleRemoveLine,
     handleSetGlobalNotes,
     handleExpandedLineIdsChange,
-    handleSetReceiverSignature,
     handleSetGiverSignature,
+    handleSetReceiverSignature,
     handleSubmit,
-    handleNewIssuance,
+    handleNewReturn,
     handleBackToDashboard,
   }
 }
 
-type IssuanceFormState = {
+type ReturnFormState = {
   activityId: string | undefined
   formId: string | undefined
-  receiver: Soldier | undefined
+  giver: Soldier | undefined
   performedAt: string
   lines: IssuanceLineItem[]
   expandedLineIds: string[]
   globalNotes: string
-  receiverSignature: string
   giverSignature: string
+  receiverSignature: string
   showSuccess: boolean
 }
 
-type IssuanceFormAction =
+type ReturnFormAction =
   | { type: "SET_ACTIVITY"; payload: string }
-  | { type: "SET_RECEIVER"; payload: Soldier | undefined }
+  | { type: "SET_GIVER"; payload: Soldier | undefined }
   | { type: "SET_PERFORMED_AT"; payload: string }
-  | { type: "ADD_LINE_FROM_INVENTORY"; payload: InventoryItem }
-  | { type: "ADD_CUSTOM_LINE"; payload: string }
   | { type: "ADD_EMPTY_LINE" }
   | { type: "UPDATE_LINE_FIELD"; payload: { lineId: string; field: keyof IssuanceLineItem; value: string | number | boolean } }
   | { type: "BIND_LINE_TO_ITEM"; payload: { lineId: string; item: InventoryItem } }
@@ -320,7 +310,7 @@ type IssuanceFormAction =
   | { type: "REMOVE_LINE"; payload: string }
   | { type: "SET_EXPANDED_LINE_IDS"; payload: string[] }
   | { type: "SET_GLOBAL_NOTES"; payload: string }
-  | { type: "SET_RECEIVER_SIGNATURE"; payload: string }
   | { type: "SET_GIVER_SIGNATURE"; payload: string }
+  | { type: "SET_RECEIVER_SIGNATURE"; payload: string }
   | { type: "SHOW_SUCCESS"; payload: string }
   | { type: "RESET" }

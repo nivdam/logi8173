@@ -13,6 +13,7 @@ type IssuanceLineItem = {
   notes: string
   isCustom: boolean
   availableQty: number
+  maxQty: number | undefined
 }
 
 export type { ItemCondition, IssuanceLineItem }

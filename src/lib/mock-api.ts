@@ -5,12 +5,14 @@ import { activitiesMock } from "../mocks/activities.mock"
 import { transactionsMock } from "../mocks/transactions.mock"
 import { dashboardMock } from "../mocks/dashboard.mock"
 import type { AuthenticatedOperator, OperatorRole } from "./auth.types"
+import type { Transaction, TransactionLineItem, TransactionType } from "../types"
 
 const MOCK_DELAY_MS = 400
 
 type MockBody = Record<string, unknown>
 
 const mockCompanies = [...companiesMock]
+const mockTransactions = [...transactionsMock]
 const mockOperators: AuthenticatedOperator[] = [
   {
     email: "dev@mock.local",
@@ -36,7 +38,11 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
       snapshotItems: inventoryMock.slice(0, activity?.selectedItemCount || 0),
     }
   },
-  "tx.list": () => transactionsMock,
+  "tx.list": (body) => {
+    const activityId = body?.activityId ? String(body.activityId) : undefined
+    if (!activityId) return mockTransactions
+    return mockTransactions.filter((transaction) => transaction.activityId === activityId)
+  },
   "dashboard.summary": () => dashboardMock,
   "auth.me": () => ({
     ...mockOperators[0],
@@ -96,14 +102,32 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
 
     return { companyId: nextCompany.companyId, name: nextCompany.name }
   },
-  "tx.create": () => ({
-    txId: "tx_mock_" + Date.now(),
-    txType: "issue",
-    performedBy: "dev@mock.local",
-    performedAt: new Date().toISOString(),
-    items: [],
-    signatureUrl: "",
-  }),
+  "tx.create": (body) => {
+    const nextTransaction: Transaction = {
+      txId: "tx_mock_" + Date.now(),
+      txType: String(body?.txType || "issue") as TransactionType,
+      giverName: String(body?.giverName || ""),
+      giverPersonalId: String(body?.giverPersonalId || ""),
+      receiverName: String(body?.receiverName || ""),
+      receiverPersonalId: String(body?.receiverPersonalId || ""),
+      performedBy: "dev@mock.local",
+      performedAt: String(body?.performedAt || new Date().toISOString()),
+      items: (Array.isArray(body?.items) ? body.items : []) as TransactionLineItem[],
+      notes: String(body?.notes || ""),
+      signatureUrl: "",
+    }
+
+    mockTransactions.unshift(nextTransaction)
+
+    return {
+      txId: nextTransaction.txId,
+      txType: nextTransaction.txType,
+      performedBy: nextTransaction.performedBy,
+      performedAt: nextTransaction.performedAt,
+      items: nextTransaction.items,
+      signatureUrl: nextTransaction.signatureUrl,
+    }
+  },
   "activities.open": (body) => ({
     activityId: "act_mock_" + Date.now(),
     name: String(body?.name || "פעילות חדשה"),

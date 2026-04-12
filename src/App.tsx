@@ -10,6 +10,7 @@ import { ActivitiesPage } from "./pages/ActivitiesPage"
 import { SettingsPage } from "./pages/SettingsPage"
 import { LoginPage } from "./pages/LoginPage"
 import { IssuanceForm } from "./features/issuance/IssuanceForm"
+import { ReturnForm } from "./features/return/ReturnForm"
 import { NotFoundPage } from "./pages/NotFoundPage"
 
 export const App = () => (
@@ -32,6 +33,7 @@ export const App = () => (
       <Route path="activities/:activityId" element={<ActivitiesPage />} />
       <Route path="soldiers" element={<SoldiersPage />} />
       <Route path="issue" element={<IssuanceForm />} />
+      <Route path="return" element={<ReturnForm />} />
       <Route
         path="settings"
         element={
