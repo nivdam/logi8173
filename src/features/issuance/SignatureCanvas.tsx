@@ -4,6 +4,20 @@ import ReactSignatureCanvas from "react-signature-canvas"
 import { Eraser } from "lucide-react"
 import { t } from "../../lib/i18n"
 
+const pointGroupsToSvg = (pointGroups: Array<Array<{ x: number; y: number }>>, width: number, height: number): string => {
+  const paths = pointGroups.map((group) => {
+    if (group.length === 0) return ""
+    if (group.length === 1) {
+      return `M ${group[0].x} ${group[0].y} L ${group[0].x} ${group[0].y}`
+    }
+    const start = `M ${group[0].x} ${group[0].y}`
+    const lines = group.slice(1).map((point) => `L ${point.x} ${point.y}`).join(" ")
+    return `${start} ${lines}`
+  }).filter((path) => path !== "")
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><path d="${paths.join(" ")}" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+}
+
 export const SignatureCanvas = ({ onSign, signatureData }: Props) => {
   const canvasRef = useRef<ReactSignatureCanvas>(null)
 
@@ -15,8 +29,10 @@ export const SignatureCanvas = ({ onSign, signatureData }: Props) => {
       return
     }
 
-    const base64 = canvasRef.current.toDataURL("image/png")
-    onSign(base64)
+    const pointGroups = canvasRef.current.toData() as Array<Array<{ x: number; y: number }>>
+    const svgString = pointGroupsToSvg(pointGroups, 500, 200)
+    const svgBase64 = `data:image/svg+xml;base64,${btoa(svgString)}`
+    onSign(svgBase64)
   }
 
   const handleClear = () => {
