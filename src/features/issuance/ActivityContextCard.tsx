@@ -168,19 +168,22 @@ export const ActivityContextCard = ({
             isLoadingSnapshot={isLoadingSnapshot}
             onChangeActivity={handleStartChanging}
           />
-          {isSnapshotError ? (
+
+          {isSnapshotError && (
             <SnapshotErrorState
               onRetry={() => onSelect(selectedActivity.activityId)}
               onChooseAnother={handleStartChanging}
             />
-          ) : null}
-          {isEmptySnapshot ? (
+          )}
+
+          {isEmptySnapshot && (
             <EmptySnapshotWarning
               onAddInventory={handleOpenAddInventory}
               onChooseAnother={handleStartChanging}
             />
-          ) : null}
+          )}
         </ContextCardShell>
+
         <ActivityInventoryDialog
           open={isAddInventoryOpen}
           inventoryItems={inventoryItems}
@@ -189,6 +192,7 @@ export const ActivityContextCard = ({
           onOpenChange={handleAddInventoryOpenChange}
           onSubmit={handleAddInventory}
         />
+
         <SwitchActivityDialog
           open={pendingActivityId !== undefined}
           onConfirm={handleConfirmSwitch}
