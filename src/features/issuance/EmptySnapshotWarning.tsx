@@ -3,6 +3,7 @@ import { AlertTriangle, ArrowLeft } from "lucide-react";
 import { t } from "../../lib/i18n";
 
 export const EmptySnapshotWarning = ({
+  onAddInventory,
   onChooseAnother,
 }: EmptySnapshotWarningProps) => (
   <Box
@@ -19,13 +20,19 @@ export const EmptySnapshotWarning = ({
         {t("issuance.emptySnapshot")}
       </Text>
     </Flex>
-    <Button variant="outline" size="sm" onClick={onChooseAnother}>
-      <ArrowLeft size={16} />
-      {t("issuance.chooseAnother")}
-    </Button>
+    <Flex gap="2" wrap="wrap">
+      <Button size="sm" colorPalette="sage" onClick={onAddInventory}>
+        {t("activities.addInventoryAction")}
+      </Button>
+      <Button variant="outline" size="sm" onClick={onChooseAnother}>
+        <ArrowLeft size={16} />
+        {t("issuance.chooseAnother")}
+      </Button>
+    </Flex>
   </Box>
 );
 
 type EmptySnapshotWarningProps = {
+  onAddInventory: () => void;
   onChooseAnother: () => void;
 };
