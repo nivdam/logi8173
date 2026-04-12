@@ -34,6 +34,7 @@ function getRoutes_() {
     'activities.get':     { handler: ActivitiesController.get,   roles: null },
     'activities.open':    { handler: ActivitiesController.open,  roles: ['admin', 'warehouse_operator'] },
     'activities.close':   { handler: ActivitiesController.close, roles: ['admin'] },
+    'activities.addItems': { handler: ActivitiesController.addItems, roles: ['admin', 'warehouse_operator'] },
 
     // Transactions
     'tx.list':            { handler: TransactionsController.list,   roles: null },

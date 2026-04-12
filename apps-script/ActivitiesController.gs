@@ -127,6 +127,75 @@ var ActivitiesController = {
       status: 'closed',
       closedAt: now
     };
+  },
+
+  addItems: function(context) {
+    var body = context.request.body;
+
+    if (!body.activityId) {
+      throw createError_('VALIDATION_ERROR', 'activityId is required');
+    }
+
+    var itemIds = normalizeSelectedItemIds_(body.itemIds);
+    if (itemIds.length === 0) {
+      throw createError_('VALIDATION_ERROR', 'itemIds must contain at least one item');
+    }
+
+    var registryId = getConfigProperty_('ACTIVITIES_REGISTRY_ID');
+    var existing = findRow_(registryId, 'activities-registry', 'activity_id', body.activityId);
+
+    if (!existing) {
+      throw createError_('NOT_FOUND', 'Activity not found: ' + body.activityId);
+    }
+
+    if (existing.row.status !== 'active') {
+      throw createError_('ACTIVITY_NOT_ACTIVE', 'Cannot add items to a ' + existing.row.status + ' activity');
+    }
+
+    var snapshotId = getConfigProperty_('ACTIVITY_' + body.activityId + '_SNAPSHOT_ID');
+    if (!snapshotId) {
+      throw createError_('NOT_FOUND', 'Activity snapshot not found');
+    }
+
+    // Read existing snapshot to skip duplicates
+    var existingSnapshotRows = readActivitySnapshotRows_(snapshotId);
+    var existingItemIds = {};
+    for (var i = 0; i < existingSnapshotRows.length; i++) {
+      existingItemIds[existingSnapshotRows[i].item_id] = true;
+    }
+
+    var newItemIds = itemIds.filter(function(itemId) {
+      return !existingItemIds[itemId];
+    });
+
+    if (newItemIds.length > 0) {
+      // Get inventory rows for new items
+      var masterInventoryId = getConfigProperty_('MASTER_INVENTORY_ID');
+      var masterInventoryRows = readAllRows_(masterInventoryId, 'master-inventory');
+      var newRows = selectInventoryRows_(masterInventoryRows, newItemIds);
+
+      // Append to snapshot
+      for (var j = 0; j < newRows.length; j++) {
+        appendRow_(snapshotId, 'inventory-snapshot', newRows[j]);
+      }
+    }
+
+    // Log audit
+    var auditLogId = getConfigProperty_('ACTIVITY_' + body.activityId + '_AUDIT_LOG_ID');
+    if (auditLogId) {
+      logAudit_(auditLogId, 'activity.addItems', context.operator.email, {
+        activityId: body.activityId,
+        addedItemIds: newItemIds,
+        skippedDuplicates: itemIds.length - newItemIds.length
+      });
+    }
+
+    // Return updated activity with snapshot
+    var snapshotItems = getActivitySnapshotItems_(body.activityId);
+    return {
+      activity: mapActivityRow_(existing.row),
+      snapshotItems: snapshotItems
+    };
   }
 };
 
