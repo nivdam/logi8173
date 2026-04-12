@@ -35,13 +35,35 @@ const appsScriptRequest = async <T>(
       window.clearTimeout(timeoutId)
     })
 
-    const json = await response.json()
+    const rawResponse = await response.text()
+    let json: { ok?: boolean; data?: T; error?: string; message?: string }
+
+    try {
+      json = JSON.parse(rawResponse)
+    } catch {
+      throw new ApiError(
+        "INVALID_RESPONSE",
+        response.ok
+          ? "The server returned an invalid response"
+          : `The server returned HTTP ${response.status}`,
+      )
+    }
+
+    if (!response.ok) {
+      throw new ApiError(
+        json.error || `HTTP_${response.status}`,
+        json.message || `The server returned HTTP ${response.status}`,
+      )
+    }
 
     if (!json.ok) {
       if (json.error === "TOKEN_EXPIRED") {
         return handleTokenExpired(() => appsScriptRequest<T>(action, body))
       }
-      throw new ApiError(json.error, json.message)
+      throw new ApiError(
+        json.error || "UNKNOWN_ERROR",
+        json.message || "The server returned an error",
+      )
     }
 
     return json.data as T
@@ -54,8 +76,8 @@ const appsScriptRequest = async <T>(
       throw new ApiError("NETWORK_TIMEOUT", "The server took too long to respond")
     }
 
-    // API unreachable — fall back to mock data in dev mode
-    if (import.meta.env.DEV) {
+    // API unreachable — fall back to mock data in dev mode only for real network failures
+    if (import.meta.env.DEV && error instanceof TypeError) {
       return mockApiRequest<T>(action, body)
     }
     throw new ApiError("NETWORK_ERROR", "Could not reach the server")

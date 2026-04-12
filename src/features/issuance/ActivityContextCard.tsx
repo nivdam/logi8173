@@ -10,10 +10,12 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { AlertTriangle, ClipboardList } from "lucide-react";
-import { useActivities } from "../../api";
+import { useActivities, useAddItemsToActivity, useInventory } from "../../api";
 import { EmptyState } from "../../components/EmptyState";
 import { t } from "../../lib/i18n";
+import { toaster } from "../../lib/toaster";
 import { animations } from "../../theme/animations";
+import { ActivityInventoryDialog } from "../activities/ActivityInventoryDialog";
 import { sortActivities } from "../activities/activity-helpers";
 import { ActivityRadioCard } from "./ActivityRadioCard";
 import { EmptySnapshotWarning } from "./EmptySnapshotWarning";
@@ -32,7 +34,11 @@ export const ActivityContextCard = ({
   const navigate = useNavigate();
   const { data: activities = [], isLoading: isLoadingActivities } =
     useActivities();
+  const { data: inventoryItems = [], isLoading: isInventoryLoading } =
+    useInventory();
+  const addItemsToActivity = useAddItemsToActivity();
   const [isChanging, setIsChanging] = useState(false);
+  const [isAddInventoryOpen, setIsAddInventoryOpen] = useState(false);
   const [pendingActivityId, setPendingActivityId] = useState<
     string | undefined
   >(undefined);
@@ -87,6 +93,41 @@ export const ActivityContextCard = ({
     setIsChanging(true);
   };
 
+  const handleOpenAddInventory = () => {
+    if (!selectedActivityId) return;
+    setIsAddInventoryOpen(true);
+  };
+
+  const handleAddInventoryOpenChange = (details: { open: boolean }) => {
+    setIsAddInventoryOpen(details.open);
+  };
+
+  const handleAddInventory = (itemIds: string[]) => {
+    if (!selectedActivityId) return;
+
+    addItemsToActivity.mutate(
+      { activityId: selectedActivityId, itemIds },
+      {
+        onSuccess: () => {
+          toaster.create({
+            title: t("common.success"),
+            description: t("activities.addInventorySuccess"),
+            type: "success",
+          });
+          setIsAddInventoryOpen(false);
+          onSelect(selectedActivityId);
+        },
+        onError: () => {
+          toaster.create({
+            title: t("common.error"),
+            description: t("activities.addInventoryError"),
+            type: "error",
+          });
+        },
+      },
+    );
+  };
+
   if (isLoadingActivities) {
     return (
       <ContextCardShell>
@@ -134,9 +175,20 @@ export const ActivityContextCard = ({
             />
           ) : null}
           {isEmptySnapshot ? (
-            <EmptySnapshotWarning onChooseAnother={handleStartChanging} />
+            <EmptySnapshotWarning
+              onAddInventory={handleOpenAddInventory}
+              onChooseAnother={handleStartChanging}
+            />
           ) : null}
         </ContextCardShell>
+        <ActivityInventoryDialog
+          open={isAddInventoryOpen}
+          inventoryItems={inventoryItems}
+          isInventoryLoading={isInventoryLoading}
+          isSubmitting={addItemsToActivity.isPending}
+          onOpenChange={handleAddInventoryOpenChange}
+          onSubmit={handleAddInventory}
+        />
         <SwitchActivityDialog
           open={pendingActivityId !== undefined}
           onConfirm={handleConfirmSwitch}
@@ -163,6 +215,14 @@ export const ActivityContextCard = ({
           ))}
         </Stack>
       </ContextCardShell>
+      <ActivityInventoryDialog
+        open={isAddInventoryOpen}
+        inventoryItems={inventoryItems}
+        isInventoryLoading={isInventoryLoading}
+        isSubmitting={addItemsToActivity.isPending}
+        onOpenChange={handleAddInventoryOpenChange}
+        onSubmit={handleAddInventory}
+      />
       <SwitchActivityDialog
         open={pendingActivityId !== undefined}
         onConfirm={handleConfirmSwitch}
