@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { Accordion, Flex, Heading, Text } from "@chakra-ui/react"
-import { RotateCcw, Package, FileSignature } from "lucide-react"
-import { useAuth } from "../../lib/use-auth"
+import { RotateCcw, PackageCheck, Package, FileSignature } from "lucide-react"
 import { useActivity } from "../../api"
 import { t } from "../../lib/i18n"
 import { animations } from "../../theme/animations"
@@ -12,11 +11,11 @@ import { useReturnForm } from "./hooks/useReturnForm"
 import { ReturnHeader } from "./ReturnHeader"
 import { ReturnFooter } from "./ReturnFooter"
 import { ReturnSuccess } from "./ReturnSuccess"
+import { IssuedItemsChecklist } from "./IssuedItemsChecklist"
 
 export const ReturnForm = () => {
-  const { operator, operatorProfile } = useAuth()
   const form = useReturnForm()
-  const [activeSection, setActiveSection] = useState<string[]>(["giver"])
+  const [activeSection, setActiveSection] = useState<string[]>(["giver", "issuedItems"])
 
   const { data: activityData, isLoading: isLoadingSnapshot, isError: isSnapshotError } = useActivity(form.state.activityId)
   const snapshotItems = activityData?.snapshotItems ?? []
@@ -91,6 +90,23 @@ export const ReturnForm = () => {
               />
             </IssuanceAccordionSection>
 
+            {form.state.giver && (
+              <IssuanceAccordionSection
+                value="issuedItems"
+                icon={PackageCheck}
+                label={t("returns.issuedItemsTitle")}
+              >
+                <IssuedItemsChecklist
+                  issuedItems={form.soldierIssuedItems}
+                  selectedItemIds={form.state.selectedIssuedItemIds}
+                  isLoading={form.isLoadingIssuedItems}
+                  onToggleItem={form.handleToggleIssuedItem}
+                  onSelectAll={form.handleSelectAllIssued}
+                  onDeselectAll={form.handleDeselectAllIssued}
+                />
+              </IssuanceAccordionSection>
+            )}
+
             <IssuanceAccordionSection
               value="items"
               icon={Package}
@@ -118,7 +134,7 @@ export const ReturnForm = () => {
                 globalNotes={form.state.globalNotes}
                 giverSignature={form.state.giverSignature}
                 receiverSignature={form.state.receiverSignature}
-                savedSignatureUrl={operatorProfile?.savedSignature || operator?.savedSignatureUrl}
+                savedSignatureUrl={form.savedSignature}
                 isFormValid={form.isFormValid}
                 totalItemCount={form.totalItemCount}
                 isSubmitting={form.isSubmitting}
