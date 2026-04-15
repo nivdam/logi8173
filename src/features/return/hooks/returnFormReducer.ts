@@ -82,34 +82,43 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
     case "POPULATE_ALL_ISSUED": {
       const { items } = action.payload
       const nextSelectedIds = new Set(items.map((item) => item.itemId))
+      const manualLines = state.lines.filter(
+        (line) => !state.selectedIssuedItemIds.has(line.itemId) && line.itemId === "",
+      )
       const existingLinesByItemId = new Map(
         state.lines
           .filter((line) => line.itemId !== "")
           .map((line) => [line.itemId, line]),
       )
 
-      const newLines = items.map((item) =>
+      const issuedLines = items.map((item) =>
         existingLinesByItemId.get(item.itemId) ?? createLineFromIssuedItem(item),
       )
-      const newExpandedIds = newLines
+      const newExpandedIds = issuedLines
         .filter((line) => !existingLinesByItemId.has(line.itemId))
         .map((line) => line.lineId)
 
       return {
         ...state,
         selectedIssuedItemIds: nextSelectedIds,
-        lines: newLines,
+        lines: [...issuedLines, ...manualLines],
         expandedLineIds: [...state.expandedLineIds, ...newExpandedIds],
       }
     }
 
-    case "CLEAR_ALL_ISSUED":
+    case "CLEAR_ALL_ISSUED": {
+      const manualLines = state.lines.filter(
+        (line) => !state.selectedIssuedItemIds.has(line.itemId),
+      )
       return {
         ...state,
         selectedIssuedItemIds: new Set<string>(),
-        lines: [],
-        expandedLineIds: [],
+        lines: manualLines,
+        expandedLineIds: state.expandedLineIds.filter(
+          (id) => manualLines.some((line) => line.lineId === id),
+        ),
       }
+    }
 
     case "ADD_EMPTY_LINE":
       return appendLine(state, createEmptyLine())

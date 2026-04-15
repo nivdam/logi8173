@@ -1,5 +1,4 @@
-import { Badge, Box, Button, Flex, Heading, Spinner, Stack, Text } from "@chakra-ui/react"
-import { PackageCheck } from "lucide-react"
+import { Badge, Box, Button, Flex, Spinner, Stack, Text } from "@chakra-ui/react"
 import { t } from "../../lib/i18n"
 import { IssuedItemRow } from "./IssuedItemRow"
 import type { SoldierIssuedItem } from "./return.types"
@@ -35,10 +34,9 @@ export const IssuedItemsChecklist = ({
     <Box>
       <Flex align="center" justify="space-between" mb="3">
         <Flex align="center" gap="2">
-          <PackageCheck size={16} />
-          <Heading size="sm" fontWeight="600">
-            {t("returns.issuedItemsTitle")}
-          </Heading>
+          <Text textStyle="xs" color="fg.muted">
+            {t("returns.issuedItemsDescription")}
+          </Text>
           <Badge colorPalette="sage" size="sm">
             {issuedItems.length}
           </Badge>
@@ -51,10 +49,6 @@ export const IssuedItemsChecklist = ({
           {allSelected ? t("returns.deselectAll") : t("returns.selectAll")}
         </Button>
       </Flex>
-
-      <Text textStyle="xs" color="fg.muted" mb="3">
-        {t("returns.issuedItemsDescription")}
-      </Text>
 
       <Stack gap="2">
         {issuedItems.map((item) => {
