@@ -1,4 +1,4 @@
-import { Combobox, Flex, Portal, Text } from "@chakra-ui/react"
+import { Badge, Combobox, Flex, Portal, Text } from "@chakra-ui/react"
 import { t } from "../../lib/i18n"
 import type { ListCollection } from "@chakra-ui/react"
 import type { InventoryItem } from "../../types/inventory"
@@ -33,9 +33,14 @@ export const InventoryCombobox = ({
             {filtered.map((item) => (
               <Combobox.Item key={item.itemId} item={item}>
                 <Combobox.ItemText>
-                  <Flex align="center" gap="2">
-                    <Text textStyle="sm" truncate>{item.name}</Text>
-                    <Text textStyle="xs" color="fg.muted">{item.itemNumber}</Text>
+                  <Flex align="center" justify="space-between" gap="3">
+                    <Flex align="center" gap="2" minW="0">
+                      <Text textStyle="sm" truncate>{item.name}</Text>
+                      <Text textStyle="xs" color="fg.muted">{item.itemNumber}</Text>
+                    </Flex>
+                    <Badge size="sm" colorPalette={item.currentQty > 0 ? "sage" : "red"} flexShrink={0}>
+                      {item.currentQty} {item.unitOfMeasure}
+                    </Badge>
                   </Flex>
                 </Combobox.ItemText>
               </Combobox.Item>

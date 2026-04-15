@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Box,
@@ -31,6 +31,7 @@ export const ActivityContextCard = ({
   isSubmitting,
   onSelect,
 }: Props) => {
+  const LAST_ACTIVITY_STORAGE_KEY = "logi8173_last_activity_id";
   const navigate = useNavigate();
   const { data: activities = [], isLoading: isLoadingActivities } =
     useActivities();
@@ -58,6 +59,34 @@ export const ActivityContextCard = ({
       ),
     [activeActivities, selectedActivityId],
   );
+
+  useEffect(() => {
+    if (!selectedActivityId) return;
+    localStorage.setItem(LAST_ACTIVITY_STORAGE_KEY, selectedActivityId);
+  }, [selectedActivityId]);
+
+  useEffect(() => {
+    if (selectedActivityId !== undefined) return;
+    if (activeActivities.length === 0) return;
+    if (isSubmitting || isFormDirty || pendingActivityId !== undefined) return;
+
+    const lastActivityId = localStorage.getItem(LAST_ACTIVITY_STORAGE_KEY);
+    if (!lastActivityId) return;
+
+    const rememberedActivity = activeActivities.find(
+      (activity) => activity.activityId === lastActivityId,
+    );
+    if (!rememberedActivity) return;
+
+    onSelect(rememberedActivity.activityId);
+  }, [
+    activeActivities,
+    isFormDirty,
+    isSubmitting,
+    onSelect,
+    pendingActivityId,
+    selectedActivityId,
+  ]);
 
   const handleGoToActivities = () => {
     navigate("/activities");
@@ -208,6 +237,9 @@ export const ActivityContextCard = ({
         <Heading size="sm" fontWeight="600" mb="3">
           {t("issuance.selectActivity")}
         </Heading>
+        <Text textStyle="xs" color="fg.muted" mb="3">
+          {t("issuance.selectActivityHelper")}
+        </Text>
         <Stack gap="2">
           {activeActivities.map((activity) => (
             <ActivityRadioCard

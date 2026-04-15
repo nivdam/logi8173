@@ -43,6 +43,10 @@ export const ReturnForm = () => {
     setActiveSection(details.value)
   }
 
+  const handleAddManualItem = () => {
+    setActiveSection((current) => Array.from(new Set([...current, "items"])))
+  }
+
   return (
     <Flex direction="column" gap="5" css={animations.fadeInUp}>
       <Heading size="lg" fontWeight="700">
@@ -103,6 +107,7 @@ export const ReturnForm = () => {
                   onToggleItem={form.handleToggleIssuedItem}
                   onSelectAll={form.handleSelectAllIssued}
                   onDeselectAll={form.handleDeselectAllIssued}
+                  onAddManualItem={handleAddManualItem}
                 />
               </IssuanceAccordionSection>
             )}
