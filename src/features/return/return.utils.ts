@@ -9,25 +9,27 @@ export const computeSoldierIssuedItems = (
 ): SoldierIssuedItem[] => {
   const itemMap = new Map<string, SoldierIssuedItem>()
 
-  for (const tx of transactions) {
+  for (const transaction of transactions) {
     const isIssueToSoldier =
-      tx.txType === "issue" && tx.receiverPersonalId === soldierPersonalId
+      transaction.txType === "issue" && transaction.receiverPersonalId === soldierPersonalId
     const isReturnBySoldier =
-      tx.txType === "return" && tx.giverPersonalId === soldierPersonalId
+      transaction.txType === "return" && transaction.giverPersonalId === soldierPersonalId
 
     if (!isIssueToSoldier && !isReturnBySoldier) continue
 
-    for (const item of tx.items) {
+    for (const item of transaction.items) {
       const existing = itemMap.get(item.itemId)
 
       if (existing) {
-        if (isIssueToSoldier) {
-          existing.issuedQty += item.qty
-          existing.condition = item.condition ?? existing.condition
-        } else {
-          existing.returnedQty += item.qty
-        }
-        existing.remainingQty = existing.issuedQty - existing.returnedQty
+        const issuedQty = existing.issuedQty + (isIssueToSoldier ? item.qty : 0)
+        const returnedQty = existing.returnedQty + (isReturnBySoldier ? item.qty : 0)
+        itemMap.set(item.itemId, {
+          ...existing,
+          issuedQty,
+          returnedQty,
+          remainingQty: issuedQty - returnedQty,
+          condition: isIssueToSoldier ? (item.condition ?? existing.condition) : existing.condition,
+        })
       } else if (isIssueToSoldier) {
         itemMap.set(item.itemId, {
           itemId: item.itemId,
