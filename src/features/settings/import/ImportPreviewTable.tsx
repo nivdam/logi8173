@@ -80,7 +80,7 @@ const ImportStatusBadge = ({ status }: { status: ImportRowStatus }) => {
   const { label, bg, color } = getStatusStyle(status)
 
   return (
-    <Flex px="2" py="0.5" borderRadius="full" bg={bg}>
+    <Flex px="2" py="0.5" borderRadius="full" bg={bg} aria-label={label}>
       <Text textStyle="xs" fontWeight="500" color={color}>
         {label}
       </Text>
@@ -95,8 +95,7 @@ const getStatusStyle = (status: ImportRowStatus): { label: string; bg: string; c
   if (status === "duplicate_in_file") return { label: "כפול", bg: "sunburst.400/10", color: "sunburst.400" }
   if (status === "importing") return { label: "מייבא...", bg: "sky.50", color: "sky.600" }
   if (status === "imported") return { label: "הושלם", bg: "sage.50", color: "sage.700" }
-  if (status === "failed") return { label: "נכשל", bg: "rose.50", color: "red.600" }
-  return { label: "תקין", bg: "sage.50", color: "sage.600" }
+  return { label: "נכשל", bg: "rose.50", color: "red.600" }
 }
 
 const getRowBackground = (status: ImportRowStatus): string => {

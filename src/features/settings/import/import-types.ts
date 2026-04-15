@@ -1,5 +1,4 @@
 type ImportRowStatus =
-  | "valid"
   | "invalid"
   | "duplicate_in_file"
   | "will_create"

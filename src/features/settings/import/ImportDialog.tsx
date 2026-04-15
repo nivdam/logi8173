@@ -19,13 +19,17 @@ import {
   SOLDIER_HEADER_ALIASES,
 } from "./import-parsers"
 import type { PreviewColumn } from "./ImportPreviewTable"
-import type { ImportRow, ImportEntity } from "./import-types"
+import type { ImportRow, ImportEntity, ColumnMapping } from "./import-types"
 import type { InventoryUpsertData, SoldierUpsertData } from "./import-parsers"
+
+const MAX_IMPORT_ROWS = 500
 
 export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
   const [activeTab, setActiveTab] = useState<ImportEntity>("inventory")
   const [inventoryRows, setInventoryRows] = useState<ImportRow<InventoryUpsertData>[] | null>(null)
   const [soldierRows, setSoldierRows] = useState<ImportRow<SoldierUpsertData>[] | null>(null)
+  const [inventoryMapping, setInventoryMapping] = useState<ColumnMapping | null>(null)
+  const [soldierMapping, setSoldierMapping] = useState<ColumnMapping | null>(null)
   const [parseError, setParseError] = useState<string | null>(null)
   const [isImporting, setIsImporting] = useState(false)
   const cancelledRef = useRef(false)
@@ -37,6 +41,8 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
   const handleReset = () => {
     setInventoryRows(null)
     setSoldierRows(null)
+    setInventoryMapping(null)
+    setSoldierMapping(null)
     setParseError(null)
   }
 
@@ -77,8 +83,13 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
       return
     }
 
-    const headerRow = allRows[0]
     const dataRows = allRows.slice(1)
+    if (dataRows.length > MAX_IMPORT_ROWS) {
+      setParseError(`${t("settings.import.tooManyRows")} ${MAX_IMPORT_ROWS}`)
+      return
+    }
+
+    const headerRow = allRows[0]
     const mapping = detectColumnMapping(headerRow, INVENTORY_HEADER_ALIASES)
 
     if (!hasRequiredInventoryColumns(mapping)) {
@@ -87,6 +98,7 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
       return
     }
 
+    setInventoryMapping(mapping)
     const validated = validateInventoryRows(dataRows, mapping, existingInventory)
     setInventoryRows(validated)
   }
@@ -99,8 +111,13 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
       return
     }
 
-    const headerRow = allRows[0]
     const dataRows = allRows.slice(1)
+    if (dataRows.length > MAX_IMPORT_ROWS) {
+      setParseError(`${t("settings.import.tooManyRows")} ${MAX_IMPORT_ROWS}`)
+      return
+    }
+
+    const headerRow = allRows[0]
     const mapping = detectColumnMapping(headerRow, SOLDIER_HEADER_ALIASES)
 
     if (!hasRequiredSoldierColumns(mapping)) {
@@ -109,6 +126,7 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
       return
     }
 
+    setSoldierMapping(mapping)
     const validated = validateSoldierRows(dataRows, mapping, existingSoldiers)
     setSoldierRows(validated)
   }
@@ -129,6 +147,9 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
 
   const isInventoryReview = inventoryRows !== null
   const isSoldierReview = soldierRows !== null
+
+  const inventoryColumns = inventoryMapping ? getInventoryColumns(inventoryMapping) : []
+  const soldierColumns = soldierMapping ? getSoldierColumns(soldierMapping) : []
 
   return (
     <Dialog.Root open={open} onOpenChange={handleOpenChange} size="xl" closeOnInteractOutside={false}>
@@ -172,7 +193,7 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
                     <ImportReviewStep
                       endpoint="inventory.upsert"
                       rows={inventoryRows}
-                      columns={INVENTORY_COLUMNS}
+                      columns={inventoryColumns}
                       onRowUpdate={handleInventoryRowUpdate}
                       onImportStart={handleImportStart}
                       onImportEnd={handleImportEnd}
@@ -192,7 +213,7 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
                     <ImportReviewStep
                       endpoint="soldiers.upsert"
                       rows={soldierRows}
-                      columns={SOLDIER_COLUMNS}
+                      columns={soldierColumns}
                       onRowUpdate={handleSoldierRowUpdate}
                       onImportStart={handleImportStart}
                       onImportEnd={handleImportEnd}
@@ -227,20 +248,24 @@ const updateRowStatus = <T,>(
   })
 }
 
-const getRawCell = (row: ImportRow<unknown>, index: number): string => row.raw[index] ?? ""
+const getRawCellByField = (row: ImportRow<unknown>, mapping: ColumnMapping, field: string): string => {
+  const index = mapping[field]
+  if (index === undefined) return ""
+  return row.raw[index] ?? ""
+}
 
-const INVENTORY_COLUMNS: PreviewColumn<InventoryUpsertData>[] = [
-  { key: "name", label: "שם פריט", width: "36", getValue: (row) => row.data?.name ?? getRawCell(row, 0) },
-  { key: "itemNumber", label: "מק\"ט", width: "20", getValue: (row) => row.data?.itemNumber ?? getRawCell(row, 1) },
-  { key: "category", label: "קטגוריה", width: "24", getValue: (row) => row.data?.category ?? getRawCell(row, 2) },
-  { key: "initialQty", label: "כמות", width: "16", getValue: (row) => row.data?.initialQty !== undefined ? String(row.data.initialQty) : getRawCell(row, 4) },
+const getInventoryColumns = (mapping: ColumnMapping): PreviewColumn<InventoryUpsertData>[] => [
+  { key: "name", label: "שם פריט", width: "36", getValue: (row) => row.data?.name ?? getRawCellByField(row, mapping, "name") },
+  { key: "itemNumber", label: "מק\"ט", width: "20", getValue: (row) => row.data?.itemNumber ?? getRawCellByField(row, mapping, "itemNumber") },
+  { key: "category", label: "קטגוריה", width: "24", getValue: (row) => row.data?.category ?? getRawCellByField(row, mapping, "category") },
+  { key: "initialQty", label: "כמות", width: "16", getValue: (row) => row.data?.initialQty !== undefined ? String(row.data.initialQty) : getRawCellByField(row, mapping, "initialQty") },
 ]
 
-const SOLDIER_COLUMNS: PreviewColumn<SoldierUpsertData>[] = [
-  { key: "personalId", label: "מ.א.", width: "20", getValue: (row) => row.data?.personalId ?? getRawCell(row, 0) },
-  { key: "fullName", label: "שם מלא", width: "32", getValue: (row) => row.data?.fullName ?? getRawCell(row, 1) },
-  { key: "rank", label: "דרגה", width: "16", getValue: (row) => row.data?.rank ?? getRawCell(row, 2) },
-  { key: "company", label: "פלוגה", width: "24", getValue: (row) => row.data?.company ?? getRawCell(row, 3) },
+const getSoldierColumns = (mapping: ColumnMapping): PreviewColumn<SoldierUpsertData>[] => [
+  { key: "personalId", label: "מ.א.", width: "20", getValue: (row) => row.data?.personalId ?? getRawCellByField(row, mapping, "personalId") },
+  { key: "fullName", label: "שם מלא", width: "32", getValue: (row) => row.data?.fullName ?? getRawCellByField(row, mapping, "fullName") },
+  { key: "rank", label: "דרגה", width: "16", getValue: (row) => row.data?.rank ?? getRawCellByField(row, mapping, "rank") },
+  { key: "company", label: "פלוגה", width: "24", getValue: (row) => row.data?.company ?? getRawCellByField(row, mapping, "company") },
 ]
 
 type ImportDialogProps = {

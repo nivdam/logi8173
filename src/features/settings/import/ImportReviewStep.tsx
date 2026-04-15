@@ -26,6 +26,7 @@ export const ImportReviewStep = <T extends Record<string, unknown>>({
   const willUpdateCount = rows.filter((row) => row.status === "will_update").length
   const invalidCount = rows.filter((row) => row.status === "invalid" || row.status === "duplicate_in_file").length
   const importableCount = willCreateCount + willUpdateCount
+  const completedCount = rows.filter((row) => row.status === "imported" || row.status === "failed").length
   const isImportDisabled = importableCount === 0 || isImporting
 
   const handleBack = () => {
@@ -129,7 +130,7 @@ export const ImportReviewStep = <T extends Record<string, unknown>>({
             onClick={handleImport}
           >
             <Download size={16} />
-            {isImporting ? t("settings.import.importing") : `${t("settings.import.importAction")} (${importableCount})`}
+            {isImporting ? `${t("settings.import.importing")} ${completedCount}/${importableCount}` : `${t("settings.import.importAction")} (${importableCount})`}
           </Button>
         )}
       </Flex>
