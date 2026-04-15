@@ -17,7 +17,7 @@ export const SoldierAutocomplete = ({ selectedSoldier, onSelect, onClear }: Sold
     const query = inputValue.toLowerCase()
     return soldiers.filter((soldier) =>
       soldier.fullName.toLowerCase().includes(query) ||
-      soldier.personalId.includes(query),
+      String(soldier.personalId).includes(query),
     )
   }, [inputValue, soldiers])
 
