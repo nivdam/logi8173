@@ -44,6 +44,7 @@ export const ReturnForm = () => {
   }
 
   const handleAddManualItem = () => {
+    form.handleAddEmptyLine()
     setActiveSection((current) => Array.from(new Set([...current, "items"])))
   }
 
