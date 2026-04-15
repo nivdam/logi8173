@@ -10,7 +10,7 @@ export const ImportPreviewTable = <T,>({ rows, columns, showErrorsOnly }: Import
   if (visibleRows.length === 0) {
     return (
       <Text textStyle="sm" color="fg.muted" textAlign="center" py="6">
-        {showErrorsOnly ? "אין שגיאות" : "אין שורות"}
+        {showErrorsOnly ? t("common.noResults") : t("settings.import.noData")}
       </Text>
     )
   }
@@ -65,7 +65,7 @@ export const ImportPreviewTable = <T,>({ rows, columns, showErrorsOnly }: Import
             </Text>
           ))}
           <Flex w="20" flexShrink={0}>
-            <StatusBadge status={row.status} />
+            <ImportStatusBadge status={row.status} />
           </Flex>
           <Text textStyle="xs" color="red.600" flex="1" minW="32">
             {row.errors.join(", ")}
@@ -76,7 +76,7 @@ export const ImportPreviewTable = <T,>({ rows, columns, showErrorsOnly }: Import
   )
 }
 
-const StatusBadge = ({ status }: { status: ImportRowStatus }) => {
+const ImportStatusBadge = ({ status }: { status: ImportRowStatus }) => {
   const { label, bg, color } = getStatusStyle(status)
 
   return (

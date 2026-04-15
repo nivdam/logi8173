@@ -9,23 +9,29 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 export const runInventoryImport = async (
   rows: ImportRow<InventoryUpsertData>[],
   onRowUpdate: (index: number, status: "importing" | "imported" | "failed", error?: string) => void,
+  shouldCancel: () => boolean,
 ): Promise<ImportResult> => {
   const importableRows = rows.filter((row) => row.data !== null && (row.status === "will_create" || row.status === "will_update"))
   const result: ImportResult = { createdCount: 0, updatedCount: 0, failedCount: 0, errors: [] }
 
   for (const row of importableRows) {
+    if (shouldCancel()) break
+
+    const originalStatus = row.status
     onRowUpdate(row.index, "importing")
 
     try {
       await api.post("inventory.upsert", row.data)
+      if (shouldCancel()) break
       onRowUpdate(row.index, "imported")
 
-      if (row.status === "will_update") {
+      if (originalStatus === "will_update") {
         result.updatedCount++
       } else {
         result.createdCount++
       }
     } catch (error) {
+      if (shouldCancel()) break
       const message = error instanceof Error ? error.message : "שגיאה לא ידועה"
       onRowUpdate(row.index, "failed", message)
       result.failedCount++
@@ -41,23 +47,29 @@ export const runInventoryImport = async (
 export const runSoldiersImport = async (
   rows: ImportRow<SoldierUpsertData>[],
   onRowUpdate: (index: number, status: "importing" | "imported" | "failed", error?: string) => void,
+  shouldCancel: () => boolean,
 ): Promise<ImportResult> => {
   const importableRows = rows.filter((row) => row.data !== null && (row.status === "will_create" || row.status === "will_update"))
   const result: ImportResult = { createdCount: 0, updatedCount: 0, failedCount: 0, errors: [] }
 
   for (const row of importableRows) {
+    if (shouldCancel()) break
+
+    const originalStatus = row.status
     onRowUpdate(row.index, "importing")
 
     try {
       await api.post("soldiers.upsert", row.data)
+      if (shouldCancel()) break
       onRowUpdate(row.index, "imported")
 
-      if (row.status === "will_update") {
+      if (originalStatus === "will_update") {
         result.updatedCount++
       } else {
         result.createdCount++
       }
     } catch (error) {
+      if (shouldCancel()) break
       const message = error instanceof Error ? error.message : "שגיאה לא ידועה"
       onRowUpdate(row.index, "failed", message)
       result.failedCount++

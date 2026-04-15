@@ -1,6 +1,6 @@
-import { Box, Button, Flex, Text } from "@chakra-ui/react"
+import { Button, Flex, Text } from "@chakra-ui/react"
 import { ArrowRight, Check, Download, Filter } from "lucide-react"
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { t } from "../../../lib/i18n"
 import { ImportPreviewTable } from "./ImportPreviewTable"
 import type { PreviewColumn } from "./ImportPreviewTable"
@@ -13,11 +13,15 @@ export const ImportReviewStep = <T extends InventoryUpsertData | SoldierUpsertDa
   rows,
   columns,
   onRowUpdate,
+  onImportStart,
+  onImportEnd,
+  shouldCancel,
   onBack,
 }: ImportReviewStepProps<T>) => {
   const [isImporting, setIsImporting] = useState(false)
   const [result, setResult] = useState<ImportResult | null>(null)
   const [showErrorsOnly, setShowErrorsOnly] = useState(false)
+  const importStartedRef = useRef(false)
 
   const willCreateCount = rows.filter((row) => row.status === "will_create").length
   const willUpdateCount = rows.filter((row) => row.status === "will_update").length
@@ -26,18 +30,22 @@ export const ImportReviewStep = <T extends InventoryUpsertData | SoldierUpsertDa
   const isImportDisabled = importableCount === 0 || isImporting
 
   const handleImport = async () => {
+    if (importStartedRef.current) return
+    importStartedRef.current = true
     setIsImporting(true)
+    onImportStart()
 
     const handleRowUpdate = (index: number, status: "importing" | "imported" | "failed", error?: string) => {
       onRowUpdate(index, status, error)
     }
 
     const importResult = entity === "inventory"
-      ? await runInventoryImport(rows as ImportRow<InventoryUpsertData>[], handleRowUpdate)
-      : await runSoldiersImport(rows as ImportRow<SoldierUpsertData>[], handleRowUpdate)
+      ? await runInventoryImport(rows as ImportRow<InventoryUpsertData>[], handleRowUpdate, shouldCancel)
+      : await runSoldiersImport(rows as ImportRow<SoldierUpsertData>[], handleRowUpdate, shouldCancel)
 
     setResult(importResult)
     setIsImporting(false)
+    onImportEnd()
   }
 
   const handleToggleErrorsOnly = () => {
@@ -58,19 +66,20 @@ export const ImportReviewStep = <T extends InventoryUpsertData | SoldierUpsertDa
       >
         <Flex gap="4" flexWrap="wrap">
           {willCreateCount > 0 && (
-            <SummaryBadge count={willCreateCount} label={t("settings.import.willCreate")} color="sage.700" bg="sage.50" />
+            <ImportSummaryBadge count={willCreateCount} label={t("settings.import.willCreate")} color="sage.700" bg="sage.50" />
           )}
           {willUpdateCount > 0 && (
-            <SummaryBadge count={willUpdateCount} label={t("settings.import.willUpdate")} color="sky.700" bg="sky.50" />
+            <ImportSummaryBadge count={willUpdateCount} label={t("settings.import.willUpdate")} color="sky.700" bg="sky.50" />
           )}
           {invalidCount > 0 && (
-            <SummaryBadge count={invalidCount} label={t("settings.import.invalid")} color="red.600" bg="rose.50" />
+            <ImportSummaryBadge count={invalidCount} label={t("settings.import.invalid")} color="red.600" bg="rose.50" />
           )}
         </Flex>
         <Button
           variant="ghost"
           size="xs"
           onClick={handleToggleErrorsOnly}
+          aria-pressed={showErrorsOnly}
         >
           <Filter size={14} />
           {t("settings.import.showErrorsOnly")}
@@ -130,7 +139,7 @@ export const ImportReviewStep = <T extends InventoryUpsertData | SoldierUpsertDa
   )
 }
 
-const SummaryBadge = ({ count, label, color, bg }: { count: number; label: string; color: string; bg: string }) => (
+const ImportSummaryBadge = ({ count, label, color, bg }: { count: number; label: string; color: string; bg: string }) => (
   <Flex px="2.5" py="1" borderRadius="full" bg={bg} gap="1.5" align="center">
     <Text textStyle="xs" fontWeight="700" color={color}>{count}</Text>
     <Text textStyle="xs" color={color}>{label}</Text>
@@ -142,5 +151,8 @@ type ImportReviewStepProps<T> = {
   rows: ImportRow<T>[]
   columns: PreviewColumn<T>[]
   onRowUpdate: (index: number, status: "importing" | "imported" | "failed", error?: string) => void
+  onImportStart: () => void
+  onImportEnd: () => void
+  shouldCancel: () => boolean
   onBack: () => void
 }

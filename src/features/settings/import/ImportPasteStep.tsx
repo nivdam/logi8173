@@ -36,6 +36,7 @@ export const ImportPasteStep = ({ entity, onParse }: ImportPasteStepProps) => {
           onChange={(event) => setRawText(event.target.value)}
           onPaste={handlePaste}
           placeholder={t("settings.import.pasteHint")}
+          aria-label={t("settings.import.pasteHint")}
           rows={10}
           fontFamily="mono"
           textStyle="sm"

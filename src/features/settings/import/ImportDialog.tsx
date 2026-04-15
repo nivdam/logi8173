@@ -1,6 +1,7 @@
-import { useState, useCallback } from "react"
+import { useState, useCallback, useRef } from "react"
 import { Box, Dialog, Flex, Portal, Tabs, Text } from "@chakra-ui/react"
 import { FileSpreadsheet, Package, Users } from "lucide-react"
+import { useQueryClient } from "@tanstack/react-query"
 import { useInventory, useSoldiers } from "../../../api"
 import { t } from "../../../lib/i18n"
 import { ImportPasteStep } from "./ImportPasteStep"
@@ -25,7 +26,10 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
   const [inventoryRows, setInventoryRows] = useState<ImportRow<InventoryUpsertData>[] | null>(null)
   const [soldierRows, setSoldierRows] = useState<ImportRow<SoldierUpsertData>[] | null>(null)
   const [parseError, setParseError] = useState<string | null>(null)
+  const [isImporting, setIsImporting] = useState(false)
+  const cancelledRef = useRef(false)
 
+  const queryClient = useQueryClient()
   const { data: existingInventory = [] } = useInventory()
   const { data: existingSoldiers = [] } = useSoldiers()
 
@@ -36,17 +40,32 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
   }
 
   const handleOpenChange = (details: { open: boolean }) => {
+    if (!details.open && isImporting) return
     onOpenChange(details)
     if (!details.open) {
+      cancelledRef.current = true
       handleReset()
       setActiveTab("inventory")
     }
   }
 
   const handleTabChange = (details: { value: string }) => {
+    if (isImporting) return
     const nextTab = details.value === "soldiers" ? "soldiers" : "inventory"
     setActiveTab(nextTab)
     handleReset()
+  }
+
+  const handleImportStart = () => {
+    cancelledRef.current = false
+    setIsImporting(true)
+  }
+
+  const handleImportEnd = () => {
+    setIsImporting(false)
+    const invalidateKey = activeTab === "inventory" ? "inventory" : "soldiers"
+    queryClient.invalidateQueries({ queryKey: [invalidateKey] })
+    queryClient.invalidateQueries({ queryKey: ["dashboard"] })
   }
 
   const handleParseInventory = (text: string) => {
@@ -121,6 +140,8 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
     })
   }, [])
 
+  const shouldCancel = useCallback(() => cancelledRef.current, [])
+
   const isInventoryReview = inventoryRows !== null
   const isSoldierReview = soldierRows !== null
 
@@ -138,11 +159,11 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
 
               <Tabs.Root value={activeTab} onValueChange={handleTabChange}>
                 <Tabs.List>
-                  <Tabs.Trigger value="inventory">
+                  <Tabs.Trigger value="inventory" disabled={isImporting}>
                     <Package size={14} />
                     {t("settings.import.tabInventory")}
                   </Tabs.Trigger>
-                  <Tabs.Trigger value="soldiers">
+                  <Tabs.Trigger value="soldiers" disabled={isImporting}>
                     <Users size={14} />
                     {t("settings.import.tabSoldiers")}
                   </Tabs.Trigger>
@@ -168,6 +189,9 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
                       rows={inventoryRows}
                       columns={INVENTORY_COLUMNS}
                       onRowUpdate={handleInventoryRowUpdate}
+                      onImportStart={handleImportStart}
+                      onImportEnd={handleImportEnd}
+                      shouldCancel={shouldCancel}
                       onBack={handleReset}
                     />
                   )}
@@ -185,6 +209,9 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
                       rows={soldierRows}
                       columns={SOLDIER_COLUMNS}
                       onRowUpdate={handleSoldierRowUpdate}
+                      onImportStart={handleImportStart}
+                      onImportEnd={handleImportEnd}
+                      shouldCancel={shouldCancel}
                       onBack={handleReset}
                     />
                   )}
@@ -192,7 +219,7 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
               )}
             </Dialog.Body>
 
-            <Dialog.CloseTrigger />
+            {!isImporting && <Dialog.CloseTrigger />}
           </Dialog.Content>
         </Dialog.Positioner>
       </Portal>
