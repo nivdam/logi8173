@@ -1,10 +1,10 @@
 import { RANK_OPTIONS } from "../../../lib/rank-options"
-import type { InventoryItem, Soldier } from "../../../types"
+import type { InventoryItem, ItemCategory, Soldier } from "../../../types"
 import type { ImportRow, ColumnMapping } from "./import-types"
 
 // --- Constants ---
 
-const VALID_CATEGORIES = new Set<string>(["רספאי", "קבלר_קרביות", "ציוד_אישי", "אנרגיה", "תקשורת", "כללי"])
+const VALID_CATEGORIES: Set<ItemCategory> = new Set(["רספאי", "קבלר_קרביות", "ציוד_אישי", "אנרגיה", "תקשורת", "כללי"])
 
 export const INVENTORY_HEADER_ALIASES: Record<string, string[]> = {
   name: ["שם", "שם פריט", "פריט", "name"],
