@@ -201,8 +201,17 @@ export const hasRequiredSoldierColumns = (mapping: ColumnMapping): boolean =>
   mapping.rank !== undefined &&
   mapping.company !== undefined
 
+const FIELD_LABELS: Record<string, string> = {
+  name: "שם פריט",
+  category: "קטגוריה",
+  personalId: "מספר אישי",
+  fullName: "שם מלא",
+  rank: "דרגה",
+  company: "פלוגה",
+}
+
 export const getMissingColumns = (mapping: ColumnMapping, required: string[]): string[] =>
-  required.filter((field) => mapping[field] === undefined)
+  required.filter((field) => mapping[field] === undefined).map((field) => FIELD_LABELS[field] ?? field)
 
 export { INVENTORY_HEADER_ALIASES, SOLDIER_HEADER_ALIASES }
 

@@ -2,7 +2,7 @@ import { api } from "../../../lib/api"
 import type { ImportRow, ImportResult } from "./import-types"
 import type { InventoryUpsertData, SoldierUpsertData } from "./import-parsers"
 
-const THROTTLE_MS = 1000
+const THROTTLE_MS = 500
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
