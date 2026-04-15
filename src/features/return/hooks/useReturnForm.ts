@@ -4,6 +4,7 @@ import { useAuth } from "../../../lib/use-auth"
 import { useCreateTransaction, useTransactions } from "../../../api"
 import { showApiErrorToast } from "../../../lib/api-error"
 import { t } from "../../../lib/i18n"
+import { toaster } from "../../../lib/toaster"
 import {
   getFilledLines,
   hasLineErrors,
@@ -150,6 +151,14 @@ export const useReturnForm = () => {
       },
       {
         onSuccess: (result) => {
+          if (result.status === "duplicate") {
+            toaster.create({
+              title: t("common.success"),
+              description: t("returns.submitDuplicate"),
+              type: "info",
+              duration: 5000,
+            })
+          }
           setSearchParams({ id: result.txId }, { replace: true })
           dispatch({ type: "SHOW_SUCCESS", payload: result.txId })
         },

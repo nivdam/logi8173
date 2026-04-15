@@ -35,6 +35,7 @@ const createInitialState = (): IssuanceFormState => ({
 
 const appendLine = (state: IssuanceFormState, line: IssuanceLineItem): IssuanceFormState => ({
   ...state,
+  clientTxId: createClientTxId(),
   lines: [...state.lines, line],
   expandedLineIds: [...state.expandedLineIds, line.lineId],
 })
@@ -55,7 +56,7 @@ const reducer = (state: IssuanceFormState, action: IssuanceFormAction): Issuance
       }
 
     case "SET_RECEIVER":
-      return { ...state, receiver: action.payload }
+      return { ...state, clientTxId: createClientTxId(), receiver: action.payload }
 
     case "ADD_LINE_FROM_INVENTORY":
       return appendLine(state, createLineFromInventoryItem(action.payload))
@@ -69,6 +70,7 @@ const reducer = (state: IssuanceFormState, action: IssuanceFormAction): Issuance
     case "UPDATE_LINE_FIELD":
       return {
         ...state,
+        clientTxId: createClientTxId(),
         lines: state.lines.map((line) =>
           line.lineId === action.payload.lineId
             ? { ...line, [action.payload.field]: action.payload.value }
@@ -80,6 +82,7 @@ const reducer = (state: IssuanceFormState, action: IssuanceFormAction): Issuance
       const { lineId, item } = action.payload
       return {
         ...state,
+        clientTxId: createClientTxId(),
         lines: state.lines.map((line) =>
           line.lineId === lineId
             ? {
@@ -106,6 +109,7 @@ const reducer = (state: IssuanceFormState, action: IssuanceFormAction): Issuance
       const after = state.lines.slice(sourceIndex + 1)
       return {
         ...state,
+        clientTxId: createClientTxId(),
         lines: [...before, duplicated, ...after],
         expandedLineIds: [...state.expandedLineIds, duplicated.lineId],
       }
@@ -115,6 +119,7 @@ const reducer = (state: IssuanceFormState, action: IssuanceFormAction): Issuance
       const remaining = state.lines.filter((line) => line.lineId !== action.payload)
       return {
         ...state,
+        clientTxId: createClientTxId(),
         lines: remaining.length === 0 ? [createEmptyLine()] : remaining,
         expandedLineIds: state.expandedLineIds.filter((id) => id !== action.payload),
       }
@@ -124,16 +129,16 @@ const reducer = (state: IssuanceFormState, action: IssuanceFormAction): Issuance
       return { ...state, expandedLineIds: action.payload }
 
     case "SET_PERFORMED_AT":
-      return { ...state, performedAt: action.payload }
+      return { ...state, clientTxId: createClientTxId(), performedAt: action.payload }
 
     case "SET_GLOBAL_NOTES":
-      return { ...state, globalNotes: action.payload }
+      return { ...state, clientTxId: createClientTxId(), globalNotes: action.payload }
 
     case "SET_RECEIVER_SIGNATURE":
-      return { ...state, receiverSignature: action.payload }
+      return { ...state, clientTxId: createClientTxId(), receiverSignature: action.payload }
 
     case "SET_GIVER_SIGNATURE":
-      return { ...state, giverSignature: action.payload }
+      return { ...state, clientTxId: createClientTxId(), giverSignature: action.payload }
 
     case "SHOW_SUCCESS":
       return { ...state, showSuccess: true, formId: action.payload }
@@ -250,6 +255,14 @@ export const useIssuanceForm = () => {
       },
       {
         onSuccess: (result) => {
+          if (result.status === "duplicate") {
+            toaster.create({
+              title: t("common.success"),
+              description: t("issuance.submitDuplicate"),
+              type: "info",
+              duration: 5000,
+            })
+          }
           setSearchParams({ id: result.txId }, { replace: true })
           dispatch({ type: "SHOW_SUCCESS", payload: result.txId })
         },
