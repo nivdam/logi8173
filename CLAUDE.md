@@ -15,7 +15,9 @@ Logi8173 is a digital logistics system for IDF Reserve Engineering Battalion 817
 
 - The frontend does not call Apps Script directly.
 - Vercel proxies requests through [`api/gas.ts`](/Users/nivdamianovich/BizoDam/Logi8173/_logi8173_/api/gas.ts).
-- The proxy sends requests to Apps Script as `GET` with a `payload` query param, because direct `POST` bodies are lost on the Apps Script redirect flow.
+- The frontend contract is `POST /api/gas?action=...`.
+- The proxy forwards requests to Apps Script as `POST` with a JSON body.
+- Apps Script still supports a `payload` query-param fallback path for compatibility.
 - Vercel SPA routing depends on [`vercel.json`](/Users/nivdamianovich/BizoDam/Logi8173/_logi8173_/vercel.json) rewrites.
 
 ## System Model
@@ -64,7 +66,7 @@ After setup, the script also stores generated resource IDs such as:
 
 ## Near-Term Product Priorities
 
-1. Keep issuance/returns activity-scoped and replace the current hardcoded activity usage.
-2. Add a minimal Settings UI for operators and bootstrap administration.
-3. Add import + manual maintenance for master inventory.
+1. Validate issuance and return end-to-end against real Sheets and Drive data.
+2. Harden import for real unit datasets, especially throughput and retry behavior.
+3. Validate retry and duplicate-protection behavior against the live backend.
 4. Sync any live Apps Script changes back into `apps-script/`.

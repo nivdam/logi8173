@@ -17,8 +17,11 @@ import type { Soldier } from "../../../types"
 import type { InventoryItem } from "../../../types/inventory"
 import type { IssuanceLineItem } from "../issuance.types"
 
+const createClientTxId = () => crypto.randomUUID()
+
 const createInitialState = (): IssuanceFormState => ({
   activityId: undefined,
+  clientTxId: createClientTxId(),
   formId: undefined,
   receiver: undefined,
   performedAt: new Date().toISOString(),
@@ -42,6 +45,7 @@ const reducer = (state: IssuanceFormState, action: IssuanceFormAction): Issuance
       return {
         ...state,
         activityId: action.payload,
+        clientTxId: createClientTxId(),
         receiver: undefined,
         lines: [createEmptyLine()],
         expandedLineIds: [],
@@ -242,6 +246,7 @@ export const useIssuanceForm = () => {
         notes: state.globalNotes || undefined,
         signatureBase64: state.receiverSignature,
         giverSignatureBase64: giverSignatureValue || undefined,
+        clientTxId: state.clientTxId,
       },
       {
         onSuccess: (result) => {
@@ -296,6 +301,7 @@ export const useIssuanceForm = () => {
 
 type IssuanceFormState = {
   activityId: string | undefined
+  clientTxId: string
   formId: string | undefined
   receiver: Soldier | undefined
   performedAt: string

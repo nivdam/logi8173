@@ -20,7 +20,8 @@ Frontend code already assumes this envelope in `src/lib/api.ts`.
 - The frontend calls `/api/gas?action=...`
 - Request body is JSON
 - `idToken` is expected in the request payload
-- Backend parsing currently supports direct POST body parsing and `payload` fallback parsing
+- The normal runtime path is direct POST body parsing
+- Backend parsing also supports `payload` fallback parsing for compatibility
 
 ## Auth And Roles
 

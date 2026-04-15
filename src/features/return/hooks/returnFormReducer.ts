@@ -8,8 +8,11 @@ import type { InventoryItem } from "../../../types/inventory"
 import type { IssuanceLineItem } from "../../issuance/issuance.types"
 import type { SoldierIssuedItem } from "../return.types"
 
+const createClientTxId = () => crypto.randomUUID()
+
 export const createInitialState = (): ReturnFormState => ({
   activityId: undefined,
+  clientTxId: createClientTxId(),
   formId: undefined,
   giver: undefined,
   performedAt: new Date().toISOString(),
@@ -34,6 +37,7 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
       return {
         ...state,
         activityId: action.payload,
+        clientTxId: createClientTxId(),
         giver: undefined,
         lines: [],
         expandedLineIds: [],
@@ -47,6 +51,7 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
       return {
         ...state,
         giver: action.payload,
+        clientTxId: createClientTxId(),
         lines: [],
         expandedLineIds: [],
         selectedIssuedItemIds: new Set<string>(),
@@ -208,6 +213,7 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
 
 export type ReturnFormState = {
   activityId: string | undefined
+  clientTxId: string
   formId: string | undefined
   giver: Soldier | undefined
   performedAt: string

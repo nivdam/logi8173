@@ -146,6 +146,7 @@ export const useReturnForm = () => {
         notes: state.globalNotes || undefined,
         signatureBase64: state.giverSignature,
         giverSignatureBase64: receiverSignatureValue || undefined,
+        clientTxId: state.clientTxId,
       },
       {
         onSuccess: (result) => {
