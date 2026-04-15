@@ -4,6 +4,7 @@ import { Box, Dialog, Flex, Portal, Tabs, Text } from "@chakra-ui/react"
 import { FileSpreadsheet, Package, Users } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
 import { useInventory, useSoldiers } from "../../../api"
+import { api } from "../../../lib/api"
 import { t } from "../../../lib/i18n"
 import { ImportPasteStep } from "./ImportPasteStep"
 import { ImportReviewStep } from "./ImportReviewStep"
@@ -76,59 +77,41 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
   }
 
   const handleParseInventory = (text: string) => {
-    setParseError(null)
-    const allRows = parseSpreadsheetText(text)
-    if (allRows.length < 2) {
-      setParseError(t("settings.import.noData"))
-      return
-    }
-
-    const dataRows = allRows.slice(1)
-    if (dataRows.length > MAX_IMPORT_ROWS) {
-      setParseError(`${t("settings.import.tooManyRows")} ${MAX_IMPORT_ROWS}`)
-      return
-    }
-
-    const headerRow = allRows[0]
-    const mapping = detectColumnMapping(headerRow, INVENTORY_HEADER_ALIASES)
-
-    if (!hasRequiredInventoryColumns(mapping)) {
-      const missing = getMissingColumns(mapping, ["name", "category"])
-      setParseError(`${t("settings.import.missingColumns")} ${missing.join(", ")}`)
-      return
-    }
-
-    setInventoryMapping(mapping)
-    const validated = validateInventoryRows(dataRows, mapping, existingInventory)
-    setInventoryRows(validated)
+    parseImportText({
+      text,
+      aliases: INVENTORY_HEADER_ALIASES,
+      requiredFields: ["name", "category"],
+      hasRequiredColumns: hasRequiredInventoryColumns,
+      validateRows: (rows, mapping) => validateInventoryRows(rows, mapping, existingInventory),
+      setMapping: setInventoryMapping,
+      setRows: setInventoryRows,
+      setParseError,
+    })
   }
 
   const handleParseSoldiers = (text: string) => {
+    parseImportText({
+      text,
+      aliases: SOLDIER_HEADER_ALIASES,
+      requiredFields: ["personalId", "fullName", "rank", "company"],
+      hasRequiredColumns: hasRequiredSoldierColumns,
+      validateRows: (rows, mapping) => validateSoldierRows(rows, mapping, existingSoldiers),
+      setMapping: setSoldierMapping,
+      setRows: setSoldierRows,
+      setParseError,
+    })
+  }
+
+  const handleImportFromUrl = async (sourceUrl: string) => {
     setParseError(null)
-    const allRows = parseSpreadsheetText(text)
-    if (allRows.length < 2) {
-      setParseError(t("settings.import.noData"))
-      return
+
+    try {
+      const response = await api.post<ImportSheetTextResponse>("imports.fetchSheetText", { sourceUrl })
+      return response.text
+    } catch {
+      setParseError(t("settings.import.sourceLoadError"))
+      throw new Error("Failed to load import source")
     }
-
-    const dataRows = allRows.slice(1)
-    if (dataRows.length > MAX_IMPORT_ROWS) {
-      setParseError(`${t("settings.import.tooManyRows")} ${MAX_IMPORT_ROWS}`)
-      return
-    }
-
-    const headerRow = allRows[0]
-    const mapping = detectColumnMapping(headerRow, SOLDIER_HEADER_ALIASES)
-
-    if (!hasRequiredSoldierColumns(mapping)) {
-      const missing = getMissingColumns(mapping, ["personalId", "fullName", "rank", "company"])
-      setParseError(`${t("settings.import.missingColumns")} ${missing.join(", ")}`)
-      return
-    }
-
-    setSoldierMapping(mapping)
-    const validated = validateSoldierRows(dataRows, mapping, existingSoldiers)
-    setSoldierRows(validated)
   }
 
   const handleInventoryRowUpdate = useCallback(
@@ -187,7 +170,11 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
               {activeTab === "inventory" && (
                 <>
                   {!isInventoryReview && (
-                    <ImportPasteStep entity="inventory" onParse={handleParseInventory} />
+                    <ImportPasteStep
+                      entity="inventory"
+                      onParse={handleParseInventory}
+                      onImportFromUrl={handleImportFromUrl}
+                    />
                   )}
                   {isInventoryReview && (
                     <ImportReviewStep
@@ -207,7 +194,11 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
               {activeTab === "soldiers" && (
                 <>
                   {!isSoldierReview && (
-                    <ImportPasteStep entity="soldiers" onParse={handleParseSoldiers} />
+                    <ImportPasteStep
+                      entity="soldiers"
+                      onParse={handleParseSoldiers}
+                      onImportFromUrl={handleImportFromUrl}
+                    />
                   )}
                   {isSoldierReview && (
                     <ImportReviewStep
@@ -271,4 +262,58 @@ const getSoldierColumns = (mapping: ColumnMapping): PreviewColumn<SoldierUpsertD
 type ImportDialogProps = {
   open: boolean
   onOpenChange: (details: { open: boolean }) => void
+}
+
+type ImportSheetTextResponse = {
+  text: string
+  sheetName: string
+  rowCount: number
+}
+
+type ParseImportTextParams<T> = {
+  text: string
+  aliases: Record<string, string[]>
+  requiredFields: string[]
+  hasRequiredColumns: (mapping: ColumnMapping) => boolean
+  validateRows: (rows: string[][], mapping: ColumnMapping) => ImportRow<T>[]
+  setMapping: Dispatch<SetStateAction<ColumnMapping | null>>
+  setRows: Dispatch<SetStateAction<ImportRow<T>[] | null>>
+  setParseError: Dispatch<SetStateAction<string | null>>
+}
+
+const parseImportText = <T,>({
+  text,
+  aliases,
+  requiredFields,
+  hasRequiredColumns,
+  validateRows,
+  setMapping,
+  setRows,
+  setParseError,
+}: ParseImportTextParams<T>) => {
+  setParseError(null)
+  const allRows = parseSpreadsheetText(text)
+
+  if (allRows.length < 2) {
+    setParseError(t("settings.import.noData"))
+    return
+  }
+
+  const dataRows = allRows.slice(1)
+  if (dataRows.length > MAX_IMPORT_ROWS) {
+    setParseError(`${t("settings.import.tooManyRows")} ${MAX_IMPORT_ROWS}`)
+    return
+  }
+
+  const headerRow = allRows[0]
+  const mapping = detectColumnMapping(headerRow, aliases)
+
+  if (!hasRequiredColumns(mapping)) {
+    const missing = getMissingColumns(mapping, requiredFields)
+    setParseError(`${t("settings.import.missingColumns")} ${missing.join(", ")}`)
+    return
+  }
+
+  setMapping(mapping)
+  setRows(validateRows(dataRows, mapping))
 }
