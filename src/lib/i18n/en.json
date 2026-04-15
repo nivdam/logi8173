@@ -48,7 +48,12 @@
     "viewInventory": "View inventory",
     "viewLowStock": "View low stock",
     "viewGaps": "View gaps",
-    "viewActivities": "View activities"
+    "viewActivities": "View activities",
+    "damageBreakdown": "Damage by company",
+    "damageBreakdownDescription": "Damaged equipment awaiting replacement or refresh",
+    "damagedItems": "Damaged items",
+    "totalDamaged": "Total damaged",
+    "noDamage": "No pending damage"
   },
   "inventory": {
     "title": "Inventory",
