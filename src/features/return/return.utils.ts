@@ -9,28 +9,24 @@ export const computeSoldierIssuedItems = (
 ): SoldierIssuedItem[] => {
   const itemMap = new Map<string, SoldierIssuedItem>()
 
-  for (const transaction of transactions) {
-    const isIssueToSoldier =
-      transaction.txType === "issue" && transaction.receiverPersonalId === soldierPersonalId
-    const isReturnBySoldier =
-      transaction.txType === "return" && transaction.giverPersonalId === soldierPersonalId
+  const issueTransactions = transactions.filter(
+    (transaction) => transaction.txType === "issue" && transaction.receiverPersonalId === soldierPersonalId,
+  )
+  const returnTransactions = transactions.filter(
+    (transaction) => transaction.txType === "return" && transaction.giverPersonalId === soldierPersonalId,
+  )
 
-    if (!isIssueToSoldier && !isReturnBySoldier) continue
-
+  for (const transaction of issueTransactions) {
     for (const item of transaction.items) {
       const existing = itemMap.get(item.itemId)
-
       if (existing) {
-        const issuedQty = existing.issuedQty + (isIssueToSoldier ? item.qty : 0)
-        const returnedQty = existing.returnedQty + (isReturnBySoldier ? item.qty : 0)
         itemMap.set(item.itemId, {
           ...existing,
-          issuedQty,
-          returnedQty,
-          remainingQty: issuedQty - returnedQty,
-          condition: isIssueToSoldier ? (item.condition ?? existing.condition) : existing.condition,
+          issuedQty: existing.issuedQty + item.qty,
+          remainingQty: existing.issuedQty + item.qty - existing.returnedQty,
+          condition: item.condition ?? existing.condition,
         })
-      } else if (isIssueToSoldier) {
+      } else {
         itemMap.set(item.itemId, {
           itemId: item.itemId,
           name: item.name,
@@ -42,6 +38,18 @@ export const computeSoldierIssuedItems = (
           condition: item.condition ?? DEFAULT_CONDITION,
         })
       }
+    }
+  }
+
+  for (const transaction of returnTransactions) {
+    for (const item of transaction.items) {
+      const existing = itemMap.get(item.itemId)
+      if (!existing) continue
+      itemMap.set(item.itemId, {
+        ...existing,
+        returnedQty: existing.returnedQty + item.qty,
+        remainingQty: existing.issuedQty - (existing.returnedQty + item.qty),
+      })
     }
   }
 

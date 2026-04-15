@@ -83,7 +83,7 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
       const { items } = action.payload
       const nextSelectedIds = new Set(items.map((item) => item.itemId))
       const manualLines = state.lines.filter(
-        (line) => !state.selectedIssuedItemIds.has(line.itemId) && line.itemId === "",
+        (line) => !state.selectedIssuedItemIds.has(line.itemId),
       )
       const existingLinesByItemId = new Map(
         state.lines

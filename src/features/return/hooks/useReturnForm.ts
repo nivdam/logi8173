@@ -1,8 +1,8 @@
-import { useReducer } from "react"
+import { useMemo, useReducer } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useAuth } from "../../../lib/use-auth"
 import { useCreateTransaction, useTransactions } from "../../../api"
-import { toaster } from "../../../lib/toaster"
+import { showApiErrorToast } from "../../../lib/api-error"
 import { t } from "../../../lib/i18n"
 import {
   getFilledLines,
@@ -48,9 +48,11 @@ export const useReturnForm = () => {
   const transactionsQuery = useTransactions(state.activityId ?? "")
   const transactions = transactionsQuery.data ?? []
 
-  const soldierIssuedItems = state.giver
-    ? computeSoldierIssuedItems(transactions, state.giver.personalId)
-    : []
+  const soldierPersonalId = state.giver?.personalId
+  const soldierIssuedItems = useMemo(
+    () => soldierPersonalId ? computeSoldierIssuedItems(transactions, soldierPersonalId) : [],
+    [transactions, soldierPersonalId],
+  )
 
   const isLoadingIssuedItems = state.giver !== undefined && transactionsQuery.isLoading
 
@@ -150,12 +152,11 @@ export const useReturnForm = () => {
           setSearchParams({ id: result.txId }, { replace: true })
           dispatch({ type: "SHOW_SUCCESS", payload: result.txId })
         },
-        onError: () => {
-          toaster.create({
-            title: t("common.error"),
-            description: t("returns.submitError"),
-            type: "error",
-            duration: 5000,
+        onError: (error) => {
+          showApiErrorToast({
+            actionLabel: t("returns.submitReturn"),
+            error,
+            fallbackMessage: t("returns.submitError"),
           })
         },
       },

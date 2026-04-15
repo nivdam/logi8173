@@ -202,6 +202,47 @@ describe("computeSoldierIssuedItems", () => {
     const result = computeSoldierIssuedItems(transactions, soldierPersonalId)
     expect(result).toHaveLength(0)
   })
+
+  it("handles return transaction appearing before issue in array", () => {
+    const transactions = [
+      makeTransaction({
+        txId: "tx-return",
+        txType: "return",
+        giverPersonalId: soldierPersonalId,
+        items: [{ itemId: "item-1", name: "Vest", qty: 1, condition: "new" }],
+      }),
+      makeTransaction({
+        txId: "tx-issue",
+        txType: "issue",
+        receiverPersonalId: soldierPersonalId,
+        items: [{ itemId: "item-1", name: "Vest", qty: 3, condition: "new" }],
+      }),
+    ]
+    const result = computeSoldierIssuedItems(transactions, soldierPersonalId)
+    expect(result).toHaveLength(1)
+    expect(result[0].issuedQty).toBe(3)
+    expect(result[0].returnedQty).toBe(1)
+    expect(result[0].remainingQty).toBe(2)
+  })
+
+  it("filters out items with negative remaining qty (over-return)", () => {
+    const transactions = [
+      makeTransaction({
+        txId: "tx-1",
+        txType: "issue",
+        receiverPersonalId: soldierPersonalId,
+        items: [{ itemId: "item-1", name: "Vest", qty: 1, condition: "new" }],
+      }),
+      makeTransaction({
+        txId: "tx-2",
+        txType: "return",
+        giverPersonalId: soldierPersonalId,
+        items: [{ itemId: "item-1", name: "Vest", qty: 3, condition: "new" }],
+      }),
+    ]
+    const result = computeSoldierIssuedItems(transactions, soldierPersonalId)
+    expect(result).toHaveLength(0)
+  })
 })
 
 describe("createLineFromIssuedItem", () => {
