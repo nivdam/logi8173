@@ -1,7 +1,15 @@
-import { DEFAULT_CONDITION, DEFAULT_UNIT_OF_MEASURE } from "../issuance/issuance.constants"
+import { DEFAULT_CONDITION, DEFAULT_UNIT_OF_MEASURE, UNIT_OPTIONS } from "../issuance/issuance.constants"
 import type { Transaction } from "../../types"
+import type { UnitOfMeasure } from "../../types/inventory"
 import type { IssuanceLineItem } from "../issuance/issuance.types"
 import type { SoldierIssuedItem } from "./return.types"
+
+const VALID_UNITS = new Set<string>(UNIT_OPTIONS.map((option) => option.value))
+
+const parseUnitOfMeasure = (value: string | undefined): UnitOfMeasure => {
+  if (value && VALID_UNITS.has(value)) return value as UnitOfMeasure
+  return DEFAULT_UNIT_OF_MEASURE
+}
 
 export const computeSoldierIssuedItems = (
   transactions: Transaction[],
@@ -31,7 +39,7 @@ export const computeSoldierIssuedItems = (
           itemId: item.itemId,
           name: item.name,
           catalogNumber: item.serialNumber ?? "",
-          unitOfMeasure: item.unitOfMeasure ?? DEFAULT_UNIT_OF_MEASURE,
+          unitOfMeasure: parseUnitOfMeasure(item.unitOfMeasure),
           issuedQty: item.qty,
           returnedQty: 0,
           remainingQty: item.qty,
