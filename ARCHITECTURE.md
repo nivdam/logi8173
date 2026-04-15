@@ -15,7 +15,7 @@ Normal production flow:
 
 1. The browser sends `POST /api/gas?action=...`
 2. `api/gas.ts` validates method and `action`
-3. The proxy forwards the request to `APPS_SCRIPT_URL`
+3. The proxy forwards the request to `APPS_SCRIPT_URL` as `POST` with a JSON body
 4. Apps Script routes the request in `apps-script/Router.gs`
 5. The controller reads or writes Sheets and Drive
 6. Apps Script returns JSON shaped as `{ ok, data }` or `{ ok, error, message }`
@@ -25,7 +25,7 @@ Notes:
 
 - The frontend contract is POST to the proxy.
 - The Apps Script parser supports both POST body parsing and `payload` fallback parsing.
-- Do not document only one parser path as if it is the whole backend truth.
+- Do not document the fallback parser path as if it is the primary runtime path.
 
 ## Frontend Boundaries
 

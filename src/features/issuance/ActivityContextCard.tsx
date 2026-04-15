@@ -1,26 +1,27 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Box,
-  Button,
   Flex,
   Heading,
   Spinner,
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { AlertTriangle, ClipboardList } from "lucide-react";
+import { ClipboardList } from "lucide-react";
 import { useActivities, useAddItemsToActivity, useInventory } from "../../api";
 import { EmptyState } from "../../components/EmptyState";
 import { t } from "../../lib/i18n";
 import { toaster } from "../../lib/toaster";
-import { animations } from "../../theme/animations";
 import { ActivityInventoryDialog } from "../activities/ActivityInventoryDialog";
 import { sortActivities } from "../activities/activity-helpers";
 import { ActivityRadioCard } from "./ActivityRadioCard";
+import { ContextCardShell } from "./ContextCardShell";
 import { EmptySnapshotWarning } from "./EmptySnapshotWarning";
 import { SelectedActivityDisplay } from "./SelectedActivityDisplay";
+import { SnapshotErrorState } from "./SnapshotErrorState";
 import { SwitchActivityDialog } from "./SwitchActivityDialog";
+
+const LAST_ACTIVITY_STORAGE_KEY = "logi8173_last_activity_id";
 
 export const ActivityContextCard = ({
   selectedActivityId,
@@ -58,6 +59,34 @@ export const ActivityContextCard = ({
       ),
     [activeActivities, selectedActivityId],
   );
+
+  useEffect(() => {
+    if (!selectedActivityId) return;
+    localStorage.setItem(LAST_ACTIVITY_STORAGE_KEY, selectedActivityId);
+  }, [selectedActivityId]);
+
+  useEffect(() => {
+    if (selectedActivityId !== undefined) return;
+    if (activeActivities.length === 0) return;
+    if (isSubmitting || isFormDirty || pendingActivityId !== undefined) return;
+
+    const lastActivityId = localStorage.getItem(LAST_ACTIVITY_STORAGE_KEY);
+    if (!lastActivityId) return;
+
+    const rememberedActivity = activeActivities.find(
+      (activity) => activity.activityId === lastActivityId,
+    );
+    if (!rememberedActivity) return;
+
+    onSelect(rememberedActivity.activityId);
+  }, [
+    activeActivities,
+    isFormDirty,
+    isSubmitting,
+    onSelect,
+    pendingActivityId,
+    selectedActivityId,
+  ]);
 
   const handleGoToActivities = () => {
     navigate("/activities");
@@ -208,6 +237,9 @@ export const ActivityContextCard = ({
         <Heading size="sm" fontWeight="600" mb="3">
           {t("issuance.selectActivity")}
         </Heading>
+        <Text textStyle="xs" color="fg.muted" mb="3">
+          {t("issuance.selectActivityHelper")}
+        </Text>
         <Stack gap="2">
           {activeActivities.map((activity) => (
             <ActivityRadioCard
@@ -235,51 +267,6 @@ export const ActivityContextCard = ({
     </>
   );
 };
-
-const ContextCardShell = ({ children }: { children: React.ReactNode }) => (
-  <Box
-    bg="bg.card"
-    borderWidth="1px"
-    borderColor="border"
-    borderRadius="2xl"
-    p={{ base: "4", md: "5" }}
-    css={animations.fadeInUp}
-  >
-    {children}
-  </Box>
-);
-
-const SnapshotErrorState = ({
-  onRetry,
-  onChooseAnother,
-}: {
-  onRetry: () => void;
-  onChooseAnother: () => void;
-}) => (
-  <Box
-    mt="3"
-    p="4"
-    bg="red.50"
-    borderWidth="1px"
-    borderColor="red.200"
-    borderRadius="xl"
-  >
-    <Flex align="center" gap="3" mb="3">
-      <AlertTriangle size={20} color="var(--chakra-colors-red-500)" />
-      <Text textStyle="sm" fontWeight="600" color="red.700">
-        {t("issuance.snapshotLoadError")}
-      </Text>
-    </Flex>
-    <Flex gap="2">
-      <Button variant="outline" size="sm" onClick={onRetry}>
-        {t("common.retry")}
-      </Button>
-      <Button variant="ghost" size="sm" onClick={onChooseAnother}>
-        {t("issuance.chooseAnother")}
-      </Button>
-    </Flex>
-  </Box>
-);
 
 type Props = {
   selectedActivityId: string | undefined;

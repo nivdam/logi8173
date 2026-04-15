@@ -1,11 +1,15 @@
-import { Box, Button, Flex, Text, Textarea } from "@chakra-ui/react"
-import { ClipboardPaste } from "lucide-react"
-import { useState } from "react"
+import { Box, Button, Flex, Input, Text, Textarea } from "@chakra-ui/react"
+import { ClipboardPaste, FileInput, Link as LinkIcon, Upload } from "lucide-react"
+import { useMemo, useRef, useState } from "react"
 import { t } from "../../../lib/i18n"
 import type { ImportEntity } from "./import-types"
 
-export const ImportPasteStep = ({ entity, onParse }: ImportPasteStepProps) => {
+export const ImportPasteStep = ({ entity, onParse, onImportFromUrl }: ImportPasteStepProps) => {
   const [rawText, setRawText] = useState("")
+  const [sourceUrl, setSourceUrl] = useState("")
+  const [isDraggingFile, setIsDraggingFile] = useState(false)
+  const [isLoadingUrl, setIsLoadingUrl] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement | null>(null)
 
   const handleTextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setRawText(event.target.value)
@@ -25,12 +29,118 @@ export const ImportPasteStep = ({ entity, onParse }: ImportPasteStepProps) => {
     }
   }
 
+  const handleLoadFromUrl = async () => {
+    if (!sourceUrl.trim()) return
+
+    setIsLoadingUrl(true)
+
+    try {
+      const importedText = await onImportFromUrl(sourceUrl.trim())
+      setRawText(importedText)
+    } finally {
+      setIsLoadingUrl(false)
+    }
+  }
+
+  const handleFileSelection = async (file: File | null) => {
+    if (!file) return
+    const fileText = await file.text()
+    setRawText(fileText)
+    onParse(fileText)
+  }
+
+  const handleFileInputChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    await handleFileSelection(event.target.files?.[0] ?? null)
+    event.target.value = ""
+  }
+
+  const handleDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault()
+    setIsDraggingFile(false)
+    await handleFileSelection(event.dataTransfer.files?.[0] ?? null)
+  }
+
+  const parsedRowCount = useMemo(() => {
+    if (!rawText.trim()) return ""
+    return `${Math.max(0, rawText.trim().split(/\r?\n/).length - 1)} ${t("settings.import.rowsParsed")}`
+  }, [rawText])
+
   const hintKey = entity === "inventory"
     ? "settings.import.pasteInventoryHint"
     : "settings.import.pasteSoldiersHint"
 
   return (
     <Flex direction="column" gap="4">
+      <Box>
+        <Text textStyle="sm" color="fg.muted" mb="2">
+          {t("settings.import.googleSheetHint")}
+        </Text>
+        <Flex gap="2" direction={{ base: "column", md: "row" }}>
+          <Input
+            value={sourceUrl}
+            onChange={(event) => setSourceUrl(event.target.value)}
+            placeholder={t("settings.import.googleSheetPlaceholder")}
+            aria-label={t("settings.import.googleSheetPlaceholder")}
+          />
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!sourceUrl.trim() || isLoadingUrl}
+            loading={isLoadingUrl}
+            onClick={handleLoadFromUrl}
+          >
+            <LinkIcon size={16} />
+            {t("settings.import.importFromUrl")}
+          </Button>
+        </Flex>
+      </Box>
+
+      <Box>
+        <Text textStyle="sm" color="fg.muted" mb="2">
+          {t("settings.import.fileHint")}
+        </Text>
+        <Box
+          borderWidth="1px"
+          borderStyle="dashed"
+          borderColor={isDraggingFile ? "sage.500" : "border"}
+          borderRadius="xl"
+          p="4"
+          bg={isDraggingFile ? "sage.50" : "bg.subtle"}
+          transition="all 0.2s"
+          onDragEnter={(event) => {
+            event.preventDefault()
+            setIsDraggingFile(true)
+          }}
+          onDragOver={(event) => {
+            event.preventDefault()
+            setIsDraggingFile(true)
+          }}
+          onDragLeave={(event) => {
+            event.preventDefault()
+            setIsDraggingFile(false)
+          }}
+          onDrop={handleDrop}
+        >
+          <Flex direction={{ base: "column", md: "row" }} align={{ base: "flex-start", md: "center" }} justify="space-between" gap="3">
+            <Flex align="center" gap="2">
+              <Upload size={16} />
+              <Text textStyle="sm">{t("settings.import.fileTitle")}</Text>
+            </Flex>
+            <Button size="sm" variant="outline" onClick={() => fileInputRef.current?.click()}>
+              <FileInput size={16} />
+              {t("settings.import.chooseFile")}
+            </Button>
+          </Flex>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".csv,.tsv,.txt"
+            hidden
+            onChange={handleFileInputChange}
+          />
+        </Box>
+      </Box>
+
       <Box>
         <Text textStyle="sm" color="fg.muted" mb="2">
           {t(hintKey)}
@@ -50,7 +160,7 @@ export const ImportPasteStep = ({ entity, onParse }: ImportPasteStepProps) => {
 
       <Flex justify="space-between" align="center">
         <Text textStyle="xs" color="fg.muted">
-          {rawText.trim() ? `${Math.max(0, rawText.trim().split(/\r?\n/).length - 1)} ${t("settings.import.rowsParsed")}` : ""}
+          {parsedRowCount}
         </Text>
         <Button
           size="sm"
@@ -71,4 +181,5 @@ export const ImportPasteStep = ({ entity, onParse }: ImportPasteStepProps) => {
 type ImportPasteStepProps = {
   entity: ImportEntity
   onParse: (text: string) => void
+  onImportFromUrl: (url: string) => Promise<string>
 }
