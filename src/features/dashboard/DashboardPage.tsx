@@ -6,6 +6,7 @@ import {
 import { useNavigate } from "react-router-dom"
 import { PageHeader } from "../../components/PageHeader"
 import { ApiErrorState } from "../../components/ApiErrorState"
+import { DamageBreakdownWidget } from "./DamageBreakdownWidget"
 import { t } from "../../lib/i18n"
 import { useDashboard, useActivities } from "../../api"
 import {
@@ -309,6 +310,9 @@ export const DashboardPage = () => {
         </Box>
       </Flex>
     </Grid>
+
+    {/* Damage breakdown */}
+    <DamageBreakdownWidget damageBreakdown={dashboard.damageBreakdown ?? []} animationDelay={0.55} />
   </Flex>
   )
 }

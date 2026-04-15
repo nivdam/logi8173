@@ -105,7 +105,7 @@ export const AppLayout = () => {
           flex="1"
           p={{ base: "4", md: "8" }}
           pb={{ base: "24", md: "8" }}
-          maxW="1200px"
+          w="100%"
           overflowY="auto"
         >
           <Outlet />

@@ -5,6 +5,17 @@ export type CompanyBreakdown = {
   issuedCount: number;
 };
 
+export type DamagedItemDetail = {
+  itemName: string;
+  qty: number;
+};
+
+export type CompanyDamageBreakdown = {
+  companyName: string;
+  totalDamagedQty: number;
+  items: DamagedItemDetail[];
+};
+
 export type DashboardSummary = {
   totalItems: number;
   lowStockCount: number;
@@ -12,4 +23,5 @@ export type DashboardSummary = {
   activeActivities: number;
   recentTransactions: Transaction[];
   companyBreakdown: CompanyBreakdown[];
+  damageBreakdown?: CompanyDamageBreakdown[];
 };
