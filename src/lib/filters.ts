@@ -47,7 +47,7 @@ export const filterSoldiers = (
   return soldiers.filter((soldier) => {
     if (company && soldier.company !== company) return false
     if (platoon && soldier.platoon !== platoon) return false
-    if (lowerQuery && !soldier.fullName.toLowerCase().includes(lowerQuery) && !soldier.personalId.includes(lowerQuery)) return false
+    if (lowerQuery && !soldier.fullName.toLowerCase().includes(lowerQuery) && !String(soldier.personalId).includes(lowerQuery)) return false
     return true
   })
 }

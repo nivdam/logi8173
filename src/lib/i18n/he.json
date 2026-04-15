@@ -48,7 +48,12 @@
     "viewInventory": "צפה במלאי",
     "viewLowStock": "צפה במלאי נמוך",
     "viewGaps": "צפה בחוסרים",
-    "viewActivities": "צפה בפעילויות"
+    "viewActivities": "צפה בפעילויות",
+    "damageBreakdown": "בלאי לפי פלוגה",
+    "damageBreakdownDescription": "ציוד פגום שממתין להחלפה או רענון",
+    "damagedItems": "פריטים פגומים",
+    "totalDamaged": "סה\"כ בלאי",
+    "noDamage": "אין בלאי ממתין"
   },
   "inventory": {
     "title": "מלאי",
