@@ -35,13 +35,9 @@ export const ImportReviewStep = <T extends InventoryUpsertData | SoldierUpsertDa
     setIsImporting(true)
     onImportStart()
 
-    const handleRowUpdate = (index: number, status: "importing" | "imported" | "failed", error?: string) => {
-      onRowUpdate(index, status, error)
-    }
-
     const importResult = entity === "inventory"
-      ? await runInventoryImport(rows as ImportRow<InventoryUpsertData>[], handleRowUpdate, shouldCancel)
-      : await runSoldiersImport(rows as ImportRow<SoldierUpsertData>[], handleRowUpdate, shouldCancel)
+      ? await runInventoryImport(rows as ImportRow<InventoryUpsertData>[], onRowUpdate, shouldCancel)
+      : await runSoldiersImport(rows as ImportRow<SoldierUpsertData>[], onRowUpdate, shouldCancel)
 
     setResult(importResult)
     setIsImporting(false)

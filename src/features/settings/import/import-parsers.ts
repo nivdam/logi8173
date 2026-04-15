@@ -6,7 +6,7 @@ import type { ImportRow, ColumnMapping } from "./import-types"
 
 const VALID_CATEGORIES = new Set<string>(["רספאי", "קבלר_קרביות", "ציוד_אישי", "אנרגיה", "תקשורת", "כללי"])
 
-const INVENTORY_HEADER_ALIASES: Record<string, string[]> = {
+export const INVENTORY_HEADER_ALIASES: Record<string, string[]> = {
   name: ["שם", "שם פריט", "פריט", "name"],
   itemNumber: ["מק\"ט", "מקט", "מסט\"ב", "item_number", "itemNumber"],
   category: ["קטגוריה", "סוג", "category"],
@@ -16,7 +16,7 @@ const INVENTORY_HEADER_ALIASES: Record<string, string[]> = {
   notes: ["הערות", "notes"],
 }
 
-const SOLDIER_HEADER_ALIASES: Record<string, string[]> = {
+export const SOLDIER_HEADER_ALIASES: Record<string, string[]> = {
   personalId: ["מספר אישי", "מ.א", "מ.א.", "מא", "personal_id", "personalId"],
   fullName: ["שם מלא", "שם", "name", "fullName"],
   rank: ["דרגה", "rank"],
@@ -85,13 +85,15 @@ export const validateInventoryRows = (
       errors.push(`קטגוריה לא חוקית: "${category}"`)
     }
 
-    const initialQty = initialQtyRaw ? Number(initialQtyRaw) : undefined
-    if (initialQtyRaw && (isNaN(initialQty!) || initialQty! < 0)) {
+    const parsedInitialQty = Number(initialQtyRaw)
+    const initialQty = initialQtyRaw ? parsedInitialQty : undefined
+    if (initialQtyRaw && (isNaN(parsedInitialQty) || parsedInitialQty < 0)) {
       errors.push("כמות לא חוקית")
     }
 
-    const minThreshold = minThresholdRaw ? Number(minThresholdRaw) : undefined
-    if (minThresholdRaw && (isNaN(minThreshold!) || minThreshold! < 0)) {
+    const parsedMinThreshold = Number(minThresholdRaw)
+    const minThreshold = minThresholdRaw ? parsedMinThreshold : undefined
+    if (minThresholdRaw && (isNaN(parsedMinThreshold) || parsedMinThreshold < 0)) {
       errors.push("סף מינימום לא חוקי")
     }
 
@@ -213,7 +215,6 @@ const FIELD_LABELS: Record<string, string> = {
 export const getMissingColumns = (mapping: ColumnMapping, required: string[]): string[] =>
   required.filter((field) => mapping[field] === undefined).map((field) => FIELD_LABELS[field] ?? field)
 
-export { INVENTORY_HEADER_ALIASES, SOLDIER_HEADER_ALIASES }
 
 type InventoryUpsertData = {
   name: string
