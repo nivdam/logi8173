@@ -441,7 +441,16 @@
     "successTitle": "ההחזרה הושלמה",
     "successDescription": "הציוד נקלט ונרשם בהצלחה.",
     "returnedFrom": "הוחזר מ",
-    "newReturn": "החזרה נוספת"
+    "newReturn": "החזרה נוספת",
+    "issuedItemsTitle": "ציוד שהונפק לחייל",
+    "issuedItemsDescription": "סמן את הפריטים שהחייל מחזיר",
+    "noIssuedItems": "לא נמצא ציוד שהונפק לחייל בפעילות זו",
+    "loadingIssuedItems": "טוען ציוד שהונפק...",
+    "issuedQty": "הונפק",
+    "returnedQty": "הוחזר",
+    "remainingQty": "נותר",
+    "selectAll": "בחר הכל",
+    "deselectAll": "נקה בחירה"
   },
   "notFound": {
     "title": "אופס, הלכת לאיבוד",

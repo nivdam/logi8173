@@ -441,7 +441,16 @@
     "successTitle": "Return completed",
     "successDescription": "The equipment was returned and recorded successfully.",
     "returnedFrom": "Returned from",
-    "newReturn": "New Return"
+    "newReturn": "New Return",
+    "issuedItemsTitle": "Equipment issued to soldier",
+    "issuedItemsDescription": "Select the items the soldier is returning",
+    "noIssuedItems": "No equipment was issued to this soldier in this activity",
+    "loadingIssuedItems": "Loading issued equipment...",
+    "issuedQty": "Issued",
+    "returnedQty": "Returned",
+    "remainingQty": "Remaining",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all"
   },
   "notFound": {
     "title": "Oops, you got lost",

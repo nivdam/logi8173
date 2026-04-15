@@ -1,135 +1,20 @@
-import { useReducer, useCallback } from "react"
+import { useMemo, useReducer } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useAuth } from "../../../lib/use-auth"
-import { useCreateTransaction } from "../../../api"
-import { toaster } from "../../../lib/toaster"
+import { useCreateTransaction, useTransactions } from "../../../api"
+import { showApiErrorToast } from "../../../lib/api-error"
 import { t } from "../../../lib/i18n"
 import {
-  createEmptyLine,
-  duplicateLine,
   getFilledLines,
   hasLineErrors,
   mapLinesToTransactionItems,
 } from "../../issuance/issuance.utils"
-import type { Soldier } from "../../../types"
+import { computeSoldierIssuedItems } from "../return.utils"
+import { createInitialState, returnFormReducer } from "./returnFormReducer"
 import type { InventoryItem } from "../../../types/inventory"
+import type { Soldier } from "../../../types"
 import type { IssuanceLineItem } from "../../issuance/issuance.types"
-
-const createInitialState = (): ReturnFormState => ({
-  activityId: undefined,
-  formId: undefined,
-  giver: undefined,
-  performedAt: new Date().toISOString(),
-  lines: [createEmptyLine()],
-  expandedLineIds: [],
-  globalNotes: "",
-  giverSignature: "",
-  receiverSignature: "",
-  showSuccess: false,
-})
-
-const appendLine = (state: ReturnFormState, line: IssuanceLineItem): ReturnFormState => ({
-  ...state,
-  lines: [...state.lines, line],
-  expandedLineIds: [...state.expandedLineIds, line.lineId],
-})
-
-const reducer = (state: ReturnFormState, action: ReturnFormAction): ReturnFormState => {
-  switch (action.type) {
-    case "SET_ACTIVITY":
-      return {
-        ...state,
-        activityId: action.payload,
-        giver: undefined,
-        lines: [createEmptyLine()],
-        expandedLineIds: [],
-        globalNotes: "",
-        giverSignature: "",
-        receiverSignature: "",
-      }
-
-    case "SET_GIVER":
-      return { ...state, giver: action.payload }
-
-    case "ADD_EMPTY_LINE":
-      return appendLine(state, createEmptyLine())
-
-    case "UPDATE_LINE_FIELD":
-      return {
-        ...state,
-        lines: state.lines.map((line) =>
-          line.lineId === action.payload.lineId
-            ? { ...line, [action.payload.field]: action.payload.value }
-            : line,
-        ),
-      }
-
-    case "BIND_LINE_TO_ITEM": {
-      const { lineId, item } = action.payload
-      return {
-        ...state,
-        lines: state.lines.map((line) =>
-          line.lineId === lineId
-            ? {
-                ...line,
-                itemId: item.itemId,
-                name: item.name,
-                catalogNumber: item.itemNumber,
-                unitOfMeasure: item.unitOfMeasure,
-                availableQty: item.currentQty,
-                maxQty: item.currentQty,
-                isCustom: false,
-              }
-            : line,
-        ),
-      }
-    }
-
-    case "DUPLICATE_LINE": {
-      const sourceIndex = state.lines.findIndex((line) => line.lineId === action.payload)
-      if (sourceIndex === -1) return state
-      const source = state.lines[sourceIndex]
-      const duplicated = duplicateLine(source)
-      const before = state.lines.slice(0, sourceIndex + 1)
-      const after = state.lines.slice(sourceIndex + 1)
-      return {
-        ...state,
-        lines: [...before, duplicated, ...after],
-        expandedLineIds: [...state.expandedLineIds, duplicated.lineId],
-      }
-    }
-
-    case "REMOVE_LINE": {
-      const remaining = state.lines.filter((line) => line.lineId !== action.payload)
-      return {
-        ...state,
-        lines: remaining.length === 0 ? [createEmptyLine()] : remaining,
-        expandedLineIds: state.expandedLineIds.filter((id) => id !== action.payload),
-      }
-    }
-
-    case "SET_EXPANDED_LINE_IDS":
-      return { ...state, expandedLineIds: action.payload }
-
-    case "SET_PERFORMED_AT":
-      return { ...state, performedAt: action.payload }
-
-    case "SET_GLOBAL_NOTES":
-      return { ...state, globalNotes: action.payload }
-
-    case "SET_GIVER_SIGNATURE":
-      return { ...state, giverSignature: action.payload }
-
-    case "SET_RECEIVER_SIGNATURE":
-      return { ...state, receiverSignature: action.payload }
-
-    case "SHOW_SUCCESS":
-      return { ...state, showSuccess: true, formId: action.payload }
-
-    case "RESET":
-      return createInitialState()
-  }
-}
+import type { SoldierIssuedItem } from "../return.types"
 
 export const useReturnForm = () => {
   const { operator, operatorProfile } = useAuth()
@@ -137,7 +22,7 @@ export const useReturnForm = () => {
   const [, setSearchParams] = useSearchParams()
   const createTransaction = useCreateTransaction()
 
-  const [state, dispatch] = useReducer(reducer, undefined, createInitialState)
+  const [state, dispatch] = useReducer(returnFormReducer, undefined, createInitialState)
 
   const savedSignature = operatorProfile?.savedSignature || operator?.savedSignatureUrl
   const hasReceiverSignature = state.receiverSignature !== "" || !!savedSignature
@@ -160,12 +45,39 @@ export const useReturnForm = () => {
 
   const totalItemCount = filledLines.reduce((sum, line) => sum + line.qty, 0)
 
+  const transactionsQuery = useTransactions(state.activityId ?? "")
+  const transactions = transactionsQuery.data ?? []
+
+  const soldierPersonalId = state.giver?.personalId
+  const soldierIssuedItems = useMemo(
+    () => soldierPersonalId ? computeSoldierIssuedItems(transactions, soldierPersonalId) : [],
+    [transactions, soldierPersonalId],
+  )
+
+  const isLoadingIssuedItems = state.giver !== undefined && transactionsQuery.isLoading
+
   const handleSelectGiver = (soldier: Soldier) => {
     dispatch({ type: "SET_GIVER", payload: soldier })
   }
 
   const handleClearGiver = () => {
     dispatch({ type: "SET_GIVER", payload: undefined })
+  }
+
+  const handleToggleIssuedItem = (item: SoldierIssuedItem) => {
+    const isCurrentlySelected = state.selectedIssuedItemIds.has(item.itemId)
+    dispatch({
+      type: "POPULATE_FROM_ISSUED",
+      payload: { item, selected: !isCurrentlySelected },
+    })
+  }
+
+  const handleSelectAllIssued = () => {
+    dispatch({ type: "POPULATE_ALL_ISSUED", payload: { items: soldierIssuedItems } })
+  }
+
+  const handleDeselectAllIssued = () => {
+    dispatch({ type: "CLEAR_ALL_ISSUED" })
   }
 
   const handleSetPerformedAt = (iso: string) => {
@@ -212,7 +124,7 @@ export const useReturnForm = () => {
     dispatch({ type: "SET_ACTIVITY", payload: activityId })
   }
 
-  const handleSubmit = useCallback(() => {
+  const handleSubmit = () => {
     if (createTransaction.isPending) return
     if (!state.activityId || !state.giver || !operator) return
 
@@ -240,26 +152,25 @@ export const useReturnForm = () => {
           setSearchParams({ id: result.txId }, { replace: true })
           dispatch({ type: "SHOW_SUCCESS", payload: result.txId })
         },
-        onError: () => {
-          toaster.create({
-            title: t("common.error"),
-            description: t("returns.submitError"),
-            type: "error",
-            duration: 5000,
+        onError: (error) => {
+          showApiErrorToast({
+            actionLabel: t("returns.submitReturn"),
+            error,
+            fallbackMessage: t("returns.submitError"),
           })
         },
       },
     )
-  }, [state.activityId, state.giver, state.performedAt, state.lines, state.globalNotes, state.giverSignature, state.receiverSignature, savedSignature, operator, operatorProfile, createTransaction, setSearchParams])
+  }
 
   const handleNewReturn = () => {
     setSearchParams({}, { replace: true })
     dispatch({ type: "RESET" })
   }
 
-  const handleBackToDashboard = useCallback(() => {
+  const handleBackToDashboard = () => {
     navigate("/")
-  }, [navigate])
+  }
 
   return {
     state,
@@ -267,6 +178,9 @@ export const useReturnForm = () => {
     isFormDirty,
     totalItemCount,
     isSubmitting: createTransaction.isPending,
+    savedSignature,
+    soldierIssuedItems,
+    isLoadingIssuedItems,
     handleSelectActivity,
     handleSelectGiver,
     handleClearGiver,
@@ -280,37 +194,11 @@ export const useReturnForm = () => {
     handleExpandedLineIdsChange,
     handleSetGiverSignature,
     handleSetReceiverSignature,
+    handleToggleIssuedItem,
+    handleSelectAllIssued,
+    handleDeselectAllIssued,
     handleSubmit,
     handleNewReturn,
     handleBackToDashboard,
   }
 }
-
-type ReturnFormState = {
-  activityId: string | undefined
-  formId: string | undefined
-  giver: Soldier | undefined
-  performedAt: string
-  lines: IssuanceLineItem[]
-  expandedLineIds: string[]
-  globalNotes: string
-  giverSignature: string
-  receiverSignature: string
-  showSuccess: boolean
-}
-
-type ReturnFormAction =
-  | { type: "SET_ACTIVITY"; payload: string }
-  | { type: "SET_GIVER"; payload: Soldier | undefined }
-  | { type: "SET_PERFORMED_AT"; payload: string }
-  | { type: "ADD_EMPTY_LINE" }
-  | { type: "UPDATE_LINE_FIELD"; payload: { lineId: string; field: keyof IssuanceLineItem; value: string | number | boolean } }
-  | { type: "BIND_LINE_TO_ITEM"; payload: { lineId: string; item: InventoryItem } }
-  | { type: "DUPLICATE_LINE"; payload: string }
-  | { type: "REMOVE_LINE"; payload: string }
-  | { type: "SET_EXPANDED_LINE_IDS"; payload: string[] }
-  | { type: "SET_GLOBAL_NOTES"; payload: string }
-  | { type: "SET_GIVER_SIGNATURE"; payload: string }
-  | { type: "SET_RECEIVER_SIGNATURE"; payload: string }
-  | { type: "SHOW_SUCCESS"; payload: string }
-  | { type: "RESET" }
