@@ -3,13 +3,12 @@ import { ArrowRight, Check, Download, Filter } from "lucide-react"
 import { useRef, useState } from "react"
 import { t } from "../../../lib/i18n"
 import { ImportPreviewTable } from "./ImportPreviewTable"
+import { runImport } from "./import-runner"
 import type { PreviewColumn } from "./ImportPreviewTable"
-import type { ImportRow, ImportResult, ImportEntity } from "./import-types"
-import type { InventoryUpsertData, SoldierUpsertData } from "./import-parsers"
-import { runInventoryImport, runSoldiersImport } from "./import-runner"
+import type { ImportRow, ImportResult } from "./import-types"
 
-export const ImportReviewStep = <T extends InventoryUpsertData | SoldierUpsertData>({
-  entity,
+export const ImportReviewStep = <T extends Record<string, unknown>>({
+  endpoint,
   rows,
   columns,
   onRowUpdate,
@@ -40,9 +39,7 @@ export const ImportReviewStep = <T extends InventoryUpsertData | SoldierUpsertDa
     setIsImporting(true)
     onImportStart()
 
-    const importResult = entity === "inventory"
-      ? await runInventoryImport(rows as ImportRow<InventoryUpsertData>[], onRowUpdate, shouldCancel)
-      : await runSoldiersImport(rows as ImportRow<SoldierUpsertData>[], onRowUpdate, shouldCancel)
+    const importResult = await runImport(endpoint, rows, onRowUpdate, shouldCancel)
 
     setResult(importResult)
     setIsImporting(false)
@@ -148,7 +145,7 @@ const ImportSummaryBadge = ({ count, label, color, bg }: { count: number; label:
 )
 
 type ImportReviewStepProps<T> = {
-  entity: ImportEntity
+  endpoint: string
   rows: ImportRow<T>[]
   columns: PreviewColumn<T>[]
   onRowUpdate: (index: number, status: "importing" | "imported" | "failed", error?: string) => void

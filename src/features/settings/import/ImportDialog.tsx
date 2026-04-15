@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from "react"
+import type { Dispatch, SetStateAction } from "react"
 import { Box, Dialog, Flex, Portal, Tabs, Text } from "@chakra-ui/react"
 import { FileSpreadsheet, Package, Users } from "lucide-react"
 import { useQueryClient } from "@tanstack/react-query"
@@ -112,33 +113,17 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
     setSoldierRows(validated)
   }
 
-  const handleInventoryRowUpdate = useCallback((index: number, status: "importing" | "imported" | "failed", error?: string) => {
-    setInventoryRows((previous) => {
-      if (!previous) return previous
-      return previous.map((row) => {
-        if (row.index !== index) return row
-        return {
-          ...row,
-          status,
-          errors: error ? [...row.errors, error] : row.errors,
-        }
-      })
-    })
-  }, [])
+  const handleInventoryRowUpdate = useCallback(
+    (index: number, status: "importing" | "imported" | "failed", error?: string) =>
+      updateRowStatus(setInventoryRows, index, status, error),
+    [],
+  )
 
-  const handleSoldierRowUpdate = useCallback((index: number, status: "importing" | "imported" | "failed", error?: string) => {
-    setSoldierRows((previous) => {
-      if (!previous) return previous
-      return previous.map((row) => {
-        if (row.index !== index) return row
-        return {
-          ...row,
-          status,
-          errors: error ? [...row.errors, error] : row.errors,
-        }
-      })
-    })
-  }, [])
+  const handleSoldierRowUpdate = useCallback(
+    (index: number, status: "importing" | "imported" | "failed", error?: string) =>
+      updateRowStatus(setSoldierRows, index, status, error),
+    [],
+  )
 
   const shouldCancel = useCallback(() => cancelledRef.current, [])
 
@@ -185,7 +170,7 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
                   )}
                   {isInventoryReview && (
                     <ImportReviewStep
-                      entity="inventory"
+                      endpoint="inventory.upsert"
                       rows={inventoryRows}
                       columns={INVENTORY_COLUMNS}
                       onRowUpdate={handleInventoryRowUpdate}
@@ -205,7 +190,7 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
                   )}
                   {isSoldierReview && (
                     <ImportReviewStep
-                      entity="soldiers"
+                      endpoint="soldiers.upsert"
                       rows={soldierRows}
                       columns={SOLDIER_COLUMNS}
                       onRowUpdate={handleSoldierRowUpdate}
@@ -225,6 +210,21 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
       </Portal>
     </Dialog.Root>
   )
+}
+
+const updateRowStatus = <T,>(
+  setter: Dispatch<SetStateAction<ImportRow<T>[] | null>>,
+  index: number,
+  status: "importing" | "imported" | "failed",
+  error?: string,
+) => {
+  setter((previous) => {
+    if (!previous) return previous
+    return previous.map((row) => {
+      if (row.index !== index) return row
+      return { ...row, status, errors: error ? [...row.errors, error] : row.errors }
+    })
+  })
 }
 
 const getRawCell = (row: ImportRow<unknown>, index: number): string => row.raw[index] ?? ""

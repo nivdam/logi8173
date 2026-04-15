@@ -7,6 +7,10 @@ import type { ImportEntity } from "./import-types"
 export const ImportPasteStep = ({ entity, onParse }: ImportPasteStepProps) => {
   const [rawText, setRawText] = useState("")
 
+  const handleTextChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setRawText(event.target.value)
+  }
+
   const handlePaste = (event: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const pastedText = event.clipboardData.getData("text/plain")
     if (pastedText.trim()) {
@@ -33,7 +37,7 @@ export const ImportPasteStep = ({ entity, onParse }: ImportPasteStepProps) => {
         </Text>
         <Textarea
           value={rawText}
-          onChange={(event) => setRawText(event.target.value)}
+          onChange={handleTextChange}
           onPaste={handlePaste}
           placeholder={t("settings.import.pasteHint")}
           aria-label={t("settings.import.pasteHint")}

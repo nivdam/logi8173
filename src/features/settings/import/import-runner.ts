@@ -1,18 +1,20 @@
 import { api } from "../../../lib/api"
 import type { ImportRow, ImportResult } from "./import-types"
-import type { InventoryUpsertData, SoldierUpsertData } from "./import-parsers"
 
 const THROTTLE_MS = 500
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
-const runEntityImport = async <T>(
+const hasImportableData = <T,>(row: ImportRow<T>): row is ImportRow<T> & { data: T } =>
+  row.data !== null && (row.status === "will_create" || row.status === "will_update")
+
+export const runImport = async <T extends Record<string, unknown>>(
   endpoint: string,
   rows: ImportRow<T>[],
   onRowUpdate: (index: number, status: "importing" | "imported" | "failed", error?: string) => void,
   shouldCancel: () => boolean,
 ): Promise<ImportResult> => {
-  const importableRows = rows.filter((row) => row.data !== null && (row.status === "will_create" || row.status === "will_update"))
+  const importableRows = rows.filter(hasImportableData)
   const result: ImportResult = { createdCount: 0, updatedCount: 0, failedCount: 0, errors: [] }
 
   for (const row of importableRows) {
@@ -22,7 +24,7 @@ const runEntityImport = async <T>(
     onRowUpdate(row.index, "importing")
 
     try {
-      await api.post(endpoint, row.data as Record<string, unknown>)
+      await api.post(endpoint, row.data)
       if (shouldCancel()) break
       onRowUpdate(row.index, "imported")
 
@@ -44,17 +46,3 @@ const runEntityImport = async <T>(
 
   return result
 }
-
-export const runInventoryImport = (
-  rows: ImportRow<InventoryUpsertData>[],
-  onRowUpdate: (index: number, status: "importing" | "imported" | "failed", error?: string) => void,
-  shouldCancel: () => boolean,
-): Promise<ImportResult> =>
-  runEntityImport("inventory.upsert", rows, onRowUpdate, shouldCancel)
-
-export const runSoldiersImport = (
-  rows: ImportRow<SoldierUpsertData>[],
-  onRowUpdate: (index: number, status: "importing" | "imported" | "failed", error?: string) => void,
-  shouldCancel: () => boolean,
-): Promise<ImportResult> =>
-  runEntityImport("soldiers.upsert", rows, onRowUpdate, shouldCancel)
