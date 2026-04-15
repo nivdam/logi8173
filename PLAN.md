@@ -15,7 +15,7 @@ Deliver a battalion-usable system where a small operator team can set up, import
 
 ### Infrastructure
 - React 19 + Vite + Chakra UI v3 frontend, hosted on Vercel
-- Google Apps Script backend with 17 endpoints
+- Google Apps Script backend with route-based action handlers
 - Vercel proxy (`api/gas.ts`) forwarding requests to Apps Script
 - SPA routing via `vercel.json` rewrites
 - Google OAuth 2.0 login with token refresh and session recovery
@@ -66,48 +66,61 @@ This gate fails if:
 - Cannot ingest realistic data volume for day 1
 - Critical writes to Sheets are unreliable
 
-### Milestone 1 — Settings for Admin Onboarding
+### Milestone 1 — Implemented, Needs Validation: Settings for Admin Onboarding
 
-Build basic but usable admin UI:
+Implemented scope:
 
 - Operators: list, add, edit role
 - Companies: list, add, edit
 - Use existing `/settings` route as entry point
-- Don't expand beyond what blocks go-live
+- Keep further expansion out of go-live scope
 
 Backend already exists: `operators.list`, `operators.upsert`, `companies.list`, `companies.upsert`.
 API hooks already exist: `useOperators()`, `useUpsertOperator()`, `useCompanies()`, `useUpsertCompany()`.
 
-### Milestone 2 — Inventory + Soldiers Import
+Validation still needed:
+
+- A newly added operator can log in successfully
+- Company changes behave correctly with real imported soldiers
+
+### Milestone 2 — Implemented, Needs Hardening: Inventory + Soldiers Import
 
 Import is a go-live requirement, not a post-rollout enhancement.
 
-Add import flow for:
+Current implementation:
 - `master-inventory`
 - `soldiers`
 
-Approach:
+Current approach:
 - Paste from Excel / Google Sheets into textarea
-- Parse TSV → preview rows → confirm → bulk create
+- Parse pasted tabular data → preview rows → confirm → per-row create/update
 - Validation per row with error summary
 - Write through existing backend endpoints
 - If per-row write proves too slow on real datasets, add bulk endpoint
 
-### Milestone 3 — Activity-Aware Issuance + Full Return Flow
+Validation and hardening still needed:
 
-Complete the operational workflow:
+- Confirm real unit datasets import at acceptable speed
+- Decide whether CSV support is required beyond TSV-style paste
+- Add bulk import path if current throughput is not acceptable
 
-- Remove hardcoded `activityId: "act1"` from issuance
+### Milestone 3 — Implemented, Needs Validation: Activity-Aware Issuance + Full Return Flow
+
+Implemented scope:
+
 - Add activity selector (active activities only) at top of form
 - Load inventory from selected activity's snapshot
 - Block issuance/return without activity context
+- Return flow derives issued items from transaction history and writes `txType: "return"`
 
-Return flow must be operationally complete:
-- Select activity → select soldier's issued equipment → mark returned
-- Update stock/transactions correctly
-- Audit trail
-- Clear UX for operators
-- Basic validation for expected failure modes
+Note:
+- The hardcoded `act1` issue is resolved in production flows. Remaining `act1` references are in mock data only.
+
+Validation still needed:
+
+- Real activity issue/return dry run with realistic data
+- Confirm stock, transaction ordering, and audit trail behavior in live Apps Script
+- Validate client-generated idempotency behavior under retry and network failure
 
 Assumption: no go-live without both issuance and return working end-to-end.
 

@@ -31,10 +31,11 @@ Flow:
 
 1. Browser sends `POST /api/gas?action=...` to Vercel.
 2. [`api/gas.ts`](/Users/nivdamianovich/BizoDam/Logi8173/_logi8173_/api/gas.ts) forwards the request to Apps Script.
-3. The Vercel proxy sends Apps Script a `GET` request with a serialized `payload` query param.
-4. Apps Script reads `action` + `payload`, verifies the Google ID token, and executes the controller.
+3. The Vercel proxy sends Apps Script a `POST` request with a JSON body.
+4. Apps Script reads the request body, verifies the Google ID token, and executes the controller.
+5. Apps Script also keeps a `payload` query-param fallback path for compatibility with redirect-based flows.
 
-This proxy shape is required because direct `POST` bodies are lost on the Apps Script redirect flow.
+The frontend contract is `POST /api/gas?action=...`. The backend parser currently supports both direct POST bodies and the older `payload` fallback.
 
 ## Core Data Model
 
@@ -131,7 +132,7 @@ pnpm install
 pnpm dev
 ```
 
-In local dev, Vite handles `POST /api/gas?action=...` and forwards it to `VITE_APP_PROXY_TARGET` using the same `GET + payload` shape as the Vercel proxy. This lets you work locally against the real Apps Script backend without pushing to Vercel.
+In local dev, Vite handles `POST /api/gas?action=...` and forwards it to `VITE_APP_PROXY_TARGET` using the same POST-based contract as the Vercel proxy. This lets you work locally against the real Apps Script backend without pushing to Vercel.
 
 ### Environment variable usage by mode
 
@@ -193,15 +194,19 @@ SPA route refreshes depend on [`vercel.json`](/Users/nivdamianovich/BizoDam/Logi
 - open activity with manually selected inventory subset
 - close activity and open activity Drive folder
 - issue form with signatures
+- activity-aware issuance with explicit activity selection and snapshot-backed stock
+- return flow with activity selection and issued-item reconstruction from transactions
+- settings UI for operators and companies
+- spreadsheet paste import for inventory and soldiers
 - Apps Script backend for inventory, operators, soldiers, companies, activities, transactions
 - Vercel proxy + SPA rewrites
 
 ### Still needed for handoff-ready rollout
 
-- return flow
-- require an explicit active activity context in issuance instead of the current hardcoded activity
-- minimal Settings UI for operator management
-- import + manual maintenance for master inventory
+- end-to-end go-live validation against real Sheets, Drive, and deployed Apps Script
+- import hardening for real unit datasets, especially speed and retry behavior
+- end-to-end validation of retry and duplicate-protection behavior
+- day-1 rollout checklist and rehearsal flow
 - cleanup/sync between repo and Apps Script live deployment
 
 ## Repo Notes

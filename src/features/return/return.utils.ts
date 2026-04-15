@@ -6,8 +6,11 @@ import type { SoldierIssuedItem } from "./return.types"
 
 const VALID_UNITS = new Set<string>(UNIT_OPTIONS.map((option) => option.value))
 
+const isValidUnitOfMeasure = (value: string): value is UnitOfMeasure =>
+  VALID_UNITS.has(value)
+
 const parseUnitOfMeasure = (value: string | undefined): UnitOfMeasure => {
-  if (value && VALID_UNITS.has(value)) return value as UnitOfMeasure
+  if (value && isValidUnitOfMeasure(value)) return value
   return DEFAULT_UNIT_OF_MEASURE
 }
 

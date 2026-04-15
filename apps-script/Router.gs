@@ -25,6 +25,9 @@ function getRoutes_() {
     'soldiers.list':      { handler: SoldiersController.list,    roles: null },
     'soldiers.upsert':    { handler: SoldiersController.upsert,  roles: ['admin', 'warehouse_operator'] },
 
+    // Imports
+    'imports.fetchSheetText': { handler: ImportController.fetchSheetText, roles: ['admin'] },
+
     // Companies
     'companies.list':     { handler: CompaniesController.list,   roles: null },
     'companies.upsert':   { handler: CompaniesController.upsert, roles: ['admin'] },

@@ -43,9 +43,10 @@ type CreateTransactionInput = {
 
 type CreateTransactionResult = {
   txId: string
-  txType: TransactionType
-  performedBy: string
-  performedAt: string
-  items: TransactionLineItem[]
-  signatureUrl: string
+  status?: "duplicate"
+  txType?: TransactionType
+  performedBy?: string
+  performedAt?: string
+  items?: TransactionLineItem[]
+  signatureUrl?: string
 }

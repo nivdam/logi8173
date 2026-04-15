@@ -32,7 +32,59 @@ export const SOLDIER_HEADER_ALIASES: Record<string, string[]> = {
 
 export const parseSpreadsheetText = (text: string): string[][] => {
   const lines = text.split(/\r?\n/).filter((line) => line.trim() !== "")
-  return lines.map((line) => line.split("\t").map((cell) => cell.trim()))
+  if (lines.length === 0) return []
+
+  const delimiter = detectDelimiter(lines[0])
+  return lines.map((line) => parseDelimitedLine(line, delimiter))
+}
+
+const detectDelimiter = (headerLine: string): string => {
+  const candidates = ["\t", ",", ";"]
+  const bestDelimiter = candidates.reduce(
+    (best, candidate) => {
+      const count = splitWithDelimiter(headerLine, candidate).length
+      return count > best.count ? { delimiter: candidate, count } : best
+    },
+    { delimiter: "\t", count: 0 },
+  )
+
+  return bestDelimiter.delimiter
+}
+
+const parseDelimitedLine = (line: string, delimiter: string): string[] =>
+  splitWithDelimiter(line, delimiter).map((cell) => cell.trim())
+
+const splitWithDelimiter = (line: string, delimiter: string): string[] => {
+  const cells: string[] = []
+  let current = ""
+  let insideQuotes = false
+
+  for (let index = 0; index < line.length; index += 1) {
+    const char = line[index]
+    const nextChar = line[index + 1]
+
+    if (char === "\"") {
+      if (insideQuotes && nextChar === "\"") {
+        current += "\""
+        index += 1
+        continue
+      }
+
+      insideQuotes = !insideQuotes
+      continue
+    }
+
+    if (!insideQuotes && char === delimiter) {
+      cells.push(current)
+      current = ""
+      continue
+    }
+
+    current += char
+  }
+
+  cells.push(current)
+  return cells
 }
 
 export const detectColumnMapping = (headerRow: string[], aliases: Record<string, string[]>): ColumnMapping => {

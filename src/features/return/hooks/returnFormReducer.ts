@@ -8,8 +8,11 @@ import type { InventoryItem } from "../../../types/inventory"
 import type { IssuanceLineItem } from "../../issuance/issuance.types"
 import type { SoldierIssuedItem } from "../return.types"
 
+const createClientTxId = () => crypto.randomUUID()
+
 export const createInitialState = (): ReturnFormState => ({
   activityId: undefined,
+  clientTxId: createClientTxId(),
   formId: undefined,
   giver: undefined,
   performedAt: new Date().toISOString(),
@@ -24,6 +27,7 @@ export const createInitialState = (): ReturnFormState => ({
 
 const appendLine = (state: ReturnFormState, line: IssuanceLineItem): ReturnFormState => ({
   ...state,
+  clientTxId: createClientTxId(),
   lines: [...state.lines, line],
   expandedLineIds: [...state.expandedLineIds, line.lineId],
 })
@@ -34,6 +38,7 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
       return {
         ...state,
         activityId: action.payload,
+        clientTxId: createClientTxId(),
         giver: undefined,
         lines: [],
         expandedLineIds: [],
@@ -47,6 +52,7 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
       return {
         ...state,
         giver: action.payload,
+        clientTxId: createClientTxId(),
         lines: [],
         expandedLineIds: [],
         selectedIssuedItemIds: new Set<string>(),
@@ -61,6 +67,7 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
         const newLine = createLineFromIssuedItem(item)
         return {
           ...state,
+          clientTxId: createClientTxId(),
           selectedIssuedItemIds: nextSelectedIds,
           lines: [...state.lines, newLine],
           expandedLineIds: [...state.expandedLineIds, newLine.lineId],
@@ -71,6 +78,7 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
       const remainingLines = state.lines.filter((line) => line.itemId !== item.itemId)
       return {
         ...state,
+        clientTxId: createClientTxId(),
         selectedIssuedItemIds: nextSelectedIds,
         lines: remainingLines,
         expandedLineIds: state.expandedLineIds.filter(
@@ -100,6 +108,7 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
 
       return {
         ...state,
+        clientTxId: createClientTxId(),
         selectedIssuedItemIds: nextSelectedIds,
         lines: [...issuedLines, ...manualLines],
         expandedLineIds: [...state.expandedLineIds, ...newExpandedIds],
@@ -112,6 +121,7 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
       )
       return {
         ...state,
+        clientTxId: createClientTxId(),
         selectedIssuedItemIds: new Set<string>(),
         lines: manualLines,
         expandedLineIds: state.expandedLineIds.filter(
@@ -126,6 +136,7 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
     case "UPDATE_LINE_FIELD":
       return {
         ...state,
+        clientTxId: createClientTxId(),
         lines: state.lines.map((line) =>
           line.lineId === action.payload.lineId
             ? { ...line, [action.payload.field]: action.payload.value }
@@ -137,6 +148,7 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
       const { lineId, item } = action.payload
       return {
         ...state,
+        clientTxId: createClientTxId(),
         lines: state.lines.map((line) =>
           line.lineId === lineId
             ? {
@@ -163,6 +175,7 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
       const after = state.lines.slice(sourceIndex + 1)
       return {
         ...state,
+        clientTxId: createClientTxId(),
         lines: [...before, duplicated, ...after],
         expandedLineIds: [...state.expandedLineIds, duplicated.lineId],
       }
@@ -177,6 +190,7 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
       }
       return {
         ...state,
+        clientTxId: createClientTxId(),
         lines: remaining,
         expandedLineIds: state.expandedLineIds.filter((id) => id !== action.payload),
         selectedIssuedItemIds: nextSelectedIds,
@@ -187,16 +201,16 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
       return { ...state, expandedLineIds: action.payload }
 
     case "SET_PERFORMED_AT":
-      return { ...state, performedAt: action.payload }
+      return { ...state, clientTxId: createClientTxId(), performedAt: action.payload }
 
     case "SET_GLOBAL_NOTES":
-      return { ...state, globalNotes: action.payload }
+      return { ...state, clientTxId: createClientTxId(), globalNotes: action.payload }
 
     case "SET_GIVER_SIGNATURE":
-      return { ...state, giverSignature: action.payload }
+      return { ...state, clientTxId: createClientTxId(), giverSignature: action.payload }
 
     case "SET_RECEIVER_SIGNATURE":
-      return { ...state, receiverSignature: action.payload }
+      return { ...state, clientTxId: createClientTxId(), receiverSignature: action.payload }
 
     case "SHOW_SUCCESS":
       return { ...state, showSuccess: true, formId: action.payload }
@@ -208,6 +222,7 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
 
 export type ReturnFormState = {
   activityId: string | undefined
+  clientTxId: string
   formId: string | undefined
   giver: Soldier | undefined
   performedAt: string

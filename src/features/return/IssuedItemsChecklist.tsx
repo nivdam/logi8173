@@ -10,6 +10,7 @@ export const IssuedItemsChecklist = ({
   onToggleItem,
   onSelectAll,
   onDeselectAll,
+  onAddManualItem,
 }: IssuedItemsChecklistProps) => {
   if (isLoading) {
     return (
@@ -22,13 +23,18 @@ export const IssuedItemsChecklist = ({
 
   if (issuedItems.length === 0) {
     return (
-      <Flex align="center" justify="center" py="6">
+      <Stack gap="3" py="4" align="start">
         <Text textStyle="sm" color="fg.muted">{t("returns.noIssuedItems")}</Text>
-      </Flex>
+        <Text textStyle="xs" color="fg.muted">{t("returns.noIssuedItemsManualHint")}</Text>
+        <Button size="sm" variant="outline" onClick={onAddManualItem}>
+          {t("returns.addManualItem")}
+        </Button>
+      </Stack>
     )
   }
 
   const allSelected = issuedItems.every((item) => selectedItemIds.has(item.itemId))
+  const selectedCount = issuedItems.filter((item) => selectedItemIds.has(item.itemId)).length
 
   return (
     <Box>
@@ -40,14 +46,24 @@ export const IssuedItemsChecklist = ({
           <Badge colorPalette="sage" size="sm">
             {issuedItems.length}
           </Badge>
+          {selectedCount > 0 && (
+            <Badge colorPalette="sky" size="sm">
+              {selectedCount} {t("returns.selectedItems")}
+            </Badge>
+          )}
         </Flex>
-        <Button
-          variant="ghost"
-          size="xs"
-          onClick={allSelected ? onDeselectAll : onSelectAll}
-        >
-          {allSelected ? t("returns.deselectAll") : t("returns.selectAll")}
-        </Button>
+        <Flex gap="2">
+          <Button
+            variant="ghost"
+            size="xs"
+            onClick={allSelected ? onDeselectAll : onSelectAll}
+          >
+            {allSelected ? t("returns.deselectAll") : t("returns.selectAll")}
+          </Button>
+          <Button size="xs" variant="outline" onClick={onAddManualItem}>
+            {t("returns.addManualItem")}
+          </Button>
+        </Flex>
       </Flex>
 
       <Stack gap="2">
@@ -74,4 +90,5 @@ type IssuedItemsChecklistProps = {
   onToggleItem: (item: SoldierIssuedItem) => void
   onSelectAll: () => void
   onDeselectAll: () => void
+  onAddManualItem: () => void
 }
