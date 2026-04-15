@@ -178,6 +178,7 @@ export const useReturnForm = () => {
     isFormDirty,
     totalItemCount,
     isSubmitting: createTransaction.isPending,
+    savedSignature,
     soldierIssuedItems,
     isLoadingIssuedItems,
     handleSelectActivity,

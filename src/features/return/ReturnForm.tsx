@@ -1,7 +1,6 @@
 import { useState } from "react"
 import { Accordion, Flex, Heading, Text } from "@chakra-ui/react"
 import { RotateCcw, PackageCheck, Package, FileSignature } from "lucide-react"
-import { useAuth } from "../../lib/use-auth"
 import { useActivity } from "../../api"
 import { t } from "../../lib/i18n"
 import { animations } from "../../theme/animations"
@@ -15,7 +14,6 @@ import { ReturnSuccess } from "./ReturnSuccess"
 import { IssuedItemsChecklist } from "./IssuedItemsChecklist"
 
 export const ReturnForm = () => {
-  const { operator, operatorProfile } = useAuth()
   const form = useReturnForm()
   const [activeSection, setActiveSection] = useState<string[]>(["giver", "issuedItems"])
 
@@ -136,7 +134,7 @@ export const ReturnForm = () => {
                 globalNotes={form.state.globalNotes}
                 giverSignature={form.state.giverSignature}
                 receiverSignature={form.state.receiverSignature}
-                savedSignatureUrl={operatorProfile?.savedSignature || operator?.savedSignatureUrl}
+                savedSignatureUrl={form.savedSignature}
                 isFormValid={form.isFormValid}
                 totalItemCount={form.totalItemCount}
                 isSubmitting={form.isSubmitting}
