@@ -22,7 +22,7 @@ const runEntityImport = async <T>(
     onRowUpdate(row.index, "importing")
 
     try {
-      await api.post(endpoint, row.data)
+      await api.post(endpoint, row.data as Record<string, unknown>)
       if (shouldCancel()) break
       onRowUpdate(row.index, "imported")
 

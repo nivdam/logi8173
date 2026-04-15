@@ -6,6 +6,9 @@ import type { ImportRow, ColumnMapping } from "./import-types"
 
 const VALID_CATEGORIES: Set<ItemCategory> = new Set(["רספאי", "קבלר_קרביות", "ציוד_אישי", "אנרגיה", "תקשורת", "כללי"])
 
+const isValidCategory = (value: string): value is ItemCategory =>
+  VALID_CATEGORIES.has(value as ItemCategory)
+
 export const INVENTORY_HEADER_ALIASES: Record<string, string[]> = {
   name: ["שם", "שם פריט", "פריט", "name"],
   itemNumber: ["מק\"ט", "מקט", "מסט\"ב", "item_number", "itemNumber"],
@@ -81,7 +84,7 @@ export const validateInventoryRows = (
     if (!name) errors.push("שם פריט חסר")
     if (!category) {
       errors.push("קטגוריה חסרה")
-    } else if (!VALID_CATEGORIES.has(category)) {
+    } else if (!isValidCategory(category)) {
       errors.push(`קטגוריה לא חוקית: "${category}"`)
     }
 
