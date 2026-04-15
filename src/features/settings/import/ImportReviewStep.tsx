@@ -29,6 +29,11 @@ export const ImportReviewStep = <T extends InventoryUpsertData | SoldierUpsertDa
   const importableCount = willCreateCount + willUpdateCount
   const isImportDisabled = importableCount === 0 || isImporting
 
+  const handleBack = () => {
+    importStartedRef.current = false
+    onBack()
+  }
+
   const handleImport = async () => {
     if (importStartedRef.current) return
     importStartedRef.current = true
@@ -110,7 +115,7 @@ export const ImportReviewStep = <T extends InventoryUpsertData | SoldierUpsertDa
         <Button
           variant="ghost"
           size="sm"
-          onClick={onBack}
+          onClick={handleBack}
           disabled={isImporting}
         >
           <ArrowRight size={16} />

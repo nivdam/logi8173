@@ -227,18 +227,20 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
   )
 }
 
+const getRawCell = (row: ImportRow<unknown>, index: number): string => row.raw[index] ?? ""
+
 const INVENTORY_COLUMNS: PreviewColumn<InventoryUpsertData>[] = [
-  { key: "name", label: "שם פריט", width: "36", getValue: (row) => row.data?.name ?? row.raw[0] ?? "" },
-  { key: "itemNumber", label: "מק\"ט", width: "20", getValue: (row) => row.data?.itemNumber ?? row.raw[1] ?? "" },
-  { key: "category", label: "קטגוריה", width: "24", getValue: (row) => row.data?.category ?? row.raw[2] ?? "" },
-  { key: "initialQty", label: "כמות", width: "16", getValue: (row) => row.data?.initialQty !== undefined ? String(row.data.initialQty) : row.raw[4] ?? "" },
+  { key: "name", label: "שם פריט", width: "36", getValue: (row) => row.data?.name ?? getRawCell(row, 0) },
+  { key: "itemNumber", label: "מק\"ט", width: "20", getValue: (row) => row.data?.itemNumber ?? getRawCell(row, 1) },
+  { key: "category", label: "קטגוריה", width: "24", getValue: (row) => row.data?.category ?? getRawCell(row, 2) },
+  { key: "initialQty", label: "כמות", width: "16", getValue: (row) => row.data?.initialQty !== undefined ? String(row.data.initialQty) : getRawCell(row, 4) },
 ]
 
 const SOLDIER_COLUMNS: PreviewColumn<SoldierUpsertData>[] = [
-  { key: "personalId", label: "מ.א.", width: "20", getValue: (row) => row.data?.personalId ?? row.raw[0] ?? "" },
-  { key: "fullName", label: "שם מלא", width: "32", getValue: (row) => row.data?.fullName ?? row.raw[1] ?? "" },
-  { key: "rank", label: "דרגה", width: "16", getValue: (row) => row.data?.rank ?? row.raw[2] ?? "" },
-  { key: "company", label: "פלוגה", width: "24", getValue: (row) => row.data?.company ?? row.raw[3] ?? "" },
+  { key: "personalId", label: "מ.א.", width: "20", getValue: (row) => row.data?.personalId ?? getRawCell(row, 0) },
+  { key: "fullName", label: "שם מלא", width: "32", getValue: (row) => row.data?.fullName ?? getRawCell(row, 1) },
+  { key: "rank", label: "דרגה", width: "16", getValue: (row) => row.data?.rank ?? getRawCell(row, 2) },
+  { key: "company", label: "פלוגה", width: "24", getValue: (row) => row.data?.company ?? getRawCell(row, 3) },
 ]
 
 type ImportDialogProps = {

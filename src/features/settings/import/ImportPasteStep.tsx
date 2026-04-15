@@ -46,7 +46,7 @@ export const ImportPasteStep = ({ entity, onParse }: ImportPasteStepProps) => {
 
       <Flex justify="space-between" align="center">
         <Text textStyle="xs" color="fg.muted">
-          {rawText.trim() ? `${rawText.trim().split(/\r?\n/).length} ${t("settings.import.rowsParsed")}` : ""}
+          {rawText.trim() ? `${Math.max(0, rawText.trim().split(/\r?\n/).length - 1)} ${t("settings.import.rowsParsed")}` : ""}
         </Text>
         <Button
           size="sm"
