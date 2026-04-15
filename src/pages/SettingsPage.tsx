@@ -3,6 +3,7 @@ import { useCompanies, useOperators } from "../api"
 import { PageHeader } from "../components/PageHeader"
 import { CompaniesSettingsSection } from "../features/settings/CompaniesSettingsSection"
 import { OperatorsSettingsSection } from "../features/settings/OperatorsSettingsSection"
+import { ImportSection } from "../features/settings/import/ImportSection"
 import { t } from "../lib/i18n"
 
 export const SettingsPage = () => {
@@ -35,6 +36,8 @@ export const SettingsPage = () => {
           onRetry={handleRetryCompanies}
         />
       </SimpleGrid>
+
+      <ImportSection />
     </VStack>
   )
 }
