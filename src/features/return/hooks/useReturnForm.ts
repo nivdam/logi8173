@@ -1,7 +1,7 @@
 import { useReducer, useCallback } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useAuth } from "../../../lib/use-auth"
-import { useCreateTransaction } from "../../../api"
+import { useCreateTransaction, useTransactions } from "../../../api"
 import { toaster } from "../../../lib/toaster"
 import { t } from "../../../lib/i18n"
 import {
@@ -11,17 +11,20 @@ import {
   hasLineErrors,
   mapLinesToTransactionItems,
 } from "../../issuance/issuance.utils"
+import { computeSoldierIssuedItems, createLineFromIssuedItem } from "../return.utils"
 import type { Soldier } from "../../../types"
 import type { InventoryItem } from "../../../types/inventory"
 import type { IssuanceLineItem } from "../../issuance/issuance.types"
+import type { SoldierIssuedItem } from "../return.types"
 
 const createInitialState = (): ReturnFormState => ({
   activityId: undefined,
   formId: undefined,
   giver: undefined,
   performedAt: new Date().toISOString(),
-  lines: [createEmptyLine()],
+  lines: [],
   expandedLineIds: [],
+  selectedIssuedItemIds: new Set<string>(),
   globalNotes: "",
   giverSignature: "",
   receiverSignature: "",
@@ -41,15 +44,83 @@ const reducer = (state: ReturnFormState, action: ReturnFormAction): ReturnFormSt
         ...state,
         activityId: action.payload,
         giver: undefined,
-        lines: [createEmptyLine()],
+        lines: [],
         expandedLineIds: [],
+        selectedIssuedItemIds: new Set<string>(),
         globalNotes: "",
         giverSignature: "",
         receiverSignature: "",
       }
 
     case "SET_GIVER":
-      return { ...state, giver: action.payload }
+      return {
+        ...state,
+        giver: action.payload,
+        lines: [],
+        expandedLineIds: [],
+        selectedIssuedItemIds: new Set<string>(),
+      }
+
+    case "POPULATE_FROM_ISSUED": {
+      const { item, selected } = action.payload
+      const nextSelectedIds = new Set(state.selectedIssuedItemIds)
+
+      if (selected) {
+        nextSelectedIds.add(item.itemId)
+        const newLine = createLineFromIssuedItem(item)
+        return {
+          ...state,
+          selectedIssuedItemIds: nextSelectedIds,
+          lines: [...state.lines, newLine],
+          expandedLineIds: [...state.expandedLineIds, newLine.lineId],
+        }
+      }
+
+      nextSelectedIds.delete(item.itemId)
+      const remainingLines = state.lines.filter((line) => line.itemId !== item.itemId)
+      return {
+        ...state,
+        selectedIssuedItemIds: nextSelectedIds,
+        lines: remainingLines,
+        expandedLineIds: state.expandedLineIds.filter(
+          (id) => remainingLines.some((line) => line.lineId === id),
+        ),
+      }
+    }
+
+    case "POPULATE_ALL_ISSUED": {
+      const { items } = action.payload
+      const nextSelectedIds = new Set<string>()
+      const newLines: IssuanceLineItem[] = []
+      const newExpandedIds: string[] = []
+
+      for (const item of items) {
+        nextSelectedIds.add(item.itemId)
+        const existingLine = state.lines.find((line) => line.itemId === item.itemId)
+        if (existingLine) {
+          newLines.push(existingLine)
+        } else {
+          const newLine = createLineFromIssuedItem(item)
+          newLines.push(newLine)
+          newExpandedIds.push(newLine.lineId)
+        }
+      }
+
+      return {
+        ...state,
+        selectedIssuedItemIds: nextSelectedIds,
+        lines: newLines,
+        expandedLineIds: [...state.expandedLineIds, ...newExpandedIds],
+      }
+    }
+
+    case "CLEAR_ALL_ISSUED":
+      return {
+        ...state,
+        selectedIssuedItemIds: new Set<string>(),
+        lines: [],
+        expandedLineIds: [],
+      }
 
     case "ADD_EMPTY_LINE":
       return appendLine(state, createEmptyLine())
@@ -100,11 +171,17 @@ const reducer = (state: ReturnFormState, action: ReturnFormAction): ReturnFormSt
     }
 
     case "REMOVE_LINE": {
+      const removedLine = state.lines.find((line) => line.lineId === action.payload)
       const remaining = state.lines.filter((line) => line.lineId !== action.payload)
+      const nextSelectedIds = new Set(state.selectedIssuedItemIds)
+      if (removedLine && nextSelectedIds.has(removedLine.itemId)) {
+        nextSelectedIds.delete(removedLine.itemId)
+      }
       return {
         ...state,
-        lines: remaining.length === 0 ? [createEmptyLine()] : remaining,
+        lines: remaining,
         expandedLineIds: state.expandedLineIds.filter((id) => id !== action.payload),
+        selectedIssuedItemIds: nextSelectedIds,
       }
     }
 
@@ -160,12 +237,37 @@ export const useReturnForm = () => {
 
   const totalItemCount = filledLines.reduce((sum, line) => sum + line.qty, 0)
 
+  const transactionsQuery = useTransactions(state.activityId ?? "")
+  const transactions = transactionsQuery.data ?? []
+
+  const soldierIssuedItems = state.giver
+    ? computeSoldierIssuedItems(transactions, state.giver.personalId)
+    : []
+
+  const isLoadingIssuedItems = state.giver !== undefined && transactionsQuery.isLoading
+
   const handleSelectGiver = (soldier: Soldier) => {
     dispatch({ type: "SET_GIVER", payload: soldier })
   }
 
   const handleClearGiver = () => {
     dispatch({ type: "SET_GIVER", payload: undefined })
+  }
+
+  const handleToggleIssuedItem = (item: SoldierIssuedItem) => {
+    const isCurrentlySelected = state.selectedIssuedItemIds.has(item.itemId)
+    dispatch({
+      type: "POPULATE_FROM_ISSUED",
+      payload: { item, selected: !isCurrentlySelected },
+    })
+  }
+
+  const handleSelectAllIssued = () => {
+    dispatch({ type: "POPULATE_ALL_ISSUED", payload: { items: soldierIssuedItems } })
+  }
+
+  const handleDeselectAllIssued = () => {
+    dispatch({ type: "CLEAR_ALL_ISSUED" })
   }
 
   const handleSetPerformedAt = (iso: string) => {
@@ -267,6 +369,8 @@ export const useReturnForm = () => {
     isFormDirty,
     totalItemCount,
     isSubmitting: createTransaction.isPending,
+    soldierIssuedItems,
+    isLoadingIssuedItems,
     handleSelectActivity,
     handleSelectGiver,
     handleClearGiver,
@@ -280,6 +384,9 @@ export const useReturnForm = () => {
     handleExpandedLineIdsChange,
     handleSetGiverSignature,
     handleSetReceiverSignature,
+    handleToggleIssuedItem,
+    handleSelectAllIssued,
+    handleDeselectAllIssued,
     handleSubmit,
     handleNewReturn,
     handleBackToDashboard,
@@ -293,6 +400,7 @@ type ReturnFormState = {
   performedAt: string
   lines: IssuanceLineItem[]
   expandedLineIds: string[]
+  selectedIssuedItemIds: Set<string>
   globalNotes: string
   giverSignature: string
   receiverSignature: string
@@ -312,5 +420,8 @@ type ReturnFormAction =
   | { type: "SET_GLOBAL_NOTES"; payload: string }
   | { type: "SET_GIVER_SIGNATURE"; payload: string }
   | { type: "SET_RECEIVER_SIGNATURE"; payload: string }
+  | { type: "POPULATE_FROM_ISSUED"; payload: { item: SoldierIssuedItem; selected: boolean } }
+  | { type: "POPULATE_ALL_ISSUED"; payload: { items: SoldierIssuedItem[] } }
+  | { type: "CLEAR_ALL_ISSUED" }
   | { type: "SHOW_SUCCESS"; payload: string }
   | { type: "RESET" }

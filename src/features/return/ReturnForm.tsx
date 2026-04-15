@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Accordion, Flex, Heading, Text } from "@chakra-ui/react"
-import { RotateCcw, Package, FileSignature } from "lucide-react"
+import { RotateCcw, PackageCheck, Package, FileSignature } from "lucide-react"
 import { useAuth } from "../../lib/use-auth"
 import { useActivity } from "../../api"
 import { t } from "../../lib/i18n"
@@ -12,11 +12,12 @@ import { useReturnForm } from "./hooks/useReturnForm"
 import { ReturnHeader } from "./ReturnHeader"
 import { ReturnFooter } from "./ReturnFooter"
 import { ReturnSuccess } from "./ReturnSuccess"
+import { IssuedItemsChecklist } from "./IssuedItemsChecklist"
 
 export const ReturnForm = () => {
   const { operator, operatorProfile } = useAuth()
   const form = useReturnForm()
-  const [activeSection, setActiveSection] = useState<string[]>(["giver"])
+  const [activeSection, setActiveSection] = useState<string[]>(["giver", "issuedItems"])
 
   const { data: activityData, isLoading: isLoadingSnapshot, isError: isSnapshotError } = useActivity(form.state.activityId)
   const snapshotItems = activityData?.snapshotItems ?? []
@@ -90,6 +91,23 @@ export const ReturnForm = () => {
                 onSetPerformedAt={form.handleSetPerformedAt}
               />
             </IssuanceAccordionSection>
+
+            {form.state.giver && (
+              <IssuanceAccordionSection
+                value="issuedItems"
+                icon={PackageCheck}
+                label={t("returns.issuedItemsTitle")}
+              >
+                <IssuedItemsChecklist
+                  issuedItems={form.soldierIssuedItems}
+                  selectedItemIds={form.state.selectedIssuedItemIds}
+                  isLoading={form.isLoadingIssuedItems}
+                  onToggleItem={form.handleToggleIssuedItem}
+                  onSelectAll={form.handleSelectAllIssued}
+                  onDeselectAll={form.handleDeselectAllIssued}
+                />
+              </IssuanceAccordionSection>
+            )}
 
             <IssuanceAccordionSection
               value="items"
