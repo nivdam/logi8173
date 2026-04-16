@@ -3,6 +3,7 @@ import type { Transaction } from "../types"
 export const transactionsMock: Transaction[] = [
   {
     txId: "tx1",
+    formNumber: "1008-0001",
     txType: "issue",
     giverName: "ערן שפירא",
     giverPersonalId: "8004001",
@@ -19,6 +20,7 @@ export const transactionsMock: Transaction[] = [
   },
   {
     txId: "tx2",
+    formNumber: "1008-0002",
     txType: "issue",
     giverName: "ערן שפירא",
     giverPersonalId: "8004001",
@@ -35,6 +37,7 @@ export const transactionsMock: Transaction[] = [
   },
   {
     txId: "tx3",
+    formNumber: "1008-0003",
     txType: "issue",
     giverName: "ערן שפירא",
     giverPersonalId: "8004001",
@@ -50,6 +53,7 @@ export const transactionsMock: Transaction[] = [
   },
   {
     txId: "tx4",
+    formNumber: "1008-0004",
     txType: "return",
     giverName: "גיל מזרחי",
     giverPersonalId: "8002002",
@@ -65,6 +69,7 @@ export const transactionsMock: Transaction[] = [
   },
   {
     txId: "tx5",
+    formNumber: "1008-0005",
     txType: "issue",
     giverName: "יניב אלון",
     giverPersonalId: "8004002",
@@ -81,6 +86,7 @@ export const transactionsMock: Transaction[] = [
   },
   {
     txId: "tx6",
+    formNumber: "1008-0006",
     txType: "issue",
     giverName: "ערן שפירא",
     giverPersonalId: "8004001",
@@ -96,6 +102,7 @@ export const transactionsMock: Transaction[] = [
   },
   {
     txId: "tx7",
+    formNumber: "1008-0007",
     txType: "return",
     giverName: "שי אדלר",
     giverPersonalId: "8003002",
@@ -112,6 +119,7 @@ export const transactionsMock: Transaction[] = [
   },
   {
     txId: "tx8",
+    formNumber: "1008-0008",
     txType: "count_adjustment",
     giverName: "ערן שפירא",
     giverPersonalId: "8004001",
@@ -127,6 +135,7 @@ export const transactionsMock: Transaction[] = [
   },
   {
     txId: "tx9",
+    formNumber: "1008-0009",
     txType: "issue",
     giverName: "יניב אלון",
     giverPersonalId: "8004002",
@@ -142,6 +151,7 @@ export const transactionsMock: Transaction[] = [
   },
   {
     txId: "tx10",
+    formNumber: "1008-0010",
     txType: "write_off",
     giverName: "ערן שפירא",
     giverPersonalId: "8004001",

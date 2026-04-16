@@ -2,6 +2,19 @@
  * Transactions — list per activity, create with stock validation + signature.
  */
 
+/**
+ * Returns the next sequential form number in format 1008-XXXX.
+ * Must be called inside an existing LockService lock (create already holds one).
+ */
+function getNextFormNumber_() {
+  var props = PropertiesService.getScriptProperties();
+  var current = Number(props.getProperty('FORM_COUNTER') || '0');
+  var next = current + 1;
+  props.setProperty('FORM_COUNTER', String(next));
+  var padded = ('0000' + next).slice(-4);
+  return '1008-' + padded;
+}
+
 var TransactionsController = {
   list: function(context) {
     var activityId = context.request.body.activityId;
@@ -27,6 +40,7 @@ var TransactionsController = {
 
       return {
         txId: row.tx_id,
+        formNumber: row.form_number || '',
         txType: row.tx_type,
         giverPersonalId: row.giver_personal_id,
         giverName: row.giver_name,
@@ -59,6 +73,101 @@ var TransactionsController = {
     } finally {
       lock.releaseLock();
     }
+  },
+
+  getPublic: function(context) {
+    var body = context.request.body;
+
+    if (!body.activityId || !body.txId) {
+      throw createError_('VALIDATION_ERROR', 'activityId and txId are required');
+    }
+
+    var transactionsId = getConfigProperty_('ACTIVITY_' + body.activityId + '_TRANSACTIONS_ID');
+    if (!transactionsId) {
+      throw createError_('NOT_FOUND', 'Transaction not found');
+    }
+
+    var existing = findRow_(transactionsId, 'transactions', 'tx_id', body.txId);
+    if (!existing) {
+      throw createError_('NOT_FOUND', 'Transaction not found');
+    }
+
+    var row = existing.row;
+    var items = [];
+    try {
+      items = JSON.parse(row.items_json || '[]');
+    } catch (parseError) {
+      items = [];
+    }
+
+    // Look up activity name from registry
+    var registryId = getConfigProperty_('ACTIVITIES_REGISTRY_ID');
+    var activityRow = findRow_(registryId, 'activities-registry', 'activity_id', body.activityId);
+    var activityName = activityRow ? activityRow.row.name : '';
+
+    // Determine soldier personal ID based on transaction type
+    var soldiersSheetId = getConfigProperty_('SOLDIERS_SHEET_ID');
+    var isIssuanceType = row.tx_type === 'issue' || row.tx_type === 'borrow_in';
+    var soldierPersonalId = isIssuanceType
+      ? row.receiver_personal_id
+      : row.giver_personal_id;
+    var soldierDetails = null;
+    if (soldiersSheetId && soldierPersonalId) {
+      var soldierRow = findRow_(soldiersSheetId, 'soldiers', 'personal_id', soldierPersonalId);
+      if (soldierRow) {
+        soldierDetails = {
+          personalId: String(soldierRow.row.personal_id),
+          fullName: soldierRow.row.full_name || '',
+          rank: soldierRow.row.rank || '',
+          company: soldierRow.row.company || ''
+        };
+      }
+    }
+
+    // Look up operator name from the operators sheet
+    var operatorsSheetId = getConfigProperty_('OPERATORS_SHEET_ID');
+    var operatorDetails = null;
+    if (operatorsSheetId && row.performed_by) {
+      var operatorRow = findRow_(operatorsSheetId, 'operators', 'email', row.performed_by);
+      if (operatorRow) {
+        operatorDetails = {
+          fullName: operatorRow.row.full_name || '',
+          role: operatorRow.row.role || ''
+        };
+      }
+    }
+
+    // Read signature file as base64 if it exists (files are private in Drive)
+    var signatureBase64 = '';
+    if (row.signature_url) {
+      try {
+        var file = DriveApp.getFileById(row.signature_url);
+        var blob = file.getBlob();
+        var bytes = blob.getBytes();
+        var base64 = Utilities.base64Encode(bytes);
+        signatureBase64 = 'data:' + blob.getContentType() + ';base64,' + base64;
+      } catch (driveError) {
+        // Signature file may have been deleted
+      }
+    }
+
+    return {
+      txId: row.tx_id,
+      formNumber: row.form_number || '',
+      txType: row.tx_type,
+      giverPersonalId: String(row.giver_personal_id),
+      giverName: row.giver_name || '',
+      receiverPersonalId: String(row.receiver_personal_id),
+      receiverName: row.receiver_name || '',
+      performedBy: row.performed_by || '',
+      performedAt: row.performed_at || '',
+      items: items,
+      notes: row.notes || '',
+      signatureBase64: signatureBase64,
+      activityName: activityName,
+      soldier: soldierDetails,
+      operator: operatorDetails
+    };
   },
 
   _doCreate: function(context) {
@@ -115,13 +224,17 @@ var TransactionsController = {
     if (body.clientTxId) {
       var existingTx = findRow_(transactionsId, 'transactions', 'tx_id', body.clientTxId);
       if (existingTx) {
-        return { txId: body.clientTxId, status: 'duplicate' };
+        return { txId: body.clientTxId, formNumber: existingTx.row.form_number || '', status: 'duplicate' };
       }
       txId = body.clientTxId;
     }
 
+    // Generate sequential form number (already inside lock from create())
+    var formNumber = getNextFormNumber_();
+
     var transaction = {
       tx_id: txId,
+      form_number: formNumber,
       tx_type: body.txType,
       giver_personal_id: body.giverPersonalId || '',
       giver_name: body.giverName || '',
@@ -148,6 +261,7 @@ var TransactionsController = {
 
     return {
       txId: txId,
+      formNumber: formNumber,
       txType: body.txType,
       performedBy: context.operator.email,
       performedAt: now,

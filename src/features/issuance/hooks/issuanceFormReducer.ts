@@ -14,6 +14,7 @@ export const createInitialState = (): IssuanceFormState => ({
   activityId: undefined,
   clientTxId: createClientTxId(),
   formId: undefined,
+  serverTxId: undefined,
   receiver: undefined,
   performedAt: new Date().toISOString(),
   lines: [createEmptyLine()],
@@ -132,7 +133,7 @@ export const issuanceFormReducer = (state: IssuanceFormState, action: IssuanceFo
       return { ...state, clientTxId: createClientTxId(), giverSignature: action.payload }
 
     case "SHOW_SUCCESS":
-      return { ...state, showSuccess: true, formId: action.payload }
+      return { ...state, showSuccess: true, formId: action.payload.formId, serverTxId: action.payload.txId }
 
     case "RESET":
       return createInitialState()
@@ -143,6 +144,7 @@ export type IssuanceFormState = {
   activityId: string | undefined
   clientTxId: string
   formId: string | undefined
+  serverTxId: string | undefined
   receiver: Soldier | undefined
   performedAt: string
   lines: IssuanceLineItem[]
@@ -168,5 +170,5 @@ export type IssuanceFormAction =
   | { type: "SET_GLOBAL_NOTES"; payload: string }
   | { type: "SET_RECEIVER_SIGNATURE"; payload: string }
   | { type: "SET_GIVER_SIGNATURE"; payload: string }
-  | { type: "SHOW_SUCCESS"; payload: string }
+  | { type: "SHOW_SUCCESS"; payload: { formId: string; txId: string } }
   | { type: "RESET" }

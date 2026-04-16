@@ -9,6 +9,6 @@ export {
   useAddItemsToActivity,
   useCloseActivity,
 } from "./useActivities"
-export { useTransactions, useCreateTransaction } from "./useTransactions"
+export { useTransactions, useCreateTransaction, usePublicTransaction } from "./useTransactions"
 export { useCurrentOperator, useDeleteOperator, useOperators, useUpsertOperator } from "./useOperators"
 export { useDashboard } from "./useDashboard"

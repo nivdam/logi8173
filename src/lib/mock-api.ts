@@ -21,6 +21,7 @@ type MockBody = Record<string, unknown>
 const mockCompanies = [...companiesMock]
 const mockActivities: Activity[] = activitiesMock.map((activity) => ({ ...activity }))
 const mockTransactions = [...transactionsMock]
+let mockFormCounter = mockTransactions.length
 const activityItemIdsById = Object.fromEntries(
   activitiesMock.map((activity) => [
     activity.activityId,
@@ -119,8 +120,11 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
     return { companyId: nextCompany.companyId, name: nextCompany.name }
   },
   "tx.create": (body) => {
+    mockFormCounter++
+    const formNumber = "1008-" + String(mockFormCounter).padStart(4, "0")
     const nextTransaction: Transaction = {
       txId: "tx_mock_" + Date.now(),
+      formNumber,
       txType: String(body?.txType || "issue") as TransactionType,
       giverName: String(body?.giverName || ""),
       giverPersonalId: String(body?.giverPersonalId || ""),
@@ -137,6 +141,7 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
 
     return {
       txId: nextTransaction.txId,
+      formNumber,
       txType: nextTransaction.txType,
       performedBy: nextTransaction.performedBy,
       performedAt: nextTransaction.performedAt,
