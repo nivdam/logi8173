@@ -80,6 +80,7 @@
     "addRow": "הוסף פריט",
     "batchSaveSuccess": "השינויים נשמרו בהצלחה",
     "batchSaveError": "שמירת השינויים נכשלה. נסה שוב.",
+    "deleteRow": "מחק שורה",
     "fields": {
       "name": "שם הפריט",
       "namePlaceholder": "לדוגמה: אפוד קרבי...",

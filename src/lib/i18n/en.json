@@ -80,6 +80,7 @@
     "addRow": "Add Item",
     "batchSaveSuccess": "Changes saved successfully",
     "batchSaveError": "Failed to save changes. Try again.",
+    "deleteRow": "Delete row",
     "fields": {
       "name": "Item name",
       "namePlaceholder": "e.g. Combat vest...",

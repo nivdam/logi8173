@@ -3,6 +3,7 @@ import { Trash2 } from "lucide-react"
 import { StatusBadge } from "../../components/StatusBadge"
 import { FilterSelect } from "../../components/FilterSelect"
 import { getItemStatusLabel } from "../../lib/formatters"
+import { t } from "../../lib/i18n"
 import { animations } from "../../theme/animations"
 import { CATEGORY_OPTIONS } from "./inventory.constants"
 import type { EditableRow, EditableField } from "./useEditableInventory"
@@ -124,7 +125,7 @@ export const EditableInventoryRow = ({
         minH="8"
         p="0"
         onClick={handleDeleteClick}
-        aria-label="מחק שורה"
+        aria-label={t("inventory.deleteRow")}
       >
         <Trash2 size={14} />
       </Button>

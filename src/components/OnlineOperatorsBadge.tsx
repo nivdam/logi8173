@@ -24,10 +24,10 @@ const OnlineOperatorRow = ({ operator }: OnlineOperatorRowProps) => (
 )
 
 export const OnlineOperatorsBadge = () => {
-  const { data: onlineOperators } = useOnlineOperators()
+  const { data: onlineOperators, isError } = useOnlineOperators()
   const count = onlineOperators?.length ?? 0
 
-  if (count === 0) {
+  if (count === 0 || isError) {
     return null
   }
 

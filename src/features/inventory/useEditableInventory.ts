@@ -17,13 +17,16 @@ const EMPTY_ROW: EditableRow = {
 
 const createEmptyRow = (): EditableRow => ({
   ...EMPTY_ROW,
-  itemId: "new_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+  itemId: NEW_ROW_PREFIX + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
 })
+
+const NEW_ROW_PREFIX = "new_"
 
 const isRowValid = (row: EditableRow): boolean => {
   if (row.name.trim() === "") return false
   if (row.category.trim() === "") return false
   if (row.currentQty < 0) return false
+  if (row.changeType === "added" && row.itemNumber.trim() === "") return false
   return true
 }
 
@@ -69,7 +72,7 @@ export const useEditableInventory = (serverItems: InventoryItem[]) => {
       previous.filter((row) => row.itemId !== itemId),
     )
 
-    const isNewRow = itemId.startsWith("new_")
+    const isNewRow = itemId.startsWith(NEW_ROW_PREFIX)
     if (!isNewRow) {
       setDeletedIds((previous) => [...previous, itemId])
     }

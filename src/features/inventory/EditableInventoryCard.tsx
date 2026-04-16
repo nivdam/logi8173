@@ -100,7 +100,7 @@ export const EditableInventoryCard = ({
           minW="10"
           minH="10"
           onClick={handleDeleteClick}
-          aria-label="מחק שורה"
+          aria-label={t("inventory.deleteRow")}
         >
           <Trash2 size={16} />
         </Button>
