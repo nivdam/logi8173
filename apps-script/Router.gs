@@ -1,6 +1,7 @@
 /**
  * Request routing, parsing, and response helpers.
  * All requests are POST (idToken always in body, never in URL).
+ * Public routes (public: true) skip authentication entirely.
  */
 
 function getRoutes_() {
@@ -40,8 +41,9 @@ function getRoutes_() {
     'activities.addItems': { handler: ActivitiesController.addItems, roles: ['admin', 'warehouse_operator'] },
 
     // Transactions
-    'tx.list':            { handler: TransactionsController.list,   roles: null },
-    'tx.create':          { handler: TransactionsController.create, roles: ['admin', 'warehouse_operator'] },
+    'tx.list':            { handler: TransactionsController.list,      roles: null },
+    'tx.create':          { handler: TransactionsController.create,    roles: ['admin', 'warehouse_operator'] },
+    'tx.getPublic':       { handler: TransactionsController.getPublic, roles: null, public: true },
 
     // Dashboard
     'dashboard.summary':  { handler: DashboardController.summary, roles: null }
@@ -50,13 +52,22 @@ function getRoutes_() {
 
 function handleRequest_(method, event) {
   try {
-    var request = parseRequest_(event);
-    var route = getRoutes_()[request.action];
+    var action = (event.parameter && event.parameter.action) || '';
+    var route = getRoutes_()[action];
 
     if (!route) {
-      return jsonError_('UNKNOWN_ACTION', 'Unknown action: ' + request.action);
+      return jsonError_('UNKNOWN_ACTION', 'Unknown action: ' + action);
     }
 
+    // Public routes skip authentication entirely
+    if (route.public) {
+      var request = parsePublicRequest_(event, action);
+      var context = { request: request, operator: null };
+      var result = route.handler(context);
+      return jsonSuccess_(result);
+    }
+
+    var request = parseRequest_(event);
     var operator = requireOperator_(request);
 
     if (route.roles) {
@@ -73,6 +84,24 @@ function handleRequest_(method, event) {
     var errorMessage = error.code ? error.message : 'An unexpected error occurred';
     return jsonError_(errorCode, errorMessage);
   }
+}
+
+function parsePublicRequest_(event, action) {
+  var body = {};
+
+  if (event.postData && event.postData.contents) {
+    try {
+      body = JSON.parse(event.postData.contents);
+    } catch (parseError) {
+      throw createError_('INVALID_BODY', 'Could not parse request body as JSON');
+    }
+  }
+
+  return {
+    action: action,
+    body: body,
+    idToken: ''
+  };
 }
 
 function parseRequest_(event) {

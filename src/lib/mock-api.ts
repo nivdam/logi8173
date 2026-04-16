@@ -9,6 +9,7 @@ import type {
   Activity,
   ActivityType,
   ActivityDetails,
+  PublicTransaction,
   Transaction,
   TransactionLineItem,
   TransactionType,
@@ -21,6 +22,10 @@ type MockBody = Record<string, unknown>
 const mockCompanies = [...companiesMock]
 const mockActivities: Activity[] = activitiesMock.map((activity) => ({ ...activity }))
 const mockTransactions = [...transactionsMock]
+let mockFormCounter = mockTransactions.length
+const mockTransactionActivityIds: Record<string, string> = Object.fromEntries(
+  mockTransactions.map((transaction) => [transaction.txId, "act1"]),
+)
 const activityItemIdsById = Object.fromEntries(
   activitiesMock.map((activity) => [
     activity.activityId,
@@ -58,6 +63,53 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
     const activityId = body?.activityId ? String(body.activityId) : undefined
     if (!activityId) return mockTransactions
     return mockTransactions
+  },
+  "tx.getPublic": (body) => {
+    const txId = String(body?.txId || "")
+    const activityId = String(body?.activityId || "")
+    const transaction = mockTransactions.find((item) => item.txId === txId)
+    const transactionActivityId = mockTransactionActivityIds[txId]
+
+    if (!transaction || transactionActivityId !== activityId) {
+      throw new Error("Transaction not found")
+    }
+
+    const isIssuanceType = transaction.txType === "issue" || transaction.txType === "borrow_in"
+    const soldierPersonalId = isIssuanceType
+      ? transaction.receiverPersonalId
+      : transaction.giverPersonalId
+    const soldier = soldiersMock.find((item) => item.personalId === soldierPersonalId) ?? null
+    const operator = mockOperators.find((item) => item.email === transaction.performedBy) ?? mockOperators[0] ?? null
+    const activity = mockActivities.find((item) => item.activityId === activityId) ?? null
+
+    return {
+      txId: transaction.txId,
+      formNumber: transaction.formNumber,
+      txType: transaction.txType,
+      giverPersonalId: transaction.giverPersonalId,
+      giverName: transaction.giverName,
+      receiverPersonalId: transaction.receiverPersonalId,
+      receiverName: transaction.receiverName,
+      performedAt: transaction.performedAt,
+      items: transaction.items,
+      notes: transaction.notes,
+      signatureBase64: "",
+      activityName: activity?.name || "",
+      soldier: soldier
+        ? {
+            personalId: soldier.personalId,
+            fullName: soldier.fullName,
+            rank: soldier.rank,
+            company: soldier.company,
+          }
+        : null,
+      operator: operator
+        ? {
+            fullName: operator.fullName,
+            role: operator.role,
+          }
+        : null,
+    } satisfies PublicTransaction
   },
   "dashboard.summary": () => dashboardMock,
   "auth.me": () => ({
@@ -119,8 +171,11 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
     return { companyId: nextCompany.companyId, name: nextCompany.name }
   },
   "tx.create": (body) => {
+    mockFormCounter++
+    const formNumber = "1008-" + String(mockFormCounter).padStart(4, "0")
     const nextTransaction: Transaction = {
       txId: "tx_mock_" + Date.now(),
+      formNumber,
       txType: String(body?.txType || "issue") as TransactionType,
       giverName: String(body?.giverName || ""),
       giverPersonalId: String(body?.giverPersonalId || ""),
@@ -134,9 +189,11 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
     }
 
     mockTransactions.unshift(nextTransaction)
+    mockTransactionActivityIds[nextTransaction.txId] = String(body?.activityId || "")
 
     return {
       txId: nextTransaction.txId,
+      formNumber,
       txType: nextTransaction.txType,
       performedBy: nextTransaction.performedBy,
       performedAt: nextTransaction.performedAt,
@@ -210,9 +267,13 @@ export const mockApiRequest = <T>(action: string, body?: MockBody): Promise<T> =
     return Promise.reject(new Error("No mock handler for action: " + action))
   }
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     setTimeout(() => {
-      resolve(handler(body) as T)
+      try {
+        resolve(handler(body) as T)
+      } catch (error) {
+        reject(error)
+      }
     }, MOCK_DELAY_MS)
   })
 }

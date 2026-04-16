@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "../lib/api"
-import type { Transaction, TransactionType, TransactionLineItem } from "../types"
+import type { Transaction, TransactionType, TransactionLineItem, PublicTransaction } from "../types"
 
 export const useTransactions = (activityId: string) =>
   useQuery({
@@ -43,6 +43,7 @@ type CreateTransactionInput = {
 
 type CreateTransactionResult = {
   txId: string
+  formNumber?: string
   status?: "duplicate"
   txType?: TransactionType
   performedBy?: string
@@ -50,3 +51,12 @@ type CreateTransactionResult = {
   items?: TransactionLineItem[]
   signatureUrl?: string
 }
+
+export const usePublicTransaction = (activityId: string, txId: string) =>
+  useQuery({
+    queryKey: ["publicTransaction", activityId, txId],
+    queryFn: () =>
+      api.publicPost<PublicTransaction>("tx.getPublic", { activityId, txId }),
+    enabled: !!activityId && !!txId,
+    retry: false,
+  })

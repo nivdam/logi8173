@@ -12,10 +12,12 @@ import { LoginPage } from "./pages/LoginPage"
 import { IssuanceForm } from "./features/issuance/IssuanceForm"
 import { ReturnForm } from "./features/return/ReturnForm"
 import { NotFoundPage } from "./pages/NotFoundPage"
+import { SharedFormPage } from "./pages/SharedFormPage"
 
 export const App = () => (
   <Routes>
     <Route path="/login" element={<LoginPage />} />
+    <Route path="/form/:activityId/:txId" element={<SharedFormPage />} />
     <Route
       element={
         <RequireAuth>

@@ -112,18 +112,17 @@ export const AppLayout = () => {
         </Box>
       </Flex>
       <BottomNav />
-      {operator && isProfileDialogOpen ? (
-        <OperatorProfileDialog
-          open
-          onOpenChange={handleProfileDialogOpenChange}
-          defaultFullName={operatorProfile?.fullName ?? ""}
-          initialProfile={operatorProfile}
-          isSaving={false}
-          showReset={operatorProfile !== undefined}
-          onReset={handleResetProfile}
-          onSubmit={handleSaveProfile}
-        />
-      ) : null}
+      <OperatorProfileDialog
+        open={isProfileDialogOpen}
+        onOpenChange={handleProfileDialogOpenChange}
+        defaultFullName={operatorProfile?.fullName ?? operator?.fullName ?? ""}
+        defaultSavedSignature={operator?.savedSignatureUrl}
+        initialProfile={operatorProfile}
+        isSaving={false}
+        showReset={operatorProfile !== undefined}
+        onReset={handleResetProfile}
+        onSubmit={handleSaveProfile}
+      />
     </Flex>
   );
 };

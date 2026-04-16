@@ -183,7 +183,14 @@ export const DashboardPage = () => {
               </Flex>
               {/* Details */}
               <Flex direction="column" gap="0.5" flex="1" minW="0">
-                <Text textStyle="sm" fontWeight="600">{transaction.receiverName}</Text>
+                <Flex align="center" gap="2">
+                  <Text textStyle="sm" fontWeight="600">{transaction.receiverName}</Text>
+                  {transaction.formNumber && (
+                    <Text textStyle="xs" color="fg.muted" fontWeight="500">
+                      {transaction.formNumber}
+                    </Text>
+                  )}
+                </Flex>
                 <Text textStyle="xs" color="fg.muted" truncate>{formatItemsSummary(transaction)}</Text>
               </Flex>
               {/* Type badge */}

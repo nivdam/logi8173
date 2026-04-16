@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Button,
   chakra,
@@ -13,7 +13,7 @@ import {
   Text,
 } from "@chakra-ui/react"
 import { RefreshCw } from "lucide-react"
-import { SignatureCanvas } from "../features/issuance/SignatureCanvas"
+import { SignatureCanvas } from "./SignatureCanvas"
 import { t } from "../lib/i18n"
 import { RANK_OPTIONS } from "../lib/rank-options"
 import type { OperatorProfile } from "../lib/auth.types"
@@ -40,6 +40,18 @@ export const OperatorProfileDialog = ({
   const [isEditingSignature, setIsEditingSignature] = useState(
     (initialProfile?.savedSignature ?? defaultSavedSignature ?? "") === "",
   )
+
+  useEffect(() => {
+    if (!open) return
+    setFullName(defaultFullName)
+    setRank(initialProfile?.rank ?? "")
+    setPersonalId(initialProfile?.personalId ?? "")
+    setPhone(initialProfile?.phone ?? "")
+    const sig = initialProfile?.savedSignature ?? defaultSavedSignature ?? ""
+    setSavedSignature(sig)
+    setIsEditingSignature(sig === "")
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset state only when dialog opens
+  }, [open])
 
   const isValid =
     fullName.trim() !== "" &&

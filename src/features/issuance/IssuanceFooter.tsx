@@ -11,7 +11,7 @@ import {
 } from "@chakra-ui/react";
 import { RefreshCw } from "lucide-react";
 import { t } from "../../lib/i18n";
-import { SignatureCanvas } from "./SignatureCanvas";
+import { SignatureCanvas } from "../../components/SignatureCanvas";
 
 export const IssuanceFooter = ({
   globalNotes,

@@ -2,6 +2,7 @@ import { SimpleGrid, VStack } from "@chakra-ui/react"
 import { useCompanies, useOperators } from "../api"
 import { PageHeader } from "../components/PageHeader"
 import { CompaniesSettingsSection } from "../features/settings/CompaniesSettingsSection"
+import { MyProfileSection } from "../features/settings/MyProfileSection"
 import { OperatorsSettingsSection } from "../features/settings/OperatorsSettingsSection"
 import { ImportSection } from "../features/settings/import/ImportSection"
 import { t } from "../lib/i18n"
@@ -21,6 +22,8 @@ export const SettingsPage = () => {
   return (
     <VStack align="stretch" gap="6">
       <PageHeader title={t("settings.title")} description={t("settings.description")} />
+
+      <MyProfileSection />
 
       <SimpleGrid columns={{ base: 1, xl: 2 }} gap="6" alignItems="start">
         <OperatorsSettingsSection

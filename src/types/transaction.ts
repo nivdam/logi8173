@@ -13,6 +13,7 @@ type TransactionLineItem = {
 
 type Transaction = {
   txId: string
+  formNumber: string
   txType: TransactionType
   giverName: string
   giverPersonalId: string
@@ -25,4 +26,33 @@ type Transaction = {
   signatureUrl: string
 }
 
-export type { Transaction, TransactionType, TransactionLineItem }
+type PublicTransactionSoldier = {
+  personalId: string
+  fullName: string
+  rank: string
+  company: string
+}
+
+type PublicTransactionOperator = {
+  fullName: string
+  role: string
+}
+
+type PublicTransaction = {
+  txId: string
+  formNumber: string
+  txType: TransactionType
+  giverPersonalId: string
+  giverName: string
+  receiverPersonalId: string
+  receiverName: string
+  performedAt: string
+  items: TransactionLineItem[]
+  notes: string
+  signatureBase64: string
+  activityName: string
+  soldier: PublicTransactionSoldier | null
+  operator: PublicTransactionOperator | null
+}
+
+export type { Transaction, TransactionType, TransactionLineItem, PublicTransaction }

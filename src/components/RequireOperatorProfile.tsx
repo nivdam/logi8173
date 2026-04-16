@@ -19,17 +19,15 @@ export const RequireOperatorProfile = ({
   return (
     <>
       {children}
-      {isMissingProfile ? (
-        <OperatorProfileDialog
-          open
-          isBlocking
-          defaultFullName={operator.fullName}
-          defaultSavedSignature={operator.savedSignatureUrl}
-          initialProfile={undefined}
-          isSaving={false}
-          onSubmit={handleSaveProfile}
-        />
-      ) : null}
+      <OperatorProfileDialog
+        open={isMissingProfile}
+        isBlocking
+        defaultFullName={operator?.fullName ?? ""}
+        defaultSavedSignature={operator?.savedSignatureUrl}
+        initialProfile={undefined}
+        isSaving={false}
+        onSubmit={handleSaveProfile}
+      />
     </>
   )
 }
