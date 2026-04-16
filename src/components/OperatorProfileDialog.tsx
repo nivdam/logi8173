@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Button,
   chakra,
@@ -40,6 +40,17 @@ export const OperatorProfileDialog = ({
   const [isEditingSignature, setIsEditingSignature] = useState(
     (initialProfile?.savedSignature ?? defaultSavedSignature ?? "") === "",
   )
+
+  useEffect(() => {
+    if (!open) return
+    setFullName(defaultFullName)
+    setRank(initialProfile?.rank ?? "")
+    setPersonalId(initialProfile?.personalId ?? "")
+    setPhone(initialProfile?.phone ?? "")
+    const sig = initialProfile?.savedSignature ?? defaultSavedSignature ?? ""
+    setSavedSignature(sig)
+    setIsEditingSignature(sig === "")
+  }, [open])
 
   const isValid =
     fullName.trim() !== "" &&

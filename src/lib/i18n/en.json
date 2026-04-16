@@ -203,6 +203,12 @@
   "settings": {
     "title": "Settings",
     "description": "Manage the operators and companies required for unit onboarding.",
+    "myProfile": {
+      "title": "My Profile",
+      "description": "Operator details stored locally on this device.",
+      "notSet": "Not set",
+      "editAction": "Edit Profile"
+    },
     "operators": {
       "title": "Operators",
       "description": "Grant access to battalion operators and update their role.",
