@@ -30,6 +30,8 @@ export const ReturnForm = () => {
     return (
       <ReturnSuccess
         formId={form.state.formId}
+        activityId={form.state.activityId || ""}
+        txId={form.state.serverTxId || ""}
         giver={form.state.giver}
         lines={form.state.lines}
         itemCount={form.totalItemCount}

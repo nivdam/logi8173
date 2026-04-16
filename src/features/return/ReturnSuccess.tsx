@@ -2,10 +2,11 @@ import { Box, Button, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { CheckCircle2, ArrowLeft, RotateCcw, Package } from "lucide-react"
 import { t } from "../../lib/i18n"
 import { animations } from "../../theme/animations"
+import { CopyFormLinkButton } from "../shared-form/CopyFormLinkButton"
 import type { Soldier } from "../../types"
 import type { IssuanceLineItem } from "../issuance/issuance.types"
 
-export const ReturnSuccess = ({ formId, giver, lines, itemCount, onNewReturn, onBackToDashboard }: Props) => (
+export const ReturnSuccess = ({ formId, activityId, txId, giver, lines, itemCount, onNewReturn, onBackToDashboard }: Props) => (
   <Flex
     direction="column"
     align="center"
@@ -34,9 +35,12 @@ export const ReturnSuccess = ({ formId, giver, lines, itemCount, onNewReturn, on
           {t("returns.successDescription")}
         </Text>
         {formId && (
-          <Text textStyle="xs" color="fg.muted">
-            #{formId}
+          <Text textStyle="sm" color="fg.muted" fontWeight="500">
+            {t("common.formNumber")}: {formId}
           </Text>
+        )}
+        {activityId && txId && (
+          <CopyFormLinkButton activityId={activityId} txId={txId} />
         )}
       </VStack>
 
@@ -127,6 +131,8 @@ export const ReturnSuccess = ({ formId, giver, lines, itemCount, onNewReturn, on
 
 type Props = {
   formId: string | undefined
+  activityId: string
+  txId: string
   giver: Soldier
   lines: IssuanceLineItem[]
   itemCount: number

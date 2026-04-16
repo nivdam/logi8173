@@ -31,6 +31,8 @@ export const IssuanceForm = () => {
     return (
       <IssuanceSuccess
         formId={form.state.formId}
+        activityId={form.state.activityId || ""}
+        txId={form.state.serverTxId || ""}
         receiver={form.state.receiver}
         lines={form.state.lines}
         itemCount={form.totalItemCount}

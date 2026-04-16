@@ -25,7 +25,7 @@ var SHEET_HEADERS = {
     'start_date', 'end_date', 'folder_id', 'created_at', 'closed_at'
   ],
   'transactions': [
-    'tx_id', 'tx_type', 'giver_personal_id', 'giver_name',
+    'tx_id', 'form_number', 'tx_type', 'giver_personal_id', 'giver_name',
     'receiver_personal_id', 'receiver_name', 'performed_by',
     'performed_at', 'items_json', 'notes', 'signature_url'
   ],

@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Box, Button, Flex, Grid, Heading, Image, Text, Textarea } from "@chakra-ui/react"
 import { RefreshCw } from "lucide-react"
 import { t } from "../../lib/i18n"
-import { SignatureCanvas } from "../issuance/SignatureCanvas"
+import { SignatureCanvas } from "../../components/SignatureCanvas"
 
 export const ReturnFooter = ({
   globalNotes,

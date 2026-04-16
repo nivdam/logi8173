@@ -14,6 +14,7 @@ export const createInitialState = (): ReturnFormState => ({
   activityId: undefined,
   clientTxId: createClientTxId(),
   formId: undefined,
+  serverTxId: undefined,
   giver: undefined,
   performedAt: new Date().toISOString(),
   lines: [],
@@ -213,7 +214,7 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
       return { ...state, clientTxId: createClientTxId(), receiverSignature: action.payload }
 
     case "SHOW_SUCCESS":
-      return { ...state, showSuccess: true, formId: action.payload }
+      return { ...state, showSuccess: true, formId: action.payload.formId, serverTxId: action.payload.txId }
 
     case "RESET":
       return createInitialState()
@@ -224,6 +225,7 @@ export type ReturnFormState = {
   activityId: string | undefined
   clientTxId: string
   formId: string | undefined
+  serverTxId: string | undefined
   giver: Soldier | undefined
   performedAt: string
   lines: IssuanceLineItem[]
@@ -251,5 +253,5 @@ export type ReturnFormAction =
   | { type: "POPULATE_FROM_ISSUED"; payload: { item: SoldierIssuedItem; selected: boolean } }
   | { type: "POPULATE_ALL_ISSUED"; payload: { items: SoldierIssuedItem[] } }
   | { type: "CLEAR_ALL_ISSUED" }
-  | { type: "SHOW_SUCCESS"; payload: string }
+  | { type: "SHOW_SUCCESS"; payload: { formId: string; txId: string } }
   | { type: "RESET" }

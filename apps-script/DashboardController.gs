@@ -54,6 +54,7 @@ var DashboardController = {
           try { items = JSON.parse(row.items_json || '[]'); } catch (e) { items = []; }
           return {
             txId: row.tx_id,
+            formNumber: row.form_number || '',
             txType: row.tx_type,
             giverName: row.giver_name,
             giverPersonalId: row.giver_personal_id,

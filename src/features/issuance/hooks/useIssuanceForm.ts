@@ -131,7 +131,7 @@ export const useIssuanceForm = () => {
             })
           }
           setSearchParams({ id: result.txId }, { replace: true })
-          dispatch({ type: "SHOW_SUCCESS", payload: result.txId })
+          dispatch({ type: "SHOW_SUCCESS", payload: { formId: result.formNumber || result.txId, txId: result.txId } })
         },
         onError: (error) => {
           showApiErrorToast({
