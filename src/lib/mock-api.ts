@@ -259,16 +259,12 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
     const added = Array.isArray(body?.added) ? body.added : []
     const deleted = Array.isArray(body?.deleted) ? body.deleted : []
 
-    let modifiedCount = 0
-    let addedCount = 0
-    let deletedCount = 0
-
-    for (const item of modified) {
-      if (!item.itemId || !item.name || !item.category) continue
+    const validModified = modified.filter((item) => {
+      if (!item.itemId || !item.name || !item.category) return false
       const existingIndex = inventoryMock.findIndex(
         (existing) => existing.itemId === String(item.itemId),
       )
-      if (existingIndex === -1) continue
+      if (existingIndex === -1) return false
       inventoryMock[existingIndex] = {
         ...inventoryMock[existingIndex],
         name: String(item.name),
@@ -279,11 +275,11 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
         notes: String(item.notes || ""),
         minThreshold: Number(item.minThreshold) || 0,
       }
-      modifiedCount++
-    }
+      return true
+    })
 
-    for (const item of added) {
-      if (!item.name || !item.category) continue
+    const validAdded = added.filter((item) => {
+      if (!item.name || !item.category) return false
       const newItem: InventoryItem = {
         itemId: "i_mock_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
         name: String(item.name),
@@ -297,23 +293,22 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
         notes: String(item.notes || ""),
       }
       inventoryMock.push(newItem)
-      addedCount++
-    }
+      return true
+    })
 
-    for (const itemId of deleted) {
+    const validDeleted = deleted.filter((itemId) => {
       const existingIndex = inventoryMock.findIndex(
         (existing) => existing.itemId === String(itemId),
       )
-      if (existingIndex >= 0) {
-        inventoryMock.splice(existingIndex, 1)
-        deletedCount++
-      }
-    }
+      if (existingIndex < 0) return false
+      inventoryMock.splice(existingIndex, 1)
+      return true
+    })
 
     return {
-      modified: modifiedCount,
-      added: addedCount,
-      deleted: deletedCount,
+      modified: validModified.length,
+      added: validAdded.length,
+      deleted: validDeleted.length,
     }
   },
   "activities.close": (body) => {
