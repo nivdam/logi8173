@@ -42,11 +42,13 @@ function getExistingFormCounterBaseline_() {
 
 function getNextFormNumber_() {
   var props = PropertiesService.getScriptProperties();
-  var current = Number(props.getProperty('FORM_COUNTER') || '0');
-  var baseline = getExistingFormCounterBaseline_();
+  var storedCounter = props.getProperty('FORM_COUNTER');
+  var current = 0;
 
-  if (baseline > current) {
-    current = baseline;
+  if (storedCounter === null || storedCounter === '') {
+    current = getExistingFormCounterBaseline_();
+  } else {
+    current = Number(storedCounter) || 0;
   }
 
   var next = current + 1;
