@@ -7,6 +7,7 @@ export const SharedFormParties = ({ transaction }: Props) => {
   const soldier = transaction.soldier
   const operator = transaction.operator
   const isIssuanceType = transaction.txType === "issue" || transaction.txType === "borrow_in"
+  const operatorName = operator?.fullName || ""
 
   const soldierName = soldier?.fullName
     || (isIssuanceType ? transaction.receiverName : transaction.giverName)
@@ -50,10 +51,7 @@ export const SharedFormParties = ({ transaction }: Props) => {
           </Text>
         </Flex>
         <VStack gap="1.5" align="stretch">
-          <DetailRow
-            label={t("sharedForm.name")}
-            value={operator?.fullName || transaction.performedBy}
-          />
+          {operatorName && <DetailRow label={t("sharedForm.name")} value={operatorName} />}
           {operator?.role && (
             <DetailRow label={t("sharedForm.role")} value={t(`roles.${operator.role}`)} />
           )}

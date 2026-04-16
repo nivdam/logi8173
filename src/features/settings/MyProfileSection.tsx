@@ -69,9 +69,9 @@ export const MyProfileSection = () => {
             variant={hasProfile ? "outline" : "solid"}
           >
             <Pencil size={14} />
-            <Box as="span" display={{ base: "none", sm: "inline" }}>
+            <Text as="span" display={{ base: "none", sm: "inline" }}>
               {t("settings.myProfile.editAction")}
-            </Box>
+            </Text>
           </Button>
         </Flex>
 

@@ -46,7 +46,6 @@ type PublicTransaction = {
   giverName: string
   receiverPersonalId: string
   receiverName: string
-  performedBy: string
   performedAt: string
   items: TransactionLineItem[]
   notes: string

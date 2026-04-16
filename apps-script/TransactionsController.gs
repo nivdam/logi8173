@@ -6,12 +6,55 @@
  * Returns the next sequential form number in format 1008-XXXX.
  * Must be called inside an existing LockService lock (create already holds one).
  */
+function extractFormCounter_(formNumber) {
+  var match = String(formNumber || '').match(/^1008-(\d+)$/);
+  return match ? Number(match[1]) || 0 : 0;
+}
+
+function getExistingFormCounterBaseline_() {
+  var registryId = getConfigProperty_('ACTIVITIES_REGISTRY_ID');
+  if (!registryId) return 0;
+
+  var activityRows = readAllRows_(registryId, 'activities-registry');
+  var totalTransactions = 0;
+  var highestFormCounter = 0;
+
+  for (var i = 0; i < activityRows.length; i++) {
+    var activityId = activityRows[i].activity_id;
+    if (!activityId) continue;
+
+    var transactionsId = getConfigProperty_('ACTIVITY_' + activityId + '_TRANSACTIONS_ID');
+    if (!transactionsId) continue;
+
+    var transactions = readAllRows_(transactionsId, 'transactions');
+    totalTransactions += transactions.length;
+
+    for (var j = 0; j < transactions.length; j++) {
+      var parsedCounter = extractFormCounter_(transactions[j].form_number);
+      if (parsedCounter > highestFormCounter) {
+        highestFormCounter = parsedCounter;
+      }
+    }
+  }
+
+  return Math.max(totalTransactions, highestFormCounter);
+}
+
 function getNextFormNumber_() {
   var props = PropertiesService.getScriptProperties();
   var current = Number(props.getProperty('FORM_COUNTER') || '0');
+  var baseline = getExistingFormCounterBaseline_();
+
+  if (baseline > current) {
+    current = baseline;
+  }
+
   var next = current + 1;
   props.setProperty('FORM_COUNTER', String(next));
-  var padded = ('0000' + next).slice(-4);
+  var padded = String(next);
+  while (padded.length < 4) {
+    padded = '0' + padded;
+  }
   return '1008-' + padded;
 }
 
@@ -159,7 +202,6 @@ var TransactionsController = {
       giverName: row.giver_name || '',
       receiverPersonalId: String(row.receiver_personal_id),
       receiverName: row.receiver_name || '',
-      performedBy: row.performed_by || '',
       performedAt: row.performed_at || '',
       items: items,
       notes: row.notes || '',
@@ -247,6 +289,7 @@ var TransactionsController = {
       signature_url: signatureUrl
     };
 
+    ensureSheetHeaders_(transactionsId, 'transactions', SHEET_HEADERS['transactions']);
     appendRow_(transactionsId, 'transactions', transaction);
 
     // Audit log

@@ -9,6 +9,7 @@ import type {
   Activity,
   ActivityType,
   ActivityDetails,
+  PublicTransaction,
   Transaction,
   TransactionLineItem,
   TransactionType,
@@ -59,6 +60,52 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
     const activityId = body?.activityId ? String(body.activityId) : undefined
     if (!activityId) return mockTransactions
     return mockTransactions
+  },
+  "tx.getPublic": (body) => {
+    const txId = String(body?.txId || "")
+    const activityId = String(body?.activityId || "")
+    const transaction = mockTransactions.find((item) => item.txId === txId) ?? mockTransactions[0]
+
+    if (!transaction) {
+      throw new Error("Transaction not found")
+    }
+
+    const isIssuanceType = transaction.txType === "issue" || transaction.txType === "borrow_in"
+    const soldierPersonalId = isIssuanceType
+      ? transaction.receiverPersonalId
+      : transaction.giverPersonalId
+    const soldier = soldiersMock.find((item) => item.personalId === soldierPersonalId) ?? null
+    const operator = mockOperators.find((item) => item.email === transaction.performedBy) ?? mockOperators[0] ?? null
+    const activity = mockActivities.find((item) => item.activityId === activityId) ?? null
+
+    return {
+      txId: transaction.txId,
+      formNumber: transaction.formNumber,
+      txType: transaction.txType,
+      giverPersonalId: transaction.giverPersonalId,
+      giverName: transaction.giverName,
+      receiverPersonalId: transaction.receiverPersonalId,
+      receiverName: transaction.receiverName,
+      performedAt: transaction.performedAt,
+      items: transaction.items,
+      notes: transaction.notes,
+      signatureBase64: "",
+      activityName: activity?.name || "",
+      soldier: soldier
+        ? {
+            personalId: soldier.personalId,
+            fullName: soldier.fullName,
+            rank: soldier.rank,
+            company: soldier.company,
+          }
+        : null,
+      operator: operator
+        ? {
+            fullName: operator.fullName,
+            role: operator.role,
+          }
+        : null,
+    } satisfies PublicTransaction
   },
   "dashboard.summary": () => dashboardMock,
   "auth.me": () => ({
