@@ -102,13 +102,21 @@ export const InventoryPage = () => {
 
   const handleBatchSave = () => {
     const payload = editable.buildPayload()
+    const expectedTotal = payload.modified.length + payload.added.length + payload.deleted.length
     batchUpdate.mutate(payload, {
-      onSuccess: () => {
+      onSuccess: (result) => {
+        const actualTotal = result.modified + result.added + result.deleted
+        const hasSkipped = actualTotal < expectedTotal
         editable.cancelEditing()
         toaster.create({
-          title: t("inventory.batchSaveSuccess"),
-          type: "success",
-          duration: 3000,
+          title: hasSkipped
+            ? t("inventory.batchSavePartial")
+            : t("inventory.batchSaveSuccess"),
+          description: hasSkipped
+            ? `${actualTotal}/${expectedTotal}`
+            : undefined,
+          type: hasSkipped ? "warning" : "success",
+          duration: hasSkipped ? 6000 : 3000,
         })
       },
       onError: () => {

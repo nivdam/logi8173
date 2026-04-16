@@ -79,6 +79,7 @@
     "saveChanges": "שמור שינויים",
     "addRow": "הוסף פריט",
     "batchSaveSuccess": "השינויים נשמרו בהצלחה",
+    "batchSavePartial": "חלק מהשינויים לא נשמרו",
     "batchSaveError": "שמירת השינויים נכשלה. נסה שוב.",
     "deleteRow": "מחק שורה",
     "fields": {

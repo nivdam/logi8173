@@ -79,6 +79,7 @@
     "saveChanges": "Save Changes",
     "addRow": "Add Item",
     "batchSaveSuccess": "Changes saved successfully",
+    "batchSavePartial": "Some changes were not saved",
     "batchSaveError": "Failed to save changes. Try again.",
     "deleteRow": "Delete row",
     "fields": {
