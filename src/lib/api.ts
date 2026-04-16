@@ -133,10 +133,78 @@ const silentReAuth = (): Promise<string | undefined> => {
   })
 }
 
+const publicRequest = async <T>(
+  action: string,
+  body: Record<string, unknown> = {},
+): Promise<T> => {
+  if (USE_MOCK) {
+    return mockApiRequest<T>(action, body)
+  }
+
+  try {
+    const url = `${API_BASE}?action=${encodeURIComponent(action)}`
+    const controller = new AbortController()
+    const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    }).finally(() => {
+      window.clearTimeout(timeoutId)
+    })
+
+    const rawResponse = await response.text()
+    let json: { ok?: boolean; data?: T; error?: string; message?: string }
+
+    try {
+      json = JSON.parse(rawResponse)
+    } catch {
+      throw new ApiError(
+        "INVALID_RESPONSE",
+        response.ok
+          ? "The server returned an invalid response"
+          : `The server returned HTTP ${response.status}`,
+      )
+    }
+
+    if (!response.ok) {
+      throw new ApiError(
+        json.error || `HTTP_${response.status}`,
+        json.message || `The server returned HTTP ${response.status}`,
+      )
+    }
+
+    if (!json.ok) {
+      throw new ApiError(
+        json.error || "UNKNOWN_ERROR",
+        json.message || "The server returned an error",
+      )
+    }
+
+    return json.data as T
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error
+    }
+
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new ApiError("NETWORK_TIMEOUT", "The server took too long to respond")
+    }
+
+    if (import.meta.env.DEV && error instanceof TypeError) {
+      return mockApiRequest<T>(action, body)
+    }
+    throw new ApiError("NETWORK_ERROR", "Could not reach the server")
+  }
+}
+
 export const api = {
   get: <T>(action: string, params?: Record<string, unknown>) =>
     appsScriptRequest<T>(action, params ?? {}),
   post: appsScriptRequest,
+  publicPost: publicRequest,
   authenticateWithGoogleToken: (idToken: string) =>
     appsScriptRequest<AuthenticatedOperator>("auth.me", {}, idToken),
 }
