@@ -40,6 +40,12 @@ const transactionTypeLabel = (txType: PublicTransaction["txType"]): string => {
   return labels[txType]
 }
 
+const formTitle = (txType: PublicTransaction["txType"]): string => {
+  if (txType === "issue" || txType === "borrow_in") return t("sharedForm.issuanceTitle")
+  if (txType === "return" || txType === "return_borrow") return t("sharedForm.returnTitle")
+  return t("sharedForm.title")
+}
+
 const transactionTypeColor = (txType: PublicTransaction["txType"]): string => {
   if (txType === "issue" || txType === "borrow_in") return "green"
   if (txType === "return" || txType === "return_borrow") return "blue"
@@ -52,9 +58,7 @@ export const SharedFormHeader = ({ transaction }: Props) => (
       <Flex align="center" gap="2">
         <FileText size={20} color="var(--chakra-colors-fg-muted)" />
         <Heading size="lg" fontWeight="700">
-          {transaction.txType === "issue"
-            ? t("sharedForm.issuanceTitle")
-            : t("sharedForm.returnTitle")}
+          {formTitle(transaction.txType)}
         </Heading>
       </Flex>
       <Badge

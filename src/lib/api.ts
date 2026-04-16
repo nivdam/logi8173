@@ -12,6 +12,69 @@ const getIdToken = (): string => {
   return session.idToken
 }
 
+const fetchAndParse = async <T>(
+  action: string,
+  body: Record<string, unknown>,
+): Promise<T> => {
+  const url = `${API_BASE}?action=${encodeURIComponent(action)}`
+  const controller = new AbortController()
+  const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+    signal: controller.signal,
+  }).finally(() => {
+    window.clearTimeout(timeoutId)
+  })
+
+  const rawResponse = await response.text()
+  let json: { ok?: boolean; data?: T; error?: string; message?: string }
+
+  try {
+    json = JSON.parse(rawResponse)
+  } catch {
+    throw new ApiError(
+      "INVALID_RESPONSE",
+      response.ok
+        ? "The server returned an invalid response"
+        : `The server returned HTTP ${response.status}`,
+    )
+  }
+
+  if (!response.ok) {
+    throw new ApiError(
+      json.error || `HTTP_${response.status}`,
+      json.message || `The server returned HTTP ${response.status}`,
+    )
+  }
+
+  if (!json.ok) {
+    throw new ApiError(
+      json.error || "UNKNOWN_ERROR",
+      json.message || "The server returned an error",
+    )
+  }
+
+  return json.data as T
+}
+
+const handleNetworkError = <T>(action: string, body: Record<string, unknown>, error: unknown): T => {
+  if (error instanceof ApiError) {
+    throw error
+  }
+
+  if (error instanceof DOMException && error.name === "AbortError") {
+    throw new ApiError("NETWORK_TIMEOUT", "The server took too long to respond")
+  }
+
+  if (import.meta.env.DEV && error instanceof TypeError) {
+    return mockApiRequest<T>(action, body) as T
+  }
+  throw new ApiError("NETWORK_ERROR", "Could not reach the server")
+}
+
 const appsScriptRequest = async <T>(
   action: string,
   body: Record<string, unknown> = {},
@@ -22,65 +85,31 @@ const appsScriptRequest = async <T>(
   }
 
   try {
-    const url = `${API_BASE}?action=${encodeURIComponent(action)}`
-    const controller = new AbortController()
-    const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...body, idToken: idToken ?? getIdToken() }),
-      signal: controller.signal,
-    }).finally(() => {
-      window.clearTimeout(timeoutId)
+    const result = await fetchAndParse<T>(action, {
+      ...body,
+      idToken: idToken ?? getIdToken(),
     })
-
-    const rawResponse = await response.text()
-    let json: { ok?: boolean; data?: T; error?: string; message?: string }
-
-    try {
-      json = JSON.parse(rawResponse)
-    } catch {
-      throw new ApiError(
-        "INVALID_RESPONSE",
-        response.ok
-          ? "The server returned an invalid response"
-          : `The server returned HTTP ${response.status}`,
-      )
-    }
-
-    if (!response.ok) {
-      throw new ApiError(
-        json.error || `HTTP_${response.status}`,
-        json.message || `The server returned HTTP ${response.status}`,
-      )
-    }
-
-    if (!json.ok) {
-      if (json.error === "TOKEN_EXPIRED") {
-        return handleTokenExpired(() => appsScriptRequest<T>(action, body))
-      }
-      throw new ApiError(
-        json.error || "UNKNOWN_ERROR",
-        json.message || "The server returned an error",
-      )
-    }
-
-    return json.data as T
+    return result
   } catch (error) {
-    if (error instanceof ApiError) {
-      throw error
+    if (error instanceof ApiError && error.code === "TOKEN_EXPIRED") {
+      return handleTokenExpired(() => appsScriptRequest<T>(action, body))
     }
+    return handleNetworkError<T>(action, body, error)
+  }
+}
 
-    if (error instanceof DOMException && error.name === "AbortError") {
-      throw new ApiError("NETWORK_TIMEOUT", "The server took too long to respond")
-    }
+const publicRequest = async <T>(
+  action: string,
+  body: Record<string, unknown> = {},
+): Promise<T> => {
+  if (USE_MOCK) {
+    return mockApiRequest<T>(action, body)
+  }
 
-    // API unreachable — fall back to mock data in dev mode only for real network failures
-    if (import.meta.env.DEV && error instanceof TypeError) {
-      return mockApiRequest<T>(action, body)
-    }
-    throw new ApiError("NETWORK_ERROR", "Could not reach the server")
+  try {
+    return await fetchAndParse<T>(action, body)
+  } catch (error) {
+    return handleNetworkError<T>(action, body, error)
   }
 }
 
@@ -131,73 +160,6 @@ const silentReAuth = (): Promise<string | undefined> => {
       resolve(session?.idToken)
     })
   })
-}
-
-const publicRequest = async <T>(
-  action: string,
-  body: Record<string, unknown> = {},
-): Promise<T> => {
-  if (USE_MOCK) {
-    return mockApiRequest<T>(action, body)
-  }
-
-  try {
-    const url = `${API_BASE}?action=${encodeURIComponent(action)}`
-    const controller = new AbortController()
-    const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-      signal: controller.signal,
-    }).finally(() => {
-      window.clearTimeout(timeoutId)
-    })
-
-    const rawResponse = await response.text()
-    let json: { ok?: boolean; data?: T; error?: string; message?: string }
-
-    try {
-      json = JSON.parse(rawResponse)
-    } catch {
-      throw new ApiError(
-        "INVALID_RESPONSE",
-        response.ok
-          ? "The server returned an invalid response"
-          : `The server returned HTTP ${response.status}`,
-      )
-    }
-
-    if (!response.ok) {
-      throw new ApiError(
-        json.error || `HTTP_${response.status}`,
-        json.message || `The server returned HTTP ${response.status}`,
-      )
-    }
-
-    if (!json.ok) {
-      throw new ApiError(
-        json.error || "UNKNOWN_ERROR",
-        json.message || "The server returned an error",
-      )
-    }
-
-    return json.data as T
-  } catch (error) {
-    if (error instanceof ApiError) {
-      throw error
-    }
-
-    if (error instanceof DOMException && error.name === "AbortError") {
-      throw new ApiError("NETWORK_TIMEOUT", "The server took too long to respond")
-    }
-
-    if (import.meta.env.DEV && error instanceof TypeError) {
-      return mockApiRequest<T>(action, body)
-    }
-    throw new ApiError("NETWORK_ERROR", "Could not reach the server")
-  }
 }
 
 export const api = {

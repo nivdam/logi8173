@@ -11,12 +11,21 @@ export const CopyFormLinkButton = ({ activityId, txId }: Props) => {
 
   const handleCopy = () => {
     const url = buildFormUrl(activityId, txId)
-    void navigator.clipboard.writeText(url).then(() => {
-      setCopied(true)
-      window.setTimeout(() => {
-        setCopied(false)
-      }, 2000)
-    })
+    if (!navigator.clipboard) {
+      window.prompt(t("sharedForm.copyLink"), url)
+      return
+    }
+    void navigator.clipboard.writeText(url).then(
+      () => {
+        setCopied(true)
+        window.setTimeout(() => {
+          setCopied(false)
+        }, 2000)
+      },
+      () => {
+        window.prompt(t("sharedForm.copyLink"), url)
+      },
+    )
   }
 
   return (
