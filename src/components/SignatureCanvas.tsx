@@ -2,7 +2,7 @@ import { useRef } from "react"
 import { Box, Button, Flex, Text } from "@chakra-ui/react"
 import ReactSignatureCanvas from "react-signature-canvas"
 import { Eraser } from "lucide-react"
-import { t } from "../../lib/i18n"
+import { t } from "../lib/i18n"
 
 const pointGroupsToSvg = (pointGroups: Array<Array<{ x: number; y: number }>>, width: number, height: number): string => {
   const paths = pointGroups.map((group) => {

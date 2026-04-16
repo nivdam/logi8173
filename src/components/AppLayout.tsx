@@ -116,6 +116,7 @@ export const AppLayout = () => {
         open={isProfileDialogOpen}
         onOpenChange={handleProfileDialogOpenChange}
         defaultFullName={operatorProfile?.fullName ?? operator?.fullName ?? ""}
+        defaultSavedSignature={operator?.savedSignatureUrl}
         initialProfile={operatorProfile}
         isSaving={false}
         showReset={operatorProfile !== undefined}

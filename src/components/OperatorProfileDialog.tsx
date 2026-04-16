@@ -13,7 +13,7 @@ import {
   Text,
 } from "@chakra-ui/react"
 import { RefreshCw } from "lucide-react"
-import { SignatureCanvas } from "../features/issuance/SignatureCanvas"
+import { SignatureCanvas } from "./SignatureCanvas"
 import { t } from "../lib/i18n"
 import { RANK_OPTIONS } from "../lib/rank-options"
 import type { OperatorProfile } from "../lib/auth.types"
