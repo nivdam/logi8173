@@ -105,5 +105,11 @@ export default defineConfig(({ mode }) => {
       react(),
       createDevAppsScriptProxyPlugin(env.VITE_APP_PROXY_TARGET),
     ],
+    test: {
+      exclude: [
+        "e2e/**",
+        "node_modules/**",
+      ],
+    },
   }
 })
