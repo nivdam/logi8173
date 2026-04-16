@@ -23,6 +23,9 @@ const mockCompanies = [...companiesMock]
 const mockActivities: Activity[] = activitiesMock.map((activity) => ({ ...activity }))
 const mockTransactions = [...transactionsMock]
 let mockFormCounter = mockTransactions.length
+const mockTransactionActivityIds: Record<string, string> = Object.fromEntries(
+  mockTransactions.map((transaction) => [transaction.txId, "act1"]),
+)
 const activityItemIdsById = Object.fromEntries(
   activitiesMock.map((activity) => [
     activity.activityId,
@@ -64,9 +67,10 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
   "tx.getPublic": (body) => {
     const txId = String(body?.txId || "")
     const activityId = String(body?.activityId || "")
-    const transaction = mockTransactions.find((item) => item.txId === txId) ?? mockTransactions[0]
+    const transaction = mockTransactions.find((item) => item.txId === txId)
+    const transactionActivityId = mockTransactionActivityIds[txId]
 
-    if (!transaction) {
+    if (!transaction || transactionActivityId !== activityId) {
       throw new Error("Transaction not found")
     }
 
@@ -185,6 +189,7 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
     }
 
     mockTransactions.unshift(nextTransaction)
+    mockTransactionActivityIds[nextTransaction.txId] = String(body?.activityId || "")
 
     return {
       txId: nextTransaction.txId,
