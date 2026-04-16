@@ -267,9 +267,13 @@ export const mockApiRequest = <T>(action: string, body?: MockBody): Promise<T> =
     return Promise.reject(new Error("No mock handler for action: " + action))
   }
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     setTimeout(() => {
-      resolve(handler(body) as T)
+      try {
+        resolve(handler(body) as T)
+      } catch (error) {
+        reject(error)
+      }
     }, MOCK_DELAY_MS)
   })
 }

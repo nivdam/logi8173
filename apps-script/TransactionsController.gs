@@ -175,9 +175,11 @@ var TransactionsController = {
     if (operatorsSheetId && row.performed_by) {
       var operatorRow = findRow_(operatorsSheetId, 'operators', 'email', row.performed_by);
       if (operatorRow) {
+        var publicSafeRoles = ['admin', 'warehouse_operator', 'commander', 'viewer'];
+        var rawRole = operatorRow.row.role || '';
         operatorDetails = {
           fullName: operatorRow.row.full_name || '',
-          role: operatorRow.row.role || ''
+          role: publicSafeRoles.indexOf(rawRole) !== -1 ? rawRole : ''
         };
       }
     }
