@@ -15,15 +15,7 @@ import {
 import { Package } from "lucide-react"
 import { FilterSelect } from "../../components/FilterSelect"
 import { t } from "../../lib/i18n"
-
-const CATEGORY_OPTIONS = [
-  { value: "רספאי", label: "רספאי" },
-  { value: "קבלר_קרביות", label: "קבלר קרביות" },
-  { value: "ציוד_אישי", label: "ציוד אישי" },
-  { value: "אנרגיה", label: "אנרגיה" },
-  { value: "תקשורת", label: "תקשורת" },
-  { value: "כללי", label: "כללי" },
-]
+import { CATEGORY_OPTIONS } from "./inventory.constants"
 
 const UNIT_OPTIONS = [
   { value: "יחידה", label: "יחידה" },

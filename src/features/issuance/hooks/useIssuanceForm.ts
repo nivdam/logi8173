@@ -5,6 +5,7 @@ import { useCreateTransaction } from "../../../api"
 import { showApiErrorToast } from "../../../lib/api-error"
 import { t } from "../../../lib/i18n"
 import { toaster } from "../../../lib/toaster"
+import { useDraftPersistence } from "../../../lib/use-draft-persistence"
 import {
   mapLinesToTransactionItems,
   getFilledLines,
@@ -43,6 +44,19 @@ export const useIssuanceForm = () => {
     hasGiverSignature
 
   const totalItemCount = filledLines.reduce((sum, line) => sum + line.qty, 0)
+
+  const draftKey = "draft:issuance"
+  const draft = useDraftPersistence(draftKey, state, isFormDirty, state.showSuccess)
+
+  const handleRestoreDraft = () => {
+    if (!draft.savedDraft) return
+    dispatch({ type: "RESTORE_DRAFT", payload: draft.savedDraft })
+    draft.dismissDraft()
+  }
+
+  const handleDiscardDraft = () => {
+    draft.clearDraft()
+  }
 
   const handleSelectReceiver = (soldier: Soldier) => {
     dispatch({ type: "SET_RECEIVER", payload: soldier })
@@ -146,6 +160,7 @@ export const useIssuanceForm = () => {
 
   const handleNewIssuance = () => {
     setSearchParams({}, { replace: true })
+    draft.clearDraft()
     dispatch({ type: "RESET" })
   }
 
@@ -159,6 +174,9 @@ export const useIssuanceForm = () => {
     isFormDirty,
     totalItemCount,
     isSubmitting: createTransaction.isPending,
+    hasDraft: draft.hasDraft,
+    handleRestoreDraft,
+    handleDiscardDraft,
     handleSelectActivity,
     handleSelectReceiver,
     handleClearReceiver,

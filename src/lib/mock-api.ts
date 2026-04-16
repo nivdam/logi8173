@@ -9,6 +9,7 @@ import type {
   Activity,
   ActivityType,
   ActivityDetails,
+  InventoryItem,
   PublicTransaction,
   Transaction,
   TransactionLineItem,
@@ -253,11 +254,117 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
       snapshotItems,
     } satisfies ActivityDetails
   },
-  "activities.close": (body) => ({
-    activityId: String(body?.activityId || "act1"),
-    status: "closed",
-    closedAt: new Date().toISOString(),
-  }),
+  "inventory.batchUpdate": (body) => {
+    const modified = Array.isArray(body?.modified) ? body.modified : []
+    const added = Array.isArray(body?.added) ? body.added : []
+    const deleted = Array.isArray(body?.deleted) ? body.deleted : []
+
+    for (const item of modified) {
+      const existingIndex = inventoryMock.findIndex(
+        (existing) => existing.itemId === String(item.itemId),
+      )
+      if (existingIndex === -1) {
+        throw new Error("Item not found: " + String(item.itemId))
+      }
+      inventoryMock[existingIndex] = {
+        ...inventoryMock[existingIndex],
+        name: String(item.name || ""),
+        itemNumber: String(item.itemNumber || ""),
+        category: String(item.category || "כללי") as InventoryItem["category"],
+        currentQty: Number(item.currentQty) || 0,
+        unitOfMeasure: String(item.unitOfMeasure || "יחידה") as InventoryItem["unitOfMeasure"],
+        notes: String(item.notes || ""),
+        minThreshold: Number(item.minThreshold) || 0,
+      }
+    }
+
+    for (const item of added) {
+      const newItem: InventoryItem = {
+        itemId: "i_mock_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+        name: String(item.name || ""),
+        itemNumber: String(item.itemNumber || ""),
+        category: (String(item.category || "כללי")) as InventoryItem["category"],
+        tags: [],
+        unitOfMeasure: (String(item.unitOfMeasure || "יחידה")) as InventoryItem["unitOfMeasure"],
+        currentQty: Number(item.currentQty) || 0,
+        minThreshold: Number(item.minThreshold) || 0,
+        status: "ok",
+        notes: String(item.notes || ""),
+      }
+      inventoryMock.push(newItem)
+    }
+
+    for (const itemId of deleted) {
+      const existingIndex = inventoryMock.findIndex(
+        (existing) => existing.itemId === String(itemId),
+      )
+      if (existingIndex >= 0) {
+        inventoryMock.splice(existingIndex, 1)
+      }
+    }
+
+    return {
+      modified: modified.length,
+      added: added.length,
+      deleted: deleted.length,
+    }
+  },
+  "activities.close": (body) => {
+    const activityId = String(body?.activityId || "act1")
+    const activity = mockActivities.find((item) => item.activityId === activityId)
+
+    if (!activity) {
+      throw new Error("Activity not found")
+    }
+
+    if (activity.status === "closed") {
+      throw new Error("Activity is already closed")
+    }
+
+    const closedAt = new Date().toISOString()
+    activity.status = "closed"
+    activity.closedAt = closedAt
+    activity.endDate = closedAt
+
+    return {
+      activityId: activity.activityId,
+      name: activity.name,
+      status: "closed",
+      closedAt,
+    }
+  },
+  "activities.reopen": (body) => {
+    const activityId = String(body?.activityId || "")
+    const activity = mockActivities.find((item) => item.activityId === activityId)
+
+    if (!activity) {
+      throw new Error("Activity not found")
+    }
+
+    if (activity.status !== "closed") {
+      throw new Error("Activity is not closed")
+    }
+
+    const reopenedAt = new Date().toISOString()
+    activity.status = "active"
+    activity.closedAt = undefined
+    activity.endDate = undefined
+
+    return {
+      activityId: activity.activityId,
+      name: activity.name,
+      status: "active",
+      reopenedAt,
+    }
+  },
+  "presence.heartbeat": () => ({ ok: true }),
+  "presence.getOnline": () => [
+    {
+      email: "dev@mock.local",
+      fullName: "Dev User",
+      lastSeen: new Date().toISOString(),
+    },
+  ],
 }
 
 export const mockApiRequest = <T>(action: string, body?: MockBody): Promise<T> => {

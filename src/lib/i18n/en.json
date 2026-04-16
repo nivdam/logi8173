@@ -74,6 +74,12 @@
     "addItemAction": "Add item",
     "addItemSuccess": "Item added successfully",
     "addItemError": "Failed to add item. Try again.",
+    "editMode": "Edit Inventory",
+    "cancelEdit": "Cancel Edit",
+    "saveChanges": "Save Changes",
+    "addRow": "Add Item",
+    "batchSaveSuccess": "Changes saved successfully",
+    "batchSaveError": "Failed to save changes. Try again.",
     "fields": {
       "name": "Item name",
       "namePlaceholder": "e.g. Combat vest...",
@@ -118,6 +124,15 @@
     "openError": "Could not open the activity. Please try again.",
     "closeSuccess": "Activity closed successfully.",
     "closeError": "Could not close the activity. Please try again.",
+    "closeConfirmTitle": "Close activity",
+    "closeConfirmBody": "Are you sure you want to close this activity? Issuance and returns will no longer be possible.",
+    "closeConfirmAction": "Close activity",
+    "reopenAction": "Reopen",
+    "reopenSuccess": "Activity reopened successfully.",
+    "reopenError": "Could not reopen the activity. Please try again.",
+    "reopenConfirmTitle": "Reopen activity",
+    "reopenConfirmBody": "Are you sure you want to reopen this activity? Issuance and returns will be possible again.",
+    "reopenConfirmAction": "Reopen activity",
     "detailDescription": "View activity details and the inventory assigned to it.",
     "snapshotTitle": "Activity Inventory",
     "snapshotDescription": "This is the partial snapshot created from the items selected when the activity was opened.",
@@ -512,6 +527,10 @@
     "title": "Oops, you got lost",
     "description": "Even the warehouse can't find this page. Someone probably forgot to return it.",
     "backHome": "Back to base"
+  },
+  "presence": {
+    "onlineOperators": "Online operators",
+    "onlineCount": "operators online"
   },
   "roles": {
     "admin": "Admin",

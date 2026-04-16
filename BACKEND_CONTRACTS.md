@@ -67,6 +67,7 @@ Frontend code already assumes this envelope in `src/lib/api.ts`.
 - `activities.get`
 - `activities.open`
 - `activities.close`
+- `activities.reopen`
 - `activities.addItems`
 
 ### Transactions

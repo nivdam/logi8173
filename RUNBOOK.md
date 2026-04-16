@@ -30,6 +30,75 @@
 - SPA rewrites still work through `vercel.json`
 - A real operator can log in after deploy
 
+## OAuth Production Domain Setup
+
+### Google Cloud Console Configuration
+
+1. Go to [Google Cloud Console](https://console.cloud.google.com) → **APIs & Services → Credentials**
+2. Select your OAuth 2.0 Client ID (Web Application type)
+3. Under **Authorized JavaScript origins**, add:
+   - `https://your-app.vercel.app` (your Vercel production domain)
+   - If you have a custom domain: `https://your-custom-domain.com`
+   - For local dev: `http://localhost:5173`
+4. Under **Authorized redirect URIs**, add the same origins
+5. Save
+
+### OAuth Consent Screen
+
+1. Go to **APIs & Services → OAuth consent screen**
+2. For internal battalion use, **External** user type is fine (Google Workspace is not required)
+3. Fill in:
+   - App name: "Logi8173" (or battalion-preferred name)
+   - User support email: the battalion admin email
+   - Authorized domains: add your Vercel domain (e.g., `your-app.vercel.app`)
+   - Developer contact: battalion admin email
+4. Under **Scopes**, no additional scopes are needed — the app only uses `openid`, `email`, `profile` (default)
+5. Under **Test users** (while in testing mode):
+   - Add all operator Google accounts
+   - Or publish the app to move out of testing mode (no review needed for unverified apps with < 100 users)
+
+### Moving from Testing to Production
+
+While in "Testing" status, only explicitly added test users can log in. To allow any operator to log in:
+
+1. Go to **OAuth consent screen → Publishing status**
+2. Click **Publish App**
+3. Google will show a warning about verification — for internal apps with < 100 users, you can proceed without verification
+4. Users will see a "Google hasn't verified this app" warning on first login — click **Advanced → Go to app (unsafe)** once
+
+### Verifying Production Login
+
+1. Deploy the latest frontend to Vercel
+2. Ensure `VITE_GOOGLE_CLIENT_ID` matches the Client ID in Cloud Console
+3. Ensure `APPS_SCRIPT_URL` points to the correct Apps Script deployment
+4. Open the production URL in an incognito window
+5. Click "Sign in with Google"
+6. Select an operator account
+7. Verify the dashboard loads and `auth.me` returns the operator profile
+
+### Troubleshooting OAuth Errors
+
+| Error | Cause | Fix |
+| --- | --- | --- |
+| `redirect_uri_mismatch` | Production domain not in Authorized origins | Add exact domain to Cloud Console (no trailing slash) |
+| `invalid_client` | Wrong Client ID | Verify `VITE_GOOGLE_CLIENT_ID` matches Cloud Console |
+| `access_denied` | App in testing mode, user not in test users list | Add user to test users, or publish the app |
+| `popup_closed_by_user` | User closed the Google login popup | Try again; check if popup blocker is active |
+| `idpiframe_initialization_failed` | Third-party cookies blocked | User needs to allow cookies for accounts.google.com |
+| CORS errors on `/api/gas` | Vercel domain mismatch | Verify `vercel.json` rewrites and env vars |
+| `MISSING_TOKEN` from Apps Script | Token not forwarded by proxy | Check `APPS_SCRIPT_URL` env var on Vercel |
+| `INVALID_TOKEN` from Apps Script | `WEB_CLIENT_ID` mismatch | Ensure Apps Script `WEB_CLIENT_ID` property matches the frontend Client ID |
+
+### Custom Domain (Optional)
+
+If using a custom domain instead of `*.vercel.app`:
+
+1. Add the domain in Vercel → **Settings → Domains**
+2. Configure DNS (CNAME or A record as instructed by Vercel)
+3. Add the custom domain to **Authorized JavaScript origins** and **Authorized redirect URIs** in Cloud Console
+4. Wait for DNS propagation (can take up to 48 hours, usually minutes)
+5. Verify HTTPS works on the custom domain before testing login
+
 ## Recovery
 
 ### Operator Access Broken

@@ -89,5 +89,75 @@ var InventoryController = {
     });
 
     return { itemId: newItem.item_id, name: newItem.name };
+  },
+
+  batchUpdate: function(context) {
+    var masterInventoryId = getConfigProperty_('MASTER_INVENTORY_ID');
+    var body = context.request.body;
+    var now = new Date().toISOString();
+    var results = { modified: 0, added: 0, deleted: 0 };
+
+    // Modify existing items
+    var modified = body.modified || [];
+    for (var m = 0; m < modified.length; m++) {
+      var mod = modified[m];
+      if (!mod.itemId || !mod.name || !mod.category) continue;
+      var existing = findRow_(masterInventoryId, 'master-inventory', 'item_id', mod.itemId);
+      if (!existing) continue;
+      var updated = {
+        item_id: mod.itemId,
+        item_number: mod.itemNumber || '',
+        name: mod.name,
+        category: mod.category,
+        tags: Array.isArray(mod.tags) ? mod.tags.join(',') : (mod.tags || ''),
+        unit_of_measure: mod.unitOfMeasure || existing.row.unit_of_measure,
+        initial_qty: mod.currentQty !== undefined ? mod.currentQty : existing.row.initial_qty,
+        min_threshold: mod.minThreshold !== undefined ? mod.minThreshold : existing.row.min_threshold,
+        notes: mod.notes !== undefined ? mod.notes : existing.row.notes,
+        created_at: existing.row.created_at,
+        updated_at: now
+      };
+      updateRow_(masterInventoryId, 'master-inventory', existing.index, updated);
+      results.modified++;
+    }
+
+    // Add new items
+    var added = body.added || [];
+    for (var a = 0; a < added.length; a++) {
+      var add = added[a];
+      if (!add.name || !add.category) continue;
+      var newItem = {
+        item_id: generateId_('item'),
+        item_number: add.itemNumber || '',
+        name: add.name,
+        category: add.category,
+        tags: Array.isArray(add.tags) ? add.tags.join(',') : (add.tags || ''),
+        unit_of_measure: add.unitOfMeasure || '',
+        initial_qty: add.currentQty || 0,
+        min_threshold: add.minThreshold || 0,
+        notes: add.notes || '',
+        created_at: now,
+        updated_at: now
+      };
+      appendRow_(masterInventoryId, 'master-inventory', newItem);
+      results.added++;
+    }
+
+    // Delete items
+    var deleted = body.deleted || [];
+    for (var d = deleted.length - 1; d >= 0; d--) {
+      var delId = deleted[d];
+      var found = findRow_(masterInventoryId, 'master-inventory', 'item_id', delId);
+      if (found) {
+        deleteRow_(masterInventoryId, 'master-inventory', found.index);
+        results.deleted++;
+      }
+    }
+
+    logGlobalAudit_('inventory.batchUpdate', context.operator.email, {
+      modified: results.modified, added: results.added, deleted: results.deleted
+    });
+
+    return results;
   }
 };
