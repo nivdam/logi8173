@@ -1,9 +1,10 @@
-import { Box, Flex, Heading, Image, Separator, Spinner, Text, VStack } from "@chakra-ui/react"
-import { AlertTriangle } from "lucide-react"
+import { Box, Flex, Image, Separator, Text, VStack } from "@chakra-ui/react"
 import { useParams } from "react-router-dom"
 import { usePublicTransaction } from "../api"
+import { SharedFormError } from "../features/shared-form/SharedFormError"
 import { SharedFormHeader } from "../features/shared-form/SharedFormHeader"
 import { SharedFormItems } from "../features/shared-form/SharedFormItems"
+import { SharedFormLoading } from "../features/shared-form/SharedFormLoading"
 import { SharedFormParties } from "../features/shared-form/SharedFormParties"
 import { SharedFormSignatures } from "../features/shared-form/SharedFormSignatures"
 import { t } from "../lib/i18n"
@@ -15,11 +16,11 @@ export const SharedFormPage = () => {
   const { data: transaction, isLoading, isError } = usePublicTransaction(activityId, txId)
 
   if (isLoading) {
-    return <LoadingState />
+    return <SharedFormLoading />
   }
 
   if (isError || !transaction) {
-    return <ErrorState />
+    return <SharedFormError />
   }
 
   return (
@@ -61,51 +62,6 @@ export const SharedFormPage = () => {
     </Flex>
   )
 }
-
-const LoadingState = () => (
-  <Flex
-    direction="column"
-    align="center"
-    justify="center"
-    minH="100dvh"
-    bg="bg"
-    gap="4"
-  >
-    <Spinner size="lg" color="sage.500" />
-    <Text color="fg.muted" textStyle="sm">{t("sharedForm.loading")}</Text>
-  </Flex>
-)
-
-const ErrorState = () => (
-  <Flex
-    direction="column"
-    align="center"
-    justify="center"
-    minH="100dvh"
-    bg="bg"
-    p="6"
-    css={animations.fadeInUp}
-  >
-    <VStack gap="4" align="center">
-      <Flex
-        align="center"
-        justify="center"
-        w="16"
-        h="16"
-        borderRadius="full"
-        bg="red.50"
-      >
-        <AlertTriangle size={32} color="var(--chakra-colors-red-500)" />
-      </Flex>
-      <Heading size="lg" fontWeight="600" textAlign="center">
-        {t("sharedForm.error")}
-      </Heading>
-      <Text color="fg.muted" textStyle="sm" textAlign="center">
-        {t("sharedForm.notFound")}
-      </Text>
-    </VStack>
-  </Flex>
-)
 
 type SharedFormPageParams = {
   activityId: string

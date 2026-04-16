@@ -50,6 +50,7 @@ export const OperatorProfileDialog = ({
     const sig = initialProfile?.savedSignature ?? defaultSavedSignature ?? ""
     setSavedSignature(sig)
     setIsEditingSignature(sig === "")
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- reset state only when dialog opens
   }, [open])
 
   const isValid =
