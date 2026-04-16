@@ -216,6 +216,21 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
     case "SHOW_SUCCESS":
       return { ...state, showSuccess: true, formId: action.payload.formId, serverTxId: action.payload.txId }
 
+    case "RESTORE_DRAFT": {
+      const rawIds = action.payload.selectedIssuedItemIds
+      const restoredSelectedIds = rawIds instanceof Set
+        ? rawIds
+        : new Set<string>(Array.isArray(rawIds) ? rawIds : [])
+      return {
+        ...action.payload,
+        clientTxId: createClientTxId(),
+        showSuccess: false,
+        formId: undefined,
+        serverTxId: undefined,
+        selectedIssuedItemIds: restoredSelectedIds,
+      }
+    }
+
     case "RESET":
       return createInitialState()
   }
@@ -237,6 +252,10 @@ export type ReturnFormState = {
   showSuccess: boolean
 }
 
+type ReturnFormDraft = Omit<ReturnFormState, "selectedIssuedItemIds"> & {
+  selectedIssuedItemIds: Set<string> | string[]
+}
+
 export type ReturnFormAction =
   | { type: "SET_ACTIVITY"; payload: string }
   | { type: "SET_GIVER"; payload: Soldier | undefined }
@@ -254,4 +273,5 @@ export type ReturnFormAction =
   | { type: "POPULATE_ALL_ISSUED"; payload: { items: SoldierIssuedItem[] } }
   | { type: "CLEAR_ALL_ISSUED" }
   | { type: "SHOW_SUCCESS"; payload: { formId: string; txId: string } }
+  | { type: "RESTORE_DRAFT"; payload: ReturnFormDraft }
   | { type: "RESET" }

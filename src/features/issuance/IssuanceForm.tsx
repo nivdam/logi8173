@@ -6,6 +6,7 @@ import { useActivity } from "../../api";
 import { t } from "../../lib/i18n";
 import { animations } from "../../theme/animations";
 import { useIssuanceForm } from "./hooks/useIssuanceForm";
+import { DraftRestoreBanner } from "../../components/DraftRestoreBanner";
 import { ActivityContextCard } from "./ActivityContextCard";
 import { IssuanceAccordionSection } from "./IssuanceAccordionSection";
 import { IssuanceHeader } from "./IssuanceHeader";
@@ -51,6 +52,13 @@ export const IssuanceForm = () => {
       <Heading size="lg" fontWeight="700">
         {t("issuance.formTitle")}
       </Heading>
+
+      {form.hasDraft && (
+        <DraftRestoreBanner
+          onRestore={form.handleRestoreDraft}
+          onDiscard={form.handleDiscardDraft}
+        />
+      )}
 
       <ActivityContextCard
         selectedActivityId={form.state.activityId}

@@ -129,6 +129,58 @@ var ActivitiesController = {
     };
   },
 
+  reopen: function(context) {
+    var body = context.request.body;
+
+    if (!body.activityId) {
+      throw createError_('VALIDATION_ERROR', 'activityId is required');
+    }
+
+    var registryId = getConfigProperty_('ACTIVITIES_REGISTRY_ID');
+    var existing = findRow_(registryId, 'activities-registry', 'activity_id', body.activityId);
+
+    if (!existing) {
+      throw createError_('NOT_FOUND', 'Activity not found: ' + body.activityId);
+    }
+
+    if (existing.row.status !== 'closed') {
+      throw createError_('NOT_CLOSED', 'Activity is not closed');
+    }
+
+    var now = new Date().toISOString();
+    var updated = {
+      activity_id: existing.row.activity_id,
+      name: existing.row.name,
+      activity_type: existing.row.activity_type,
+      status: 'active',
+      opened_by: existing.row.opened_by,
+      start_date: existing.row.start_date,
+      end_date: '',
+      folder_id: existing.row.folder_id,
+      created_at: existing.row.created_at,
+      closed_at: ''
+    };
+    updateRow_(registryId, 'activities-registry', existing.index, updated);
+
+    var auditLogId = getConfigProperty_('ACTIVITY_' + body.activityId + '_AUDIT_LOG_ID');
+    if (auditLogId) {
+      logAudit_(auditLogId, 'activity.reopen', context.operator.email, {
+        activityId: body.activityId
+      });
+    }
+
+    logGlobalAudit_('activity.reopen', context.operator.email, {
+      activityId: body.activityId
+    });
+
+    return {
+      activityId: updated.activity_id,
+      name: updated.name,
+      status: 'active',
+      reopenedAt: now
+    };
+  },
+
   addItems: function(context) {
     var body = context.request.body;
 

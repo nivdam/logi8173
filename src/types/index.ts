@@ -5,3 +5,4 @@ export type { Activity, ActivityType, ActivityStatus, ActivityDetails } from "./
 export type { Transaction, TransactionType, TransactionLineItem, PublicTransaction } from "./transaction"
 export type { DashboardSummary, CompanyBreakdown, CompanyDamageBreakdown, DamagedItemDetail } from "./dashboard"
 export type { SetupStatus, SetupResult } from "./setup"
+export type { OnlineOperator } from "./presence"

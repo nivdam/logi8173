@@ -61,6 +61,23 @@ export const useCloseActivity = () => {
   })
 }
 
+export const useReopenActivity = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (input: ReopenActivityInput) =>
+      api.post<{ activityId: string; status: string; reopenedAt: string }>(
+        "activities.reopen",
+        input,
+      ),
+    onSuccess: (_result, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["activities"] })
+      queryClient.invalidateQueries({ queryKey: ["activities", variables.activityId] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+    },
+  })
+}
+
 type OpenActivityInput = {
   name: string
   activityType: ActivityType
@@ -71,6 +88,10 @@ type OpenActivityInput = {
 type CloseActivityInput = {
   activityId: string
   endDate?: string
+}
+
+type ReopenActivityInput = {
+  activityId: string
 }
 
 type AddItemsToActivityInput = {

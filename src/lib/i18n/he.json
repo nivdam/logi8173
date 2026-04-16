@@ -74,6 +74,14 @@
     "addItemAction": "הוסף פריט",
     "addItemSuccess": "הפריט נוסף בהצלחה",
     "addItemError": "הוספת הפריט נכשלה. נסה שוב.",
+    "editMode": "עריכת מלאי",
+    "cancelEdit": "ביטול עריכה",
+    "saveChanges": "שמור שינויים",
+    "addRow": "הוסף פריט",
+    "batchSaveSuccess": "השינויים נשמרו בהצלחה",
+    "batchSavePartial": "חלק מהשינויים לא נשמרו",
+    "batchSaveError": "שמירת השינויים נכשלה. נסה שוב.",
+    "deleteRow": "מחק שורה",
     "fields": {
       "name": "שם הפריט",
       "namePlaceholder": "לדוגמה: אפוד קרבי...",
@@ -118,6 +126,15 @@
     "openError": "פתיחת הפעילות נכשלה. נסה שוב.",
     "closeSuccess": "הפעילות נסגרה בהצלחה.",
     "closeError": "סגירת הפעילות נכשלה. נסה שוב.",
+    "closeConfirmTitle": "סגירת פעילות",
+    "closeConfirmBody": "האם לסגור את הפעילות? לא ניתן יהיה להנפיק או להחזיר ציוד בפעילות סגורה.",
+    "closeConfirmAction": "סגור פעילות",
+    "reopenAction": "פתח מחדש",
+    "reopenSuccess": "הפעילות נפתחה מחדש בהצלחה.",
+    "reopenError": "פתיחת הפעילות מחדש נכשלה. נסה שוב.",
+    "reopenConfirmTitle": "פתיחה מחדש",
+    "reopenConfirmBody": "האם לפתוח מחדש את הפעילות? הנפקות והחזרות יתאפשרו שוב.",
+    "reopenConfirmAction": "פתח מחדש",
     "detailDescription": "צפייה בפרטי הפעילות ובמלאי שהוקצה לה.",
     "snapshotTitle": "מלאי הפעילות",
     "snapshotDescription": "זהו ה-snapshot החלקי שנוצר מהפריטים שנבחרו בעת פתיחת הפעילות.",
@@ -512,6 +529,10 @@
     "title": "אופס, הלכת לאיבוד",
     "description": "גם בימ\"ח לא מצליח למצוא את הדף הזה. כנראה מישהו שכח להחזיר אותו.",
     "backHome": "חזרה לבסיס"
+  },
+  "presence": {
+    "onlineOperators": "מפעילים מחוברים",
+    "onlineCount": "מפעילים מחוברים"
   },
   "roles": {
     "admin": "מנהל",

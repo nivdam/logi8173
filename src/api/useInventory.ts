@@ -21,6 +21,19 @@ export const useUpsertInventoryItem = () => {
   })
 }
 
+export const useBatchUpdateInventory = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (payload: BatchUpdateInventoryInput) =>
+      api.post<BatchUpdateInventoryResult>("inventory.batchUpdate", payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["inventory"] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+    },
+  })
+}
+
 type UpsertInventoryItemInput = {
   itemId?: string
   itemNumber?: string
@@ -31,4 +44,16 @@ type UpsertInventoryItemInput = {
   initialQty?: number
   minThreshold?: number
   notes?: string
+}
+
+type BatchUpdateInventoryInput = {
+  modified: Record<string, string | number | string[]>[]
+  added: InventoryItem[]
+  deleted: string[]
+}
+
+type BatchUpdateInventoryResult = {
+  modified: number
+  added: number
+  deleted: number
 }
