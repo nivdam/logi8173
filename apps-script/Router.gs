@@ -20,7 +20,8 @@ function getRoutes_() {
 
     // Inventory
     'inventory.list':     { handler: InventoryController.list,   roles: null },
-    'inventory.upsert':   { handler: InventoryController.upsert, roles: ['admin', 'warehouse_operator'] },
+    'inventory.upsert':       { handler: InventoryController.upsert,      roles: ['admin', 'warehouse_operator'] },
+    'inventory.batchUpdate':  { handler: InventoryController.batchUpdate, roles: ['admin', 'warehouse_operator'] },
 
     // Soldiers
     'soldiers.list':      { handler: SoldiersController.list,    roles: null },
@@ -38,6 +39,7 @@ function getRoutes_() {
     'activities.get':     { handler: ActivitiesController.get,   roles: null },
     'activities.open':    { handler: ActivitiesController.open,  roles: ['admin', 'warehouse_operator'] },
     'activities.close':   { handler: ActivitiesController.close, roles: ['admin'] },
+    'activities.reopen':  { handler: ActivitiesController.reopen, roles: ['admin'] },
     'activities.addItems': { handler: ActivitiesController.addItems, roles: ['admin', 'warehouse_operator'] },
 
     // Transactions
@@ -46,7 +48,11 @@ function getRoutes_() {
     'tx.getPublic':       { handler: TransactionsController.getPublic, roles: null, public: true },
 
     // Dashboard
-    'dashboard.summary':  { handler: DashboardController.summary, roles: null }
+    'dashboard.summary':  { handler: DashboardController.summary, roles: null },
+
+    // Presence
+    'presence.heartbeat': { handler: PresenceController.heartbeat, roles: null },
+    'presence.getOnline': { handler: PresenceController.getOnline, roles: null }
   };
 }
 

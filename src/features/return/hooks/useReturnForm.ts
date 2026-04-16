@@ -5,6 +5,7 @@ import { useCreateTransaction, useTransactions } from "../../../api"
 import { showApiErrorToast } from "../../../lib/api-error"
 import { t } from "../../../lib/i18n"
 import { toaster } from "../../../lib/toaster"
+import { useDraftPersistence } from "../../../lib/use-draft-persistence"
 import {
   getFilledLines,
   hasLineErrors,
@@ -16,6 +17,14 @@ import type { InventoryItem } from "../../../types/inventory"
 import type { Soldier } from "../../../types"
 import type { IssuanceLineItem } from "../../issuance/issuance.types"
 import type { SoldierIssuedItem } from "../return.types"
+import type { ReturnFormState } from "./returnFormReducer"
+
+const serializeReturnState = (formState: ReturnFormState) => ({
+  ...formState,
+  selectedIssuedItemIds: Array.from(formState.selectedIssuedItemIds),
+  giverSignature: "",
+  receiverSignature: "",
+})
 
 export const useReturnForm = () => {
   const { operator, operatorProfile } = useAuth()
@@ -56,6 +65,18 @@ export const useReturnForm = () => {
   )
 
   const isLoadingIssuedItems = state.giver !== undefined && transactionsQuery.isLoading
+
+  const draft = useDraftPersistence("draft:return", state, isFormDirty, state.showSuccess, serializeReturnState)
+
+  const handleRestoreDraft = () => {
+    if (!draft.savedDraft) return
+    dispatch({ type: "RESTORE_DRAFT", payload: draft.savedDraft })
+    draft.dismissDraft()
+  }
+
+  const handleDiscardDraft = () => {
+    draft.clearDraft()
+  }
 
   const handleSelectGiver = (soldier: Soldier) => {
     dispatch({ type: "SET_GIVER", payload: soldier })
@@ -175,6 +196,7 @@ export const useReturnForm = () => {
 
   const handleNewReturn = () => {
     setSearchParams({}, { replace: true })
+    draft.clearDraft()
     dispatch({ type: "RESET" })
   }
 
@@ -188,6 +210,9 @@ export const useReturnForm = () => {
     isFormDirty,
     totalItemCount,
     isSubmitting: createTransaction.isPending,
+    hasDraft: draft.hasDraft,
+    handleRestoreDraft,
+    handleDiscardDraft,
     savedSignature,
     soldierIssuedItems,
     isLoadingIssuedItems,

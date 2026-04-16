@@ -4,6 +4,7 @@ import { RotateCcw, PackageCheck, Package, FileSignature } from "lucide-react"
 import { useActivity } from "../../api"
 import { t } from "../../lib/i18n"
 import { animations } from "../../theme/animations"
+import { DraftRestoreBanner } from "../../components/DraftRestoreBanner"
 import { ActivityContextCard } from "../issuance/ActivityContextCard"
 import { IssuanceAccordionSection } from "../issuance/IssuanceAccordionSection"
 import { ItemsSection } from "../issuance/ItemsSection"
@@ -47,7 +48,7 @@ export const ReturnForm = () => {
 
   const handleAddManualItem = () => {
     form.handleAddEmptyLine()
-    setActiveSection((current) => Array.from(new Set([...current, "items"])))
+    setActiveSection((current) => current.includes("items") ? current : [...current, "items"])
   }
 
   return (
@@ -55,6 +56,13 @@ export const ReturnForm = () => {
       <Heading size="lg" fontWeight="700">
         {t("returns.formTitle")}
       </Heading>
+
+      {form.hasDraft && (
+        <DraftRestoreBanner
+          onRestore={form.handleRestoreDraft}
+          onDiscard={form.handleDiscardDraft}
+        />
+      )}
 
       <ActivityContextCard
         selectedActivityId={form.state.activityId}

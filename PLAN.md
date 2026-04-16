@@ -46,10 +46,21 @@ Deliver a battalion-usable system where a small operator team can set up, import
 - Soldiers list with search, filter by company/platoon, sort
 - Backend CRUD for all entities (inventory, soldiers, companies, operators)
 
+### Shareable Forms
+- Sequential form number (1008-XXXX) auto-generated per transaction
+- Shareable form link (`/form/:activityId/:txId`) — viewable without login
+- Clipboard link sharing from transaction UI
+
+### Operator Profile
+- My Profile section in Settings with operator details and saved signature
+- SignatureCanvas extracted to shared components
+
 ### Code Quality (recent)
 - Activity detail page split into focused sub-components (orchestrator pattern)
 - Named handlers, no `as` casts, flat control flow across pages
 - Composition architecture documented in frontend rules
+- Mock error handling aligned with real backend behavior
+- Form counter seeded once instead of per-transaction scan
 
 ## What's next — Rollout Milestones
 
@@ -124,15 +135,16 @@ Validation still needed:
 
 Assumption: no go-live without both issuance and return working end-to-end.
 
-### Milestone 4 — Rollout Readiness
+### Milestone 4 — Rollout Readiness (Complete)
 
-Before handoff to the unit:
+Documentation delivered:
 
-- Short admin checklist: setup, add operators, add companies, import inventory, import soldiers, open activity
-- Short operator checklist: login, select activity, issue, return, error recovery
-- Full dry-run with realistic scenario: setup → operators → import → open activity → issue → return
-- Test with 2+ different users
-- Test on mobile
+- [x] Admin checklist: `CHECKLIST_ADMIN.md` — setup through verification, with error recovery
+- [x] Operator checklist: `CHECKLIST_OPERATOR.md` — login through return, field tips
+- [x] Full dry-run rehearsal: `REHEARSAL.md` — scripted scenario with test data, checkpoints, pass/fail criteria
+- [x] OAuth production domain guide: added to `RUNBOOK.md`
+- [ ] Test with 2+ different users (manual validation required)
+- [ ] Test on mobile (manual validation required)
 
 ## Acceptance Criteria for Unit Handoff
 

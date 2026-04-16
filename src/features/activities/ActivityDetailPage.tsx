@@ -2,7 +2,7 @@ import { useMemo, useState } from "react"
 import { Flex, Spinner, Stack } from "@chakra-ui/react"
 import { useNavigate } from "react-router-dom"
 import { ApiErrorState } from "../../components/ApiErrorState"
-import { useActivity, useCloseActivity } from "../../api"
+import { useActivity, useCloseActivity, useReopenActivity } from "../../api"
 import { showApiErrorToast } from "../../lib/api-error"
 import { filterInventory, sortInventory } from "../../lib/filters"
 import { t } from "../../lib/i18n"
@@ -12,16 +12,18 @@ import { parseCategory, parseItemStatus } from "./activity-helpers"
 import { ActivityDetailHeader } from "./ActivityDetailHeader"
 import { ActivityDetailSummary } from "./ActivityDetailSummary"
 import { ActivitySnapshotSection } from "./ActivitySnapshotSection"
+import { ConfirmActivityStatusDialog } from "./ConfirmActivityStatusDialog"
 import type { SortConfig } from "../../components/SortableHeader"
-import type { ItemCategory, ItemStatus } from "../../types"
+import type { InventoryItem, ItemCategory, ItemStatus } from "../../types"
 
-const EMPTY_SNAPSHOT_ITEMS: never[] = []
+const EMPTY_SNAPSHOT_ITEMS: InventoryItem[] = []
 
 export const ActivityDetailPage = ({ activityId }: ActivityDetailPageProps) => {
   const navigate = useNavigate()
   const { operator, operatorProfile } = useAuth()
   const { data, error, isPending, refetch } = useActivity(activityId)
   const closeActivity = useCloseActivity()
+  const reopenActivity = useReopenActivity()
 
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<ItemCategory | undefined>(
@@ -34,6 +36,9 @@ export const ActivityDetailPage = ({ activityId }: ActivityDetailPageProps) => {
     key: "name",
     direction: "asc",
   })
+  const [confirmDialogVariant, setConfirmDialogVariant] = useState<
+    "close" | "reopen" | null
+  >(null)
 
   const snapshotItems = data?.snapshotItems ?? EMPTY_SNAPSHOT_ITEMS
   const filteredItems = filterInventory(
@@ -50,6 +55,8 @@ export const ActivityDetailPage = ({ activityId }: ActivityDetailPageProps) => {
       ),
     [snapshotItems],
   )
+
+  const isAdmin = operator?.role === "admin"
 
   const handleBack = () => {
     navigate("/activities")
@@ -75,22 +82,41 @@ export const ActivityDetailPage = ({ activityId }: ActivityDetailPageProps) => {
     void refetch()
   }
 
-  const handleCloseActivity = () => {
-    closeActivity.mutate(
+  const handleRequestClose = () => {
+    setConfirmDialogVariant("close")
+  }
+
+  const handleRequestReopen = () => {
+    setConfirmDialogVariant("reopen")
+  }
+
+  const handleCancelConfirm = () => {
+    setConfirmDialogVariant(null)
+  }
+
+  const handleConfirmStatusChange = () => {
+    if (!confirmDialogVariant) return
+
+    const isClose = confirmDialogVariant === "close"
+    const mutation = isClose ? closeActivity : reopenActivity
+
+    mutation.mutate(
       { activityId },
       {
         onSuccess: () => {
+          setConfirmDialogVariant(null)
           toaster.create({
             title: t("common.success"),
-            description: t("activities.closeSuccess"),
+            description: t(isClose ? "activities.closeSuccess" : "activities.reopenSuccess"),
             type: "success",
           })
         },
         onError: (mutationError) => {
+          setConfirmDialogVariant(null)
           showApiErrorToast({
-            actionLabel: t("activities.closeAction"),
+            actionLabel: t(isClose ? "activities.closeAction" : "activities.reopenAction"),
             error: mutationError,
-            fallbackMessage: t("activities.closeError"),
+            fallbackMessage: t(isClose ? "activities.closeError" : "activities.reopenError"),
           })
         },
       },
@@ -123,10 +149,12 @@ export const ActivityDetailPage = ({ activityId }: ActivityDetailPageProps) => {
     <Stack gap={{ base: "5", md: "7" }}>
       <ActivityDetailHeader
         activity={activity}
-        canCloseActivity={operator?.role === "admin" && activity.status === "active"}
-        isClosing={closeActivity.isPending}
+        canCloseActivity={isAdmin && activity.status === "active"}
+        canReopenActivity={isAdmin && activity.status === "closed"}
+        isStatusChanging={closeActivity.isPending || reopenActivity.isPending}
         onBack={handleBack}
-        onCloseActivity={handleCloseActivity}
+        onCloseActivity={handleRequestClose}
+        onReopenActivity={handleRequestReopen}
         onOpenFolder={handleOpenFolder}
       />
 
@@ -146,6 +174,14 @@ export const ActivityDetailPage = ({ activityId }: ActivityDetailPageProps) => {
         sort={sort}
         sortedItems={sortedItems}
         statusFilter={statusFilter}
+      />
+
+      <ConfirmActivityStatusDialog
+        open={confirmDialogVariant !== null}
+        variant={confirmDialogVariant ?? "close"}
+        isLoading={closeActivity.isPending || reopenActivity.isPending}
+        onConfirm={handleConfirmStatusChange}
+        onCancel={handleCancelConfirm}
       />
     </Stack>
   )

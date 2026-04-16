@@ -8,7 +8,10 @@ export const ActivityCard = ({
   activity,
   openedByLabel,
   onOpen,
-}: ActivityCardProps) => (
+}: ActivityCardProps) => {
+  const isClosed = activity.status === "closed"
+
+  return (
   <Box
     data-testid="activity-card"
     bg="bg.card"
@@ -17,8 +20,9 @@ export const ActivityCard = ({
     borderRadius="2xl"
     p={{ base: "5", md: "6" }}
     cursor="pointer"
+    opacity={isClosed ? 0.65 : 1}
     onClick={onOpen}
-    transition="border-color 0.15s ease, transform 0.15s ease"
+    transition="border-color 0.15s ease, transform 0.15s ease, opacity 0.15s ease"
     _hover={{ borderColor: "sage.300", transform: "translateY(-1px)" }}
   >
     <Flex justify="space-between" align={{ base: "start", md: "center" }} direction={{ base: "column", md: "row" }} gap="4">
@@ -40,7 +44,8 @@ export const ActivityCard = ({
       <MetaRow label={t("activities.fields.createdAt")} value={formatDateTime(activity.createdAt)} />
     </Grid>
   </Box>
-)
+  )
+}
 
 const MetaRow = ({ label, value }: MetaRowProps) => (
   <Stack gap="1">

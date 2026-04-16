@@ -135,6 +135,15 @@ export const issuanceFormReducer = (state: IssuanceFormState, action: IssuanceFo
     case "SHOW_SUCCESS":
       return { ...state, showSuccess: true, formId: action.payload.formId, serverTxId: action.payload.txId }
 
+    case "RESTORE_DRAFT":
+      return {
+        ...action.payload,
+        clientTxId: createClientTxId(),
+        showSuccess: false,
+        formId: undefined,
+        serverTxId: undefined,
+      }
+
     case "RESET":
       return createInitialState()
   }
@@ -171,4 +180,5 @@ export type IssuanceFormAction =
   | { type: "SET_RECEIVER_SIGNATURE"; payload: string }
   | { type: "SET_GIVER_SIGNATURE"; payload: string }
   | { type: "SHOW_SUCCESS"; payload: { formId: string; txId: string } }
+  | { type: "RESTORE_DRAFT"; payload: IssuanceFormState }
   | { type: "RESET" }

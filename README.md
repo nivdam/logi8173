@@ -206,7 +206,7 @@ SPA route refreshes depend on [`vercel.json`](/Users/nivdamianovich/BizoDam/Logi
 - end-to-end go-live validation against real Sheets, Drive, and deployed Apps Script
 - import hardening for real unit datasets, especially speed and retry behavior
 - end-to-end validation of retry and duplicate-protection behavior
-- day-1 rollout checklist and rehearsal flow
+- ~~day-1 rollout checklist and rehearsal flow~~ — delivered: `CHECKLIST_ADMIN.md`, `CHECKLIST_OPERATOR.md`, `REHEARSAL.md`
 - cleanup/sync between repo and Apps Script live deployment
 
 ## Repo Notes
