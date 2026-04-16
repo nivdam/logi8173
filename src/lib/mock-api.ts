@@ -259,31 +259,36 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
     const added = Array.isArray(body?.added) ? body.added : []
     const deleted = Array.isArray(body?.deleted) ? body.deleted : []
 
+    let modifiedCount = 0
+    let addedCount = 0
+    let deletedCount = 0
+
     for (const item of modified) {
+      if (!item.itemId || !item.name || !item.category) continue
       const existingIndex = inventoryMock.findIndex(
         (existing) => existing.itemId === String(item.itemId),
       )
-      if (existingIndex === -1) {
-        throw new Error("Item not found: " + String(item.itemId))
-      }
+      if (existingIndex === -1) continue
       inventoryMock[existingIndex] = {
         ...inventoryMock[existingIndex],
-        name: String(item.name || ""),
+        name: String(item.name),
         itemNumber: String(item.itemNumber || ""),
-        category: String(item.category || "כללי") as InventoryItem["category"],
+        category: String(item.category) as InventoryItem["category"],
         currentQty: Number(item.currentQty) || 0,
         unitOfMeasure: String(item.unitOfMeasure || "יחידה") as InventoryItem["unitOfMeasure"],
         notes: String(item.notes || ""),
         minThreshold: Number(item.minThreshold) || 0,
       }
+      modifiedCount++
     }
 
     for (const item of added) {
+      if (!item.name || !item.category) continue
       const newItem: InventoryItem = {
         itemId: "i_mock_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
-        name: String(item.name || ""),
+        name: String(item.name),
         itemNumber: String(item.itemNumber || ""),
-        category: (String(item.category || "כללי")) as InventoryItem["category"],
+        category: String(item.category) as InventoryItem["category"],
         tags: [],
         unitOfMeasure: (String(item.unitOfMeasure || "יחידה")) as InventoryItem["unitOfMeasure"],
         currentQty: Number(item.currentQty) || 0,
@@ -292,6 +297,7 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
         notes: String(item.notes || ""),
       }
       inventoryMock.push(newItem)
+      addedCount++
     }
 
     for (const itemId of deleted) {
@@ -300,13 +306,14 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
       )
       if (existingIndex >= 0) {
         inventoryMock.splice(existingIndex, 1)
+        deletedCount++
       }
     }
 
     return {
-      modified: modified.length,
-      added: added.length,
-      deleted: deleted.length,
+      modified: modifiedCount,
+      added: addedCount,
+      deleted: deletedCount,
     }
   },
   "activities.close": (body) => {
