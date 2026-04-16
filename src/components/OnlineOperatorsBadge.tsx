@@ -18,7 +18,7 @@ const OnlineOperatorRow = ({ operator }: OnlineOperatorRowProps) => (
       <Circle size={8} fill="currentColor" />
     </Box>
     <Text textStyle="sm" truncate>
-      {operator.fullName || operator.email}
+      {operator.fullName}
     </Text>
   </Flex>
 )
@@ -65,7 +65,7 @@ export const OnlineOperatorsBadge = () => {
             </Text>
             <Flex direction="column" gap="0.5">
               {onlineOperators?.map((operator) => (
-                <OnlineOperatorRow key={operator.email} operator={operator} />
+                <OnlineOperatorRow key={operator.fullName} operator={operator} />
               ))}
             </Flex>
           </PopoverBody>

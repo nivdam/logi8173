@@ -97,20 +97,20 @@ var InventoryController = {
     var now = new Date().toISOString();
     var results = { modified: 0, added: 0, deleted: 0 };
 
-    // Modify existing items
+    // Modify existing items — merge only provided fields (delta update)
     var modified = body.modified || [];
     for (var m = 0; m < modified.length; m++) {
       var mod = modified[m];
-      if (!mod.itemId || !mod.name || !mod.category) continue;
+      if (!mod.itemId) continue;
       var existing = findRow_(masterInventoryId, 'master-inventory', 'item_id', mod.itemId);
       if (!existing) continue;
       var updated = {
         item_id: mod.itemId,
-        item_number: mod.itemNumber || '',
-        name: mod.name,
-        category: mod.category,
-        tags: Array.isArray(mod.tags) ? mod.tags.join(',') : (mod.tags || ''),
-        unit_of_measure: mod.unitOfMeasure || existing.row.unit_of_measure,
+        item_number: mod.itemNumber !== undefined ? mod.itemNumber : existing.row.item_number,
+        name: mod.name !== undefined ? mod.name : existing.row.name,
+        category: mod.category !== undefined ? mod.category : existing.row.category,
+        tags: mod.tags !== undefined ? (Array.isArray(mod.tags) ? mod.tags.join(',') : mod.tags) : existing.row.tags,
+        unit_of_measure: mod.unitOfMeasure !== undefined ? mod.unitOfMeasure : existing.row.unit_of_measure,
         initial_qty: mod.currentQty !== undefined ? mod.currentQty : existing.row.initial_qty,
         min_threshold: mod.minThreshold !== undefined ? mod.minThreshold : existing.row.min_threshold,
         notes: mod.notes !== undefined ? mod.notes : existing.row.notes,

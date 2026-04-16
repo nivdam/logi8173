@@ -31,6 +31,21 @@ const removeDraft = (storageKey: string) => {
   }
 }
 
+export const clearAllDrafts = () => {
+  try {
+    const keysToRemove = []
+    for (const index of Array.from({ length: localStorage.length }, (_, i) => i)) {
+      const key = localStorage.key(index)
+      if (key && key.startsWith("draft:")) {
+        keysToRemove.push(key)
+      }
+    }
+    keysToRemove.forEach((key) => localStorage.removeItem(key))
+  } catch {
+    // ignore
+  }
+}
+
 export const useDraftPersistence = <T, TSerialized = T>(
   storageKey: string,
   currentState: T,

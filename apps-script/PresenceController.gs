@@ -24,15 +24,21 @@ var PresenceController = {
     });
     cache.put(entryKey, entry, PRESENCE_TTL_SECONDS);
 
-    // Update the registry of known-online operators
-    var registryRaw = cache.get(PRESENCE_REGISTRY_KEY);
-    var registry = registryRaw ? JSON.parse(registryRaw) : [];
+    // Update the registry of known-online operators (locked to prevent concurrent overwrites)
+    var lock = LockService.getScriptLock();
+    try {
+      lock.waitLock(5000);
+      var registryRaw = cache.get(PRESENCE_REGISTRY_KEY);
+      var registry = registryRaw ? JSON.parse(registryRaw) : [];
 
-    if (registry.indexOf(email) === -1) {
-      registry.push(email);
+      if (registry.indexOf(email) === -1) {
+        registry.push(email);
+      }
+
+      cache.put(PRESENCE_REGISTRY_KEY, JSON.stringify(registry), PRESENCE_REGISTRY_TTL_SECONDS);
+    } finally {
+      lock.releaseLock();
     }
-
-    cache.put(PRESENCE_REGISTRY_KEY, JSON.stringify(registry), PRESENCE_REGISTRY_TTL_SECONDS);
 
     return { ok: true };
   },
@@ -57,7 +63,6 @@ var PresenceController = {
       if (entryRaw) {
         var entry = JSON.parse(entryRaw);
         onlineOperators.push({
-          email: entry.email,
           fullName: entry.fullName,
           lastSeen: entry.lastSeen
         });

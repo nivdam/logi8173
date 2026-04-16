@@ -47,7 +47,7 @@ type UpsertInventoryItemInput = {
 }
 
 type BatchUpdateInventoryInput = {
-  modified: InventoryItem[]
+  modified: Record<string, string | number | string[]>[]
   added: InventoryItem[]
   deleted: string[]
 }

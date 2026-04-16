@@ -260,20 +260,21 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
     const deleted = Array.isArray(body?.deleted) ? body.deleted : []
 
     const validModified = modified.filter((item) => {
-      if (!item.itemId || !item.name || !item.category) return false
+      if (!item.itemId) return false
       const existingIndex = inventoryMock.findIndex(
         (existing) => existing.itemId === String(item.itemId),
       )
       if (existingIndex === -1) return false
+      const existing = inventoryMock[existingIndex]
       inventoryMock[existingIndex] = {
-        ...inventoryMock[existingIndex],
-        name: String(item.name),
-        itemNumber: String(item.itemNumber || ""),
-        category: String(item.category) as InventoryItem["category"],
-        currentQty: Number(item.currentQty) || 0,
-        unitOfMeasure: String(item.unitOfMeasure || "יחידה") as InventoryItem["unitOfMeasure"],
-        notes: String(item.notes || ""),
-        minThreshold: Number(item.minThreshold) || 0,
+        ...existing,
+        ...(item.name !== undefined ? { name: String(item.name) } : {}),
+        ...(item.itemNumber !== undefined ? { itemNumber: String(item.itemNumber) } : {}),
+        ...(item.category !== undefined ? { category: String(item.category) as InventoryItem["category"] } : {}),
+        ...(item.currentQty !== undefined ? { currentQty: Number(item.currentQty) } : {}),
+        ...(item.unitOfMeasure !== undefined ? { unitOfMeasure: String(item.unitOfMeasure) as InventoryItem["unitOfMeasure"] } : {}),
+        ...(item.notes !== undefined ? { notes: String(item.notes) } : {}),
+        ...(item.minThreshold !== undefined ? { minThreshold: Number(item.minThreshold) } : {}),
       }
       return true
     })
@@ -362,7 +363,6 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
   "presence.heartbeat": () => ({ ok: true }),
   "presence.getOnline": () => [
     {
-      email: "dev@mock.local",
       fullName: "Dev User",
       lastSeen: new Date().toISOString(),
     },

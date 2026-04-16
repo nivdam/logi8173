@@ -10,6 +10,7 @@ import {
   clearSession,
   updateStoredSessionProfile,
 } from "./auth-helpers"
+import { clearAllDrafts } from "./use-draft-persistence"
 import type { StoredSession } from "./auth-helpers"
 import { AuthContext, AuthLoginContext } from "./auth-store"
 
@@ -59,6 +60,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, [])
 
   const logout = useCallback(() => {
+    clearAllDrafts()
     resetSession()
     googleLogout()
   }, [resetSession])

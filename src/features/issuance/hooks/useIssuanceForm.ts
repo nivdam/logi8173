@@ -15,6 +15,13 @@ import { createInitialState, issuanceFormReducer } from "./issuanceFormReducer"
 import type { InventoryItem } from "../../../types/inventory"
 import type { Soldier } from "../../../types"
 import type { IssuanceLineItem } from "../issuance.types"
+import type { IssuanceFormState } from "./issuanceFormReducer"
+
+const serializeIssuanceState = (formState: IssuanceFormState) => ({
+  ...formState,
+  receiverSignature: "",
+  giverSignature: "",
+})
 
 export const useIssuanceForm = () => {
   const { operator, operatorProfile } = useAuth()
@@ -45,8 +52,7 @@ export const useIssuanceForm = () => {
 
   const totalItemCount = filledLines.reduce((sum, line) => sum + line.qty, 0)
 
-  const draftKey = "draft:issuance"
-  const draft = useDraftPersistence(draftKey, state, isFormDirty, state.showSuccess)
+  const draft = useDraftPersistence("draft:issuance", state, isFormDirty, state.showSuccess, serializeIssuanceState)
 
   const handleRestoreDraft = () => {
     if (!draft.savedDraft) return

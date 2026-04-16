@@ -22,6 +22,8 @@ import type { ReturnFormState } from "./returnFormReducer"
 const serializeReturnState = (formState: ReturnFormState) => ({
   ...formState,
   selectedIssuedItemIds: Array.from(formState.selectedIssuedItemIds),
+  giverSignature: "",
+  receiverSignature: "",
 })
 
 export const useReturnForm = () => {

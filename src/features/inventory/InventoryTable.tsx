@@ -9,6 +9,7 @@ import type { EditableRow, EditableField } from "./useEditableInventory"
 const toEditableRow = (item: InventoryItem): EditableRow => ({
   ...item,
   changeType: "unchanged",
+  changedFields: new Set(),
 })
 
 export const InventoryTable = ({

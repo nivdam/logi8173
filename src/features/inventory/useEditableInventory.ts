@@ -13,6 +13,7 @@ const EMPTY_ROW: EditableRow = {
   status: "ok",
   notes: "",
   changeType: "added",
+  changedFields: new Set(),
 }
 
 const createEmptyRow = (): EditableRow => ({
@@ -37,7 +38,7 @@ export const useEditableInventory = (serverItems: InventoryItem[]) => {
 
   const startEditing = useCallback(() => {
     setEditableRows(
-      serverItems.map((item) => ({ ...item, changeType: "unchanged" })),
+      serverItems.map((item) => ({ ...item, changeType: "unchanged", changedFields: new Set<EditableField>() })),
     )
     setDeletedIds([])
     setIsEditing(true)
@@ -56,7 +57,9 @@ export const useEditableInventory = (serverItems: InventoryItem[]) => {
           if (row.itemId !== itemId) return row
           const nextChangeType =
             row.changeType === "added" ? "added" : "modified"
-          return { ...row, [field]: value, changeType: nextChangeType }
+          const nextChangedFields = new Set(row.changedFields)
+          nextChangedFields.add(field)
+          return { ...row, [field]: value, changeType: nextChangeType, changedFields: nextChangedFields }
         }),
       )
     },
@@ -92,8 +95,8 @@ export const useEditableInventory = (serverItems: InventoryItem[]) => {
   const canSave = hasChanges && !hasValidationErrors
 
   const buildPayload = (): BatchUpdatePayload => ({
-    modified: modifiedRows.map(stripChangeType),
-    added: addedRows.map(stripChangeType),
+    modified: modifiedRows.map(buildModifiedDelta),
+    added: addedRows.map(stripEditMetadata),
     deleted: deletedIds,
   })
 
@@ -113,15 +116,24 @@ export const useEditableInventory = (serverItems: InventoryItem[]) => {
   }
 }
 
-const stripChangeType = (row: EditableRow): InventoryItem => {
-  const { changeType: _changeType, ...item } = row
+const stripEditMetadata = (row: EditableRow): InventoryItem => {
+  const { changeType: _changeType, changedFields: _changedFields, ...item } = row
   return item
+}
+
+const buildModifiedDelta = (row: EditableRow): Record<string, string | number | string[]> => {
+  const delta: Record<string, string | number | string[]> = { itemId: row.itemId }
+  row.changedFields.forEach((field) => {
+    delta[field] = row[field]
+  })
+  return delta
 }
 
 type ChangeType = "unchanged" | "modified" | "added"
 
 type EditableRow = InventoryItem & {
   changeType: ChangeType
+  changedFields: Set<EditableField>
 }
 
 type EditableField = keyof Pick<
@@ -130,7 +142,7 @@ type EditableField = keyof Pick<
 >
 
 type BatchUpdatePayload = {
-  modified: InventoryItem[]
+  modified: Record<string, string | number | string[]>[]
   added: InventoryItem[]
   deleted: string[]
 }
