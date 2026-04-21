@@ -1,3 +1,4 @@
+import { memo } from "react"
 import { Box, Button, Flex, Grid, Input, Stack, Text } from "@chakra-ui/react"
 import { ChevronDown, ChevronUp, Trash2 } from "lucide-react"
 import { StatusBadge } from "../../components/StatusBadge"
@@ -15,7 +16,7 @@ const getRowBackground = (changeType: EditableRow["changeType"]): string | undef
   return undefined
 }
 
-export const EditableInventoryRow = ({
+export const EditableInventoryRow = memo(function EditableInventoryRow({
   row,
   index,
   isExpanded,
@@ -23,7 +24,7 @@ export const EditableInventoryRow = ({
   onToggleExpand,
   onFieldChange,
   onDelete,
-}: EditableInventoryRowProps) => {
+}: EditableInventoryRowProps) {
   const {
     handleToggle,
     handleNameChange,
@@ -217,7 +218,7 @@ export const EditableInventoryRow = ({
       </Box>
     </Stack>
   )
-}
+})
 
 type EditableInventoryRowProps = {
   row: EditableRow

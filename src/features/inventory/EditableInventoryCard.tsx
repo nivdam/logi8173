@@ -1,3 +1,4 @@
+import { memo } from "react"
 import { Box, Button, Flex, Grid, Input, Text } from "@chakra-ui/react"
 import { ChevronDown, ChevronUp, Trash2 } from "lucide-react"
 import { StatusBadge } from "../../components/StatusBadge"
@@ -18,7 +19,7 @@ const getCardColors = (
   return { bg: "bg.card", borderColor: isExpanded ? "sage.300" : "border" }
 }
 
-export const EditableInventoryCard = ({
+export const EditableInventoryCard = memo(function EditableInventoryCard({
   row,
   index,
   isExpanded,
@@ -26,7 +27,7 @@ export const EditableInventoryCard = ({
   onToggleExpand,
   onFieldChange,
   onDelete,
-}: EditableInventoryCardProps) => {
+}: EditableInventoryCardProps) {
   const {
     handleToggle,
     handleNameChange,
@@ -226,7 +227,7 @@ export const EditableInventoryCard = ({
       </Flex>
     </Box>
   )
-}
+})
 
 type EditableInventoryCardProps = {
   row: EditableRow
