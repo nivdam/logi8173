@@ -10,6 +10,7 @@ export const useTransactions = (activityId: string) =>
       api.post<Transaction[]>("tx.list", { activityId }),
     enabled: !!activityId,
     refetchInterval: LIVE_POLL_MS,
+    refetchIntervalInBackground: false,
     staleTime: LIVE_POLL_MS,
   })
 

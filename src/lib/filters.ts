@@ -22,9 +22,8 @@ export const sortInventory = <T extends InventoryItem>(
   sort: SortConfig,
 ): T[] => {
   const sorted = [...items].sort((itemA, itemB) => {
-    const key = sort.key as keyof InventoryItem
-    const valueA = itemA[key]
-    const valueB = itemB[key]
+    const valueA = getSortValue(itemA, sort.key)
+    const valueB = getSortValue(itemB, sort.key)
 
     if (typeof valueA === "number" && typeof valueB === "number") {
       return valueA - valueB
@@ -34,6 +33,16 @@ export const sortInventory = <T extends InventoryItem>(
 
   if (sort.direction === "desc") sorted.reverse()
   return sorted
+}
+
+const getSortValue = (item: InventoryItem, key: string): string | number => {
+  if (key === "name") return item.name
+  if (key === "itemNumber") return item.itemNumber
+  if (key === "category") return item.category
+  if (key === "currentQty") return item.currentQty
+  if (key === "minThreshold") return item.minThreshold
+  if (key === "status") return item.status
+  return ""
 }
 
 export const filterSoldiers = (

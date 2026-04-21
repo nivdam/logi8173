@@ -82,7 +82,7 @@ export const EditableInventoryRow = memo(function EditableInventoryRow({
         <Text textStyle="sm" color="fg.muted" role="cell">{getCategoryLabel(row.category)}</Text>
         <Text textStyle="sm" fontWeight="500" role="cell">{row.currentQty} {row.unitOfMeasure}</Text>
         <StatusBadge status={row.status} label={getItemStatusLabel(row.status)} />
-        {isReadOnly ? <span /> : <ChevronDown size={14} color="var(--chakra-colors-fg-muted)" />}
+        {isReadOnly ? <Box /> : <ChevronDown size={14} color="var(--chakra-colors-fg-muted)" />}
       </Grid>
     )
   }
