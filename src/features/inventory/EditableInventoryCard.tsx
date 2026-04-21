@@ -139,6 +139,7 @@ export const EditableInventoryCard = ({
             <Input
               size="sm"
               borderRadius="md"
+              bg="white"
               type="tel"
               inputMode="numeric"
               pattern="[0-9]*"
@@ -152,6 +153,7 @@ export const EditableInventoryCard = ({
             <Input
               size="sm"
               borderRadius="md"
+              bg="white"
               value={row.name}
               onChange={handleNameChange}
               placeholder={t("inventory.name")}
@@ -166,6 +168,7 @@ export const EditableInventoryCard = ({
             <Input
               size="sm"
               borderRadius="md"
+              bg="white"
               type="number"
               inputMode="numeric"
               value={row.currentQty}
@@ -178,6 +181,7 @@ export const EditableInventoryCard = ({
             <Input
               size="sm"
               borderRadius="md"
+              bg="white"
               type="number"
               inputMode="numeric"
               value={row.minThreshold}
@@ -213,6 +217,7 @@ export const EditableInventoryCard = ({
           <Input
             size="sm"
             borderRadius="md"
+            bg="white"
             value={row.notes ?? ""}
             onChange={handleNotesChange}
             placeholder={t("inventory.notesPlaceholder")}
