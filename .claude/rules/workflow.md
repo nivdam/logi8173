@@ -13,6 +13,17 @@ Answer these 4 questions before touching code:
 
 If the answers are trivial → skip to implementation. If they're not → write a short plan first.
 
+## For complex tasks — pressure-test before building
+
+If the task touches any of the plan-required surfaces below, also answer these before writing code:
+
+1. **3 ways this could go wrong in production** — not "compile error", real scenarios (race condition, stale cache, partial failure, wrong user sees X).
+2. **2–3 edge cases the user didn't mention** — empty state, offline, concurrent action, retry after failure, permission revoked mid-flow.
+3. **The strongest argument AGAINST building this** — what would a skeptical senior engineer say? "It's premature", "the current thing works", "scope creep", "maintenance cost". Take the argument seriously — don't strawman it.
+4. **What problem is the user actually trying to solve?** — restate it. Often the real problem is smaller (or different) than the proposed solution. Confirm with the user before building if the restatement changes the approach.
+
+Present 1–4 back to the user before implementing. If they disagree with the framing, adjust before any code is written.
+
 ## When to write a plan
 
 Write a plan (not just think) for tasks that touch:
