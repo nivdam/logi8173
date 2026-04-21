@@ -14,8 +14,36 @@ export const canAccessRoute = (
   return requiredRoles.includes(role)
 }
 
-const SESSION_KEY = "logi8173_session"
+export const SESSION_KEY = "logi8173_session"
 const PROFILE_KEY = "logi8173_operator_profiles"
+
+const sessionLostListeners = new Set<() => void>()
+let sessionLostDispatched = false
+let sessionLostPendingFlush = false
+
+export const onSessionLost = (listener: () => void): (() => void) => {
+  sessionLostListeners.add(listener)
+  if (sessionLostPendingFlush) {
+    sessionLostPendingFlush = false
+    listener()
+  }
+  return () => {
+    sessionLostListeners.delete(listener)
+  }
+}
+
+export const notifySessionLost = (): void => {
+  if (sessionLostDispatched) return
+  sessionLostDispatched = true
+  clearSession()
+  if (sessionLostListeners.size === 0) {
+    sessionLostPendingFlush = true
+    return
+  }
+  sessionLostListeners.forEach((listener) => {
+    listener()
+  })
+}
 
 export const getStoredSession = (): StoredSession | undefined => {
   try {
@@ -33,11 +61,19 @@ export const getStoredSession = (): StoredSession | undefined => {
 }
 
 export const storeSession = (session: StoredSession): void => {
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session))
+  safeLocalStorageWrite(SESSION_KEY, JSON.stringify(session))
+}
+
+export const markSessionActive = (): void => {
+  sessionLostDispatched = false
+}
+
+export const markSessionDispatched = (): void => {
+  sessionLostDispatched = true
 }
 
 export const clearSession = (): void => {
-  localStorage.removeItem(SESSION_KEY)
+  safeLocalStorageRemove(SESSION_KEY)
 }
 
 const getStoredProfiles = (): Record<string, OperatorProfile> => {
@@ -64,7 +100,7 @@ export const storeOperatorProfile = (
 ): void => {
   const profiles = getStoredProfiles()
   const updated = { ...profiles, [email]: profile }
-  localStorage.setItem(PROFILE_KEY, JSON.stringify(updated))
+  safeLocalStorageWrite(PROFILE_KEY, JSON.stringify(updated))
 }
 
 export const clearStoredOperatorProfile = (email: string): void => {
@@ -72,7 +108,7 @@ export const clearStoredOperatorProfile = (email: string): void => {
   const updated = Object.fromEntries(
     Object.entries(profiles).filter(([key]) => key !== email),
   )
-  localStorage.setItem(PROFILE_KEY, JSON.stringify(updated))
+  safeLocalStorageWrite(PROFILE_KEY, JSON.stringify(updated))
 }
 
 export const updateStoredSessionProfile = (
@@ -82,9 +118,25 @@ export const updateStoredSessionProfile = (
     const raw = localStorage.getItem(SESSION_KEY)
     if (!raw) return
     const session = JSON.parse(raw) as StoredSession
-    localStorage.setItem(SESSION_KEY, JSON.stringify({ ...session, operatorProfile: profile }))
+    safeLocalStorageWrite(SESSION_KEY, JSON.stringify({ ...session, operatorProfile: profile }))
   } catch {
     // noop — session corrupted
+  }
+}
+
+const safeLocalStorageWrite = (key: string, value: string): void => {
+  try {
+    localStorage.setItem(key, value)
+  } catch (error) {
+    console.warn(`[auth-helpers] localStorage write failed for ${key}:`, error)
+  }
+}
+
+const safeLocalStorageRemove = (key: string): void => {
+  try {
+    localStorage.removeItem(key)
+  } catch (error) {
+    console.warn(`[auth-helpers] localStorage remove failed for ${key}:`, error)
   }
 }
 

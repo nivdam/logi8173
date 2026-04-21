@@ -74,6 +74,12 @@ export const semanticColors = defineSemanticTokens.colors({
     DEFAULT: { value: { _light: "{colors.gray.50}", _dark: "{colors.gray.900}" } },
     card: { value: { _light: "white", _dark: "{colors.gray.800}" } },
     muted: { value: { _light: "{colors.gray.100}", _dark: "{colors.gray.700}" } },
+    auth: {
+      value: {
+        _light: "linear-gradient(180deg, #f8faf8 0%, #eef2ef 100%)",
+        _dark: "{colors.gray.900}",
+      },
+    },
   },
   fg: {
     DEFAULT: { value: { _light: "{colors.gray.900}", _dark: "white" } },
