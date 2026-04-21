@@ -128,7 +128,20 @@ export const EditableInventoryRow = ({
         </Flex>
       </Flex>
 
-      <Grid templateColumns="2fr 1fr 1fr" gap="3">
+      <Grid templateColumns="1fr 2fr" gap="3">
+        <Box>
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.itemNumber")}</Text>
+          <Input
+            size="sm"
+            borderRadius="md"
+            type="tel"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={row.itemNumber}
+            onChange={handleItemNumberChange}
+            placeholder={t("inventory.itemNumber")}
+          />
+        </Box>
         <Box>
           <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.name")}</Text>
           <Input
@@ -140,6 +153,9 @@ export const EditableInventoryRow = ({
             autoFocus
           />
         </Box>
+      </Grid>
+
+      <Grid templateColumns="1fr 1fr 1fr 1fr" gap="3">
         <Box>
           <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.qty")}</Text>
           <Input
@@ -164,18 +180,6 @@ export const EditableInventoryRow = ({
             min={0}
           />
         </Box>
-      </Grid>
-
-      <Grid templateColumns="1fr 1fr 1fr" gap="3">
-        <Box>
-          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.category")}</Text>
-          <FilterSelect
-            label={t("inventory.category")}
-            value={row.category}
-            options={CATEGORY_OPTIONS}
-            onChange={handleCategoryChange}
-          />
-        </Box>
         <Box>
           <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.unit")}</Text>
           <FilterSelect
@@ -186,16 +190,12 @@ export const EditableInventoryRow = ({
           />
         </Box>
         <Box>
-          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.itemNumber")}</Text>
-          <Input
-            size="sm"
-            borderRadius="md"
-            type="tel"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            value={row.itemNumber}
-            onChange={handleItemNumberChange}
-            placeholder={t("inventory.itemNumber")}
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.category")}</Text>
+          <FilterSelect
+            label={t("inventory.category")}
+            value={row.category}
+            options={CATEGORY_OPTIONS}
+            onChange={handleCategoryChange}
           />
         </Box>
       </Grid>

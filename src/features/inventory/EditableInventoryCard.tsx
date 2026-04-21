@@ -133,17 +133,32 @@ export const EditableInventoryCard = ({
       </Flex>
 
       <Flex direction="column" gap="3" onClick={stopPropagation}>
-        <Box>
-          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.name")}</Text>
-          <Input
-            size="sm"
-            borderRadius="md"
-            value={row.name}
-            onChange={handleNameChange}
-            placeholder={t("inventory.name")}
-            autoFocus
-          />
-        </Box>
+        <Grid templateColumns="1fr 2fr" gap="3">
+          <Box>
+            <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.itemNumber")}</Text>
+            <Input
+              size="sm"
+              borderRadius="md"
+              type="tel"
+              inputMode="numeric"
+              pattern="[0-9]*"
+              value={row.itemNumber}
+              onChange={handleItemNumberChange}
+              placeholder={t("inventory.itemNumber")}
+            />
+          </Box>
+          <Box>
+            <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.name")}</Text>
+            <Input
+              size="sm"
+              borderRadius="md"
+              value={row.name}
+              onChange={handleNameChange}
+              placeholder={t("inventory.name")}
+              autoFocus
+            />
+          </Box>
+        </Grid>
 
         <Grid templateColumns="1fr 1fr" gap="3">
           <Box>
@@ -174,15 +189,6 @@ export const EditableInventoryCard = ({
 
         <Grid templateColumns="1fr 1fr" gap="3">
           <Box>
-            <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.category")}</Text>
-            <FilterSelect
-              label={t("inventory.category")}
-              value={row.category}
-              options={CATEGORY_OPTIONS}
-              onChange={handleCategoryChange}
-            />
-          </Box>
-          <Box>
             <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.unit")}</Text>
             <FilterSelect
               label={t("inventory.unit")}
@@ -191,21 +197,16 @@ export const EditableInventoryCard = ({
               onChange={handleUnitChange}
             />
           </Box>
+          <Box>
+            <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.category")}</Text>
+            <FilterSelect
+              label={t("inventory.category")}
+              value={row.category}
+              options={CATEGORY_OPTIONS}
+              onChange={handleCategoryChange}
+            />
+          </Box>
         </Grid>
-
-        <Box>
-          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.itemNumber")}</Text>
-          <Input
-            size="sm"
-            borderRadius="md"
-            type="tel"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            value={row.itemNumber}
-            onChange={handleItemNumberChange}
-            placeholder={t("inventory.itemNumber")}
-          />
-        </Box>
 
         <Box>
           <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.notes")}</Text>
