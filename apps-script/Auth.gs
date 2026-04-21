@@ -82,6 +82,12 @@ function verifyIdToken_(idToken) {
   }
 
   try {
+    var expectedClientId = String(getConfigProperty_('WEB_CLIENT_ID') || '').trim();
+    if (!expectedClientId) {
+      console.error('Auth misconfigured: WEB_CLIENT_ID is not set in Script Properties');
+      throw createError_('MISCONFIGURED', 'Authentication is not configured');
+    }
+
     // Check cache first to avoid network call on every request
     var cache = CacheService.getScriptCache();
     var cacheKey = buildTokenCacheKey_(idToken);
@@ -102,8 +108,7 @@ function verifyIdToken_(idToken) {
 
     var payload = JSON.parse(response.getContentText());
 
-    var expectedClientId = getConfigProperty_('WEB_CLIENT_ID');
-    if (expectedClientId && payload.aud !== expectedClientId) {
+    if (payload.aud !== expectedClientId) {
       throw createError_('INVALID_AUDIENCE', 'Token audience does not match');
     }
 
