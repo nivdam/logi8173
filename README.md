@@ -71,7 +71,7 @@ This repo supports a persistent break-glass admin through the Script Property:
 
 - `BREAK_GLASS_ADMIN_EMAIL`
 
-If set to `nivdam@gmail.com`, that account can regain admin access remotely if the operator sheet or permissions become misconfigured. During setup, that email is also auto-seeded as an admin operator if it is different from the primary setup admin.
+Set this to a dedicated support account (value stored only in Script Properties). That account can regain admin access remotely if the operator sheet or permissions become misconfigured. During setup, that email is also auto-seeded as an admin operator if it is different from the primary setup admin.
 
 ## Environment Variables
 

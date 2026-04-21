@@ -53,12 +53,19 @@ export const OperatorProfileDialog = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset state only when dialog opens
   }, [open])
 
+  const fullNameError = validateFullName(fullName)
+  const personalIdError = validatePersonalId(personalId)
+  const phoneError = validatePhone(phone)
+
   const isValid =
     fullName.trim() !== "" &&
     rank.trim() !== "" &&
     personalId.trim() !== "" &&
     phone.trim() !== "" &&
-    savedSignature !== ""
+    savedSignature !== "" &&
+    fullNameError === undefined &&
+    personalIdError === undefined &&
+    phoneError === undefined
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -82,16 +89,22 @@ export const OperatorProfileDialog = ({
   }
 
   const handlePersonalIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPersonalId(event.currentTarget.value)
+    const digitsOnly = event.currentTarget.value.replace(/\D/g, "")
+    setPersonalId(digitsOnly)
   }
 
   const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPhone(event.currentTarget.value)
+    const sanitized = event.currentTarget.value.replace(/[^\d-]/g, "")
+    setPhone(sanitized)
   }
 
   const handleEditSignature = () => {
     setIsEditingSignature(true)
   }
+
+  const showFullNameError = fullName.length > 0 && fullNameError !== undefined
+  const showPersonalIdError = personalId.length > 0 && personalIdError !== undefined
+  const showPhoneError = phone.length > 0 && phoneError !== undefined
 
   return (
     <Dialog.Root
@@ -104,27 +117,30 @@ export const OperatorProfileDialog = ({
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content mx="4" maxW="2xl" asChild>
+          <Dialog.Content mx="4" maxW="2xl" maxH="90vh" display="flex" flexDirection="column" asChild>
             <chakra.form onSubmit={handleSubmit}>
-              <Dialog.Header>
+              <Dialog.Header flexShrink={0}>
                 <Dialog.Title>{t("auth.profileTitle")}</Dialog.Title>
                 <Dialog.Description>
                   {t("auth.profileDescription")}
                 </Dialog.Description>
               </Dialog.Header>
 
-              <Dialog.Body>
+              <Dialog.Body overflowY="auto" flex="1">
                 <Stack gap="4">
                   <Text textStyle="sm" color="fg.muted">
                     {t("auth.profileDeviceOnly")}
                   </Text>
 
-                  <Field.Root required>
+                  <Field.Root required invalid={showFullNameError}>
                     <Field.Label>{t("soldiers.fullName")}</Field.Label>
                     <Input
                       value={fullName}
                       onChange={handleFullNameChange}
                     />
+                    {showFullNameError ? (
+                      <Field.ErrorText>{fullNameError}</Field.ErrorText>
+                    ) : null}
                   </Field.Root>
 
                   <Flex gap="4" direction={{ base: "column", md: "row" }}>
@@ -145,25 +161,35 @@ export const OperatorProfileDialog = ({
                         <NativeSelect.Indicator />
                       </NativeSelect.Root>
                     </Field.Root>
-                    <Field.Root required flex="1">
+                    <Field.Root required flex="1" invalid={showPersonalIdError}>
                       <Field.Label>{t("soldiers.personalId")}</Field.Label>
                       <Input
                         type="tel"
                         value={personalId}
                         onChange={handlePersonalIdChange}
                         inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={9}
                       />
+                      {showPersonalIdError ? (
+                        <Field.ErrorText>{personalIdError}</Field.ErrorText>
+                      ) : null}
                     </Field.Root>
                   </Flex>
 
-                  <Field.Root required>
+                  <Field.Root required invalid={showPhoneError}>
                     <Field.Label>{t("soldiers.phone")}</Field.Label>
                     <Input
                       type="tel"
                       value={phone}
                       onChange={handlePhoneChange}
                       inputMode="tel"
+                      placeholder="05X-XXXXXXX"
+                      maxLength={11}
                     />
+                    {showPhoneError ? (
+                      <Field.ErrorText>{phoneError}</Field.ErrorText>
+                    ) : null}
                   </Field.Root>
 
                   <Field.Root required>
@@ -212,7 +238,7 @@ export const OperatorProfileDialog = ({
                 </Stack>
               </Dialog.Body>
 
-              <Dialog.Footer>
+              <Dialog.Footer flexShrink={0}>
                 {!isBlocking && (
                   <Dialog.ActionTrigger asChild>
                     <Button type="button" variant="ghost">{t("common.cancel")}</Button>
@@ -238,6 +264,29 @@ export const OperatorProfileDialog = ({
       </Portal>
     </Dialog.Root>
   )
+}
+
+const validateFullName = (value: string): string | undefined => {
+  const trimmed = value.trim()
+  if (trimmed === "") return undefined
+  if (/\d/.test(trimmed)) return t("auth.errors.fullNameHasDigits")
+  if (trimmed.replace(/\s/g, "").length < 3) return t("auth.errors.fullNameTooShort")
+  return undefined
+}
+
+const validatePersonalId = (value: string): string | undefined => {
+  const trimmed = value.trim()
+  if (trimmed === "") return undefined
+  if (!/^\d+$/.test(trimmed)) return t("auth.errors.personalIdDigitsOnly")
+  if (trimmed.length < 6 || trimmed.length > 9) return t("auth.errors.personalIdLength")
+  return undefined
+}
+
+const validatePhone = (value: string): string | undefined => {
+  const trimmed = value.trim()
+  if (trimmed === "") return undefined
+  if (!/^05\d-?\d{7}$/.test(trimmed)) return t("auth.errors.phoneInvalid")
+  return undefined
 }
 
 type OperatorProfileDialogProps = {
