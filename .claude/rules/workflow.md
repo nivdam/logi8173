@@ -68,14 +68,15 @@ Not every `Medium` gets fixed now.
 
 ## Before commit
 
-- `tsc -b` passes
-- `eslint` on touched files passes
-- Happy path tested manually in browser
+- `pnpm build` passes
+- Run lint when practical, especially for larger changes
+- Happy path tested manually in browser when UI/auth/API behavior changed
 - No unrelated files in the diff
 
 ## After first review
 
-Commit. If something was missed, it's a follow-up — not a blocker for this PR.
+Fix only blocker findings from the review policy, then commit.
+Anything else becomes a follow-up — not a blocker for this PR.
 
 ## The one sentence to remember
 
