@@ -9,10 +9,14 @@ export const useCurrentOperator = () =>
     staleTime: Infinity,
   })
 
+const POLL_INTERVAL_MS = 60_000
+
 export const useOperators = () =>
   useQuery({
     queryKey: ["operators"],
     queryFn: () => api.get<AuthenticatedOperator[]>("operators.list"),
+    refetchInterval: POLL_INTERVAL_MS,
+    staleTime: POLL_INTERVAL_MS,
   })
 
 export const useUpsertOperator = () => {

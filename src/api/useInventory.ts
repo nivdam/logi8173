@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "../lib/api"
 import type { InventoryItem } from "../types"
 
-const INVENTORY_POLL_MS = 60_000
+const INVENTORY_POLL_MS = 30_000
 
 export const useInventory = () =>
   useQuery({

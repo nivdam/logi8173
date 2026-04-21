@@ -2,10 +2,14 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "../lib/api"
 import type { Soldier } from "../types"
 
+const POLL_INTERVAL_MS = 60_000
+
 export const useSoldiers = () =>
   useQuery({
     queryKey: ["soldiers"],
     queryFn: () => api.get<Soldier[]>("soldiers.list"),
+    refetchInterval: POLL_INTERVAL_MS,
+    staleTime: POLL_INTERVAL_MS,
   })
 
 export const useUpsertSoldier = () => {

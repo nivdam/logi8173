@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "../lib/api"
 import type { Transaction, TransactionType, TransactionLineItem, PublicTransaction } from "../types"
 
-const TRANSACTIONS_POLL_MS = 20_000
+const TRANSACTIONS_POLL_MS = 10_000
 
 export const useTransactions = (activityId: string) =>
   useQuery({
