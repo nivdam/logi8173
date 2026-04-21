@@ -11,7 +11,9 @@ function readAllRows_(spreadsheetId, sheetName) {
     throw createError_('SHEET_NOT_FOUND', 'Sheet "' + sheetName + '" not found');
   }
 
-  var data = sheet.getDataRange().getValues();
+  var range = sheet.getDataRange();
+  var data = range.getValues();
+  var displayData = range.getDisplayValues();
   if (data.length <= 1) return [];
 
   var headers = data[0];
@@ -20,7 +22,7 @@ function readAllRows_(spreadsheetId, sheetName) {
   for (var i = 1; i < data.length; i++) {
     var row = {};
     for (var j = 0; j < headers.length; j++) {
-      row[headers[j]] = data[i][j];
+      row[headers[j]] = isTextColumn_(headers[j]) ? displayData[i][j] : data[i][j];
     }
     rows.push(row);
   }
@@ -59,6 +61,7 @@ function appendRow_(spreadsheetId, sheetName, rowObject) {
   }
 
   var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  applyTextColumnFormats_(sheet, headers);
   var rowArray = [];
 
   for (var i = 0; i < headers.length; i++) {
@@ -91,6 +94,7 @@ function updateRow_(spreadsheetId, sheetName, rowIndex, rowObject) {
   }
 
   var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  applyTextColumnFormats_(sheet, headers);
   var rowArray = [];
 
   for (var i = 0; i < headers.length; i++) {
@@ -118,6 +122,7 @@ function createSheetWithHeaders_(spreadsheetId, sheetName, headers) {
   var sheet = spreadsheet.insertSheet(sheetName);
   sheet.appendRow(headers);
   sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+  applyTextColumnFormats_(sheet, headers);
   return sheet;
 }
 
@@ -141,18 +146,19 @@ function ensureSheetHeaders_(spreadsheetId, sheetName, requiredHeaders) {
     }
   }
 
-  if (missingHeaders.length === 0) {
-    return;
-  }
+  if (missingHeaders.length === 0) return;
 
   var startColumn = headers.length + 1;
   sheet.insertColumnsAfter(headers.length || 1, missingHeaders.length);
   sheet.getRange(1, startColumn, 1, missingHeaders.length).setValues([missingHeaders]);
   sheet.getRange(1, startColumn, 1, missingHeaders.length).setFontWeight('bold');
+  applyTextColumnFormats_(sheet, headers.concat(missingHeaders));
 }
 
 function mapSheetRows_(sheet) {
-  var data = sheet.getDataRange().getValues();
+  var range = sheet.getDataRange();
+  var data = range.getValues();
+  var displayData = range.getDisplayValues();
   if (data.length <= 1) return [];
 
   var headers = data[0];
@@ -161,10 +167,33 @@ function mapSheetRows_(sheet) {
   for (var i = 1; i < data.length; i++) {
     var row = {};
     for (var j = 0; j < headers.length; j++) {
-      row[headers[j]] = data[i][j];
+      row[headers[j]] = isTextColumn_(headers[j]) ? displayData[i][j] : data[i][j];
     }
     rows.push(row);
   }
 
   return rows;
+}
+
+function applyTextColumnFormats_(sheet, headers) {
+  var maxRows = sheet.getMaxRows();
+  for (var i = 0; i < headers.length; i++) {
+    if (isTextColumn_(headers[i])) {
+      sheet.getRange(1, i + 1, maxRows, 1).setNumberFormat('@');
+    }
+  }
+}
+
+function isTextColumn_(header) {
+  var textColumns = {
+    item_number: true,
+    personal_id: true,
+    phone: true,
+    form_number: true,
+    giver_personal_id: true,
+    receiver_personal_id: true,
+    soldier_personal_id: true
+  };
+
+  return !!textColumns[header];
 }

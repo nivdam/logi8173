@@ -10,12 +10,15 @@ import {
   Input,
   NativeSelect,
   Portal,
+  SegmentGroup,
   Stack,
   Text,
 } from "@chakra-ui/react";
 import {
+  useActivitySoldiers,
   useCompanies,
   useSoldiers,
+  useUpsertActivitySoldier,
   useUpsertCompany,
   useUpsertSoldier,
 } from "../../api";
@@ -34,15 +37,18 @@ const parseInitialQuery = (
 };
 
 export const AddSoldierDialog = ({
+  activityId,
   open,
   initialQuery,
   onOpenChange,
   onCreated,
 }: AddSoldierDialogProps) => {
-  const { data: soldiers = [] } = useSoldiers();
+  const { data: globalSoldiers = [] } = useSoldiers();
+  const { data: activitySoldiers = [] } = useActivitySoldiers(activityId);
   const { data: companies = [] } = useCompanies();
   const upsertCompany = useUpsertCompany();
-  const createSoldier = useUpsertSoldier();
+  const upsertGlobalSoldier = useUpsertSoldier();
+  const upsertActivitySoldier = useUpsertActivitySoldier();
 
   const initial = parseInitialQuery(initialQuery);
   const [fullName, setFullName] = useState(initial.fullName);
@@ -51,6 +57,9 @@ export const AddSoldierDialog = ({
   const [phone, setPhone] = useState("");
   const [companyInput, setCompanyInput] = useState("");
   const [companyName, setCompanyName] = useState("");
+  const [saveScope, setSaveScope] = useState<SoldierSaveScope>(
+    activityId ? "activity" : "global",
+  );
 
   const activeCompanies = companies.filter((company) => company.isActive);
   const companyValue = companyName.trim() || companyInput.trim();
@@ -71,7 +80,14 @@ export const AddSoldierDialog = ({
 
   const isDuplicatePersonalId =
     personalId.trim() !== "" &&
-    soldiers.some((soldier) => soldier.personalId === personalId.trim());
+    getDuplicateSource(
+      activityId ? saveScope : "global",
+      personalId.trim(),
+      activitySoldiers,
+      globalSoldiers,
+    ) !== undefined;
+
+  const isActivityScope = saveScope === "activity" && activityId !== undefined;
 
   const isValid =
     fullName.trim() !== "" &&
@@ -88,7 +104,7 @@ export const AddSoldierDialog = ({
       fullName: fullName.trim(),
       personalId: personalId.trim(),
       rank: rank.trim(),
-      company: companyValue,
+      company: normalizedCompanyValue,
       platoon: undefined,
       phone: phone.trim() || undefined,
       createdAt: new Date().toISOString(),
@@ -100,17 +116,27 @@ export const AddSoldierDialog = ({
         normalizedCompanyValue,
       );
 
-      if (companyInput) {
+      if (saveScope === "global" && companyInput) {
         await upsertCompany.mutateAsync(companyInput);
       }
 
-      await createSoldier.mutateAsync({
+      const upsertInput = {
         fullName: nextSoldier.fullName,
         personalId: nextSoldier.personalId,
         rank: nextSoldier.rank,
         company: nextSoldier.company,
         phone: nextSoldier.phone,
-      });
+      }
+
+      if (isActivityScope) {
+        await upsertActivitySoldier.mutateAsync({
+          ...upsertInput,
+          activityId,
+        });
+      } else {
+        await upsertGlobalSoldier.mutateAsync(upsertInput);
+      }
+
       onCreated(nextSoldier);
       onOpenChange(false);
     } catch {
@@ -153,6 +179,11 @@ export const AddSoldierDialog = ({
     setPhone(event.currentTarget.value)
   }
 
+  const handleSaveScopeChange = (details: { value: string | null }) => {
+    const nextScope = details.value === "global" ? "global" : "activity"
+    setSaveScope(activityId ? nextScope : "global")
+  }
+
   return (
     <Dialog.Root
       open={open}
@@ -172,6 +203,30 @@ export const AddSoldierDialog = ({
 
               <Dialog.Body>
                 <Stack gap="4">
+                  {activityId ? (
+                    <Field.Root>
+                      <Field.Label>{t("issuance.addSoldierScopeLabel")}</Field.Label>
+                      <SegmentGroup.Root
+                        value={saveScope}
+                        onValueChange={handleSaveScopeChange}
+                      >
+                        <SegmentGroup.Indicator bg="sage.600" borderRadius="md" />
+                        <SegmentGroup.Item value="activity">
+                          <SegmentGroup.ItemText>
+                            {t("issuance.addSoldierScopeActivity")}
+                          </SegmentGroup.ItemText>
+                          <SegmentGroup.ItemHiddenInput />
+                        </SegmentGroup.Item>
+                        <SegmentGroup.Item value="global">
+                          <SegmentGroup.ItemText>
+                            {t("issuance.addSoldierScopeGlobal")}
+                          </SegmentGroup.ItemText>
+                          <SegmentGroup.ItemHiddenInput />
+                        </SegmentGroup.Item>
+                      </SegmentGroup.Root>
+                    </Field.Root>
+                  ) : null}
+
                   <Field.Root required>
                     <Field.Label>{t("soldiers.fullName")}</Field.Label>
                     <Input
@@ -286,7 +341,11 @@ export const AddSoldierDialog = ({
                 <Button
                   type="submit"
                   colorPalette="sage"
-                  loading={createSoldier.isPending || upsertCompany.isPending}
+                  loading={
+                    upsertActivitySoldier.isPending ||
+                    upsertGlobalSoldier.isPending ||
+                    upsertCompany.isPending
+                  }
                   disabled={!isValid}
                 >
                   {t("common.save")}
@@ -301,11 +360,24 @@ export const AddSoldierDialog = ({
 };
 
 type AddSoldierDialogProps = {
+  activityId: string | undefined;
   open: boolean;
   initialQuery: string;
   onOpenChange: (open: boolean) => void;
   onCreated: (soldier: Soldier) => void;
 };
+
+type SoldierSaveScope = "activity" | "global";
+
+const getDuplicateSource = (
+  saveScope: SoldierSaveScope,
+  personalId: string,
+  activitySoldiers: Soldier[],
+  globalSoldiers: Soldier[],
+): Soldier | undefined => {
+  const source = saveScope === "activity" ? activitySoldiers : globalSoldiers
+  return source.find((soldier) => soldier.personalId === personalId)
+}
 
 function buildCompanyUpsertInput_(
   existingCompany: {

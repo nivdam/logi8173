@@ -26,6 +26,8 @@
     "profileDescription": "Complete the local details used by forms on this device.",
     "profileDeviceOnly": "This information is stored locally in this browser for convenience only.",
     "rank": "Rank",
+    "company": "Company",
+    "selectCompany": "Select company",
     "accountNameFallback": "Account",
     "selectRank": "Select rank",
     "editProfile": "Account Details",
@@ -36,8 +38,9 @@
       "fullNameTooShort": "Full name must be at least 3 letters",
       "fullNameHasDigits": "Full name cannot contain digits",
       "personalIdDigitsOnly": "Personal ID can contain digits only",
-      "personalIdLength": "Personal ID must be 6 to 9 digits",
-      "phoneInvalid": "Invalid phone number (format: 05X-XXXXXXX)"
+      "personalIdLength": "Invalid personal ID",
+      "personalIdTaken": "This personal ID is already registered",
+      "phoneInvalid": "Invalid phone number"
     }
   },
   "dashboard": {
@@ -220,7 +223,8 @@
       "title": "My Profile",
       "description": "Operator details stored locally on this device.",
       "notSet": "Not set",
-      "editAction": "Edit Profile"
+      "editAction": "Edit Profile",
+      "saveError": "Failed to save profile"
     },
     "operators": {
       "title": "Operators",
@@ -366,6 +370,7 @@
     "searchSoldier": "Search soldier by name or ID...",
     "selectSoldier": "Select Soldier",
     "noSoldiersFound": "No soldiers found",
+    "cannotSignSelf": "Cannot sign to self",
     "selectedItems": "Selected Items",
     "noItemsSelected": "No items selected",
     "addItems": "Add items from inventory",
@@ -435,6 +440,10 @@
     "addSoldierTitle": "Add New Soldier",
     "addSoldierDescription": "Create a new soldier directly from the issuance form.",
     "addSoldierError": "Saving the soldier failed. Please try again.",
+    "addSoldierScopeLabel": "Save soldier",
+    "addSoldierScopeActivity": "This activity only",
+    "addSoldierScopeGlobal": "Battalion directory",
+    "activitySoldierBadge": "Activity",
     "companyPlaceholder": "Select company",
     "noCompaniesFound": "No active companies found",
     "duplicatePersonalId": "This personal ID already exists",

@@ -19,6 +19,7 @@ export const useUpsertCompany = () => {
       api.post<{ companyId: string; name: string }>("companies.upsert", company),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["companies"] })
+      await queryClient.invalidateQueries({ queryKey: ["dashboard"] })
     },
   })
 }

@@ -22,6 +22,7 @@ function createSpreadsheetInFolder_(folder, name, sheetName, headers) {
   sheet.setName(sheetName);
   sheet.appendRow(headers);
   sheet.getRange(1, 1, 1, headers.length).setFontWeight('bold');
+  applyTextColumnFormats_(sheet, headers);
 
   return spreadsheet;
 }

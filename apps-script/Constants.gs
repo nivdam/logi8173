@@ -17,6 +17,10 @@ var SHEET_HEADERS = {
     'personal_id', 'full_name', 'rank', 'company', 'platoon', 'phone',
     'created_at', 'updated_at'
   ],
+  'activity-soldiers': [
+    'personal_id', 'full_name', 'rank', 'company', 'platoon', 'phone',
+    'created_at', 'updated_at'
+  ],
   'companies': [
     'company_id', 'name', 'is_active', 'created_at'
   ],

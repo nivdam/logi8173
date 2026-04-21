@@ -35,6 +35,7 @@ const formatDateTime = (date: CalendarDateTime): string => {
 }
 
 export const IssuanceHeader = ({
+  activityId,
   receiver,
   performedAt,
   onSelectReceiver,
@@ -105,6 +106,7 @@ export const IssuanceHeader = ({
             {t("issuance.receiverSection")}
           </Heading>
           <SoldierAutocomplete
+            activityId={activityId}
             selectedSoldier={receiver}
             onSelect={onSelectReceiver}
             onClear={onClearReceiver}
@@ -181,6 +183,7 @@ export const IssuanceHeader = ({
 }
 
 type IssuanceHeaderProps = {
+  activityId: string | undefined
   receiver: Soldier | undefined
   performedAt: string
   onSelectReceiver: (soldier: Soldier) => void

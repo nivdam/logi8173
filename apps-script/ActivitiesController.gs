@@ -327,6 +327,10 @@ function createActivityResources_(activitiesFolderId, activityName, selectedInve
     activityFolder, 'incidents', 'incidents',
     SHEET_HEADERS['incidents']
   );
+  var activitySoldiersSheet = createSpreadsheetInFolder_(
+    activityFolder, 'activity-soldiers', 'activity-soldiers',
+    SHEET_HEADERS['activity-soldiers']
+  );
   var auditLogSheet = createSpreadsheetInFolder_(
     activityFolder, 'audit-log', 'audit-log',
     SHEET_HEADERS['audit-log']
@@ -339,6 +343,7 @@ function createActivityResources_(activitiesFolderId, activityName, selectedInve
     snapshotId: snapshot.getId(),
     transactionsId: transactionsSheet.getId(),
     incidentsId: incidentsSheet.getId(),
+    activitySoldiersId: activitySoldiersSheet.getId(),
     auditLogId: auditLogSheet.getId()
   };
 }
@@ -379,6 +384,7 @@ function persistActivityResources_(activityId, activityResources) {
     ['ACTIVITY_' + activityId + '_SNAPSHOT_ID']: activityResources.snapshotId,
     ['ACTIVITY_' + activityId + '_TRANSACTIONS_ID']: activityResources.transactionsId,
     ['ACTIVITY_' + activityId + '_INCIDENTS_ID']: activityResources.incidentsId,
+    ['ACTIVITY_' + activityId + '_SOLDIERS_ID']: activityResources.activitySoldiersId,
     ['ACTIVITY_' + activityId + '_AUDIT_LOG_ID']: activityResources.auditLogId
   });
 }
@@ -526,7 +532,7 @@ function mapInventoryRowToItem_(row, currentQtyOverride) {
 
   return {
     itemId: row.item_id,
-    itemNumber: row.item_number,
+    itemNumber: String(row.item_number || ''),
     name: row.name,
     category: row.category,
     tags: row.tags ? String(row.tags).split(',') : [],
