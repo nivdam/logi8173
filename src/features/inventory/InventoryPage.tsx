@@ -14,13 +14,15 @@ import { InventoryTable } from "./InventoryTable";
 import { useEditableInventory } from "./useEditableInventory";
 import type { SortConfig } from "../../components/SortableHeader";
 import { CATEGORY_OPTIONS, CATEGORY_VALUES } from "./inventory.constants";
-import type { ItemCategory, ItemStatus } from "../../types";
+import type { InventoryItem, ItemCategory, ItemStatus } from "../../types";
 
 const STATUS_OPTIONS = [
   { value: "ok", label: "תקין" },
   { value: "low", label: "מלאי נמוך" },
   { value: "gap", label: "חוסר" },
 ] as const;
+
+const EMPTY_INVENTORY_ITEMS: InventoryItem[] = [];
 
 const parseCategory = (value: string | undefined): ItemCategory | undefined =>
   CATEGORY_VALUES.includes(value ?? "") ? (value as ItemCategory) : undefined;
@@ -30,11 +32,12 @@ const parseStatus = (value: string | undefined): ItemStatus | undefined =>
 
 export const InventoryPage = () => {
   const {
-    data: inventoryItems = [],
+    data: inventoryData,
     error,
     isPending: isLoading,
     refetch,
   } = useInventory();
+  const inventoryItems = inventoryData ?? EMPTY_INVENTORY_ITEMS;
   const batchUpdate = useBatchUpdateInventory();
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<

@@ -56,6 +56,7 @@ export const SignatureCanvas = ({ onSign, signatureData }: Props) => {
       return;
     }
 
+    // react-signature-canvas exposes point groups without a precise exported type.
     const pointGroups = canvasRef.current.toData() as Array<
       Array<{ x: number; y: number }>
     >;

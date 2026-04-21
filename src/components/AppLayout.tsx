@@ -11,11 +11,14 @@ import { OnlineOperatorsBadge } from "./OnlineOperatorsBadge";
 import { OperatorProfileDialog } from "./OperatorProfileDialog";
 import { RefreshDataButton } from "./RefreshDataButton";
 import { UserAvatar } from "./UserAvatar";
+import { showApiErrorToast } from "../lib/api-error";
+import { useSaveOperatorProfile } from "../features/operator-profile/useSaveOperatorProfile";
 import type { OperatorProfile } from "../lib/auth.types";
 
 export const AppLayout = () => {
   useHeartbeat();
-  const { operator, operatorProfile, saveOperatorProfile, clearOperatorProfile, logout } = useAuth();
+  const { operator, operatorProfile, clearOperatorProfile, logout } = useAuth();
+  const { saveProfile, isSaving } = useSaveOperatorProfile();
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const accountDisplayName = operatorProfile?.fullName || t("auth.accountNameFallback");
 
@@ -32,9 +35,16 @@ export const AppLayout = () => {
     setIsProfileDialogOpen(false)
   }
 
-  const handleSaveProfile = (profile: OperatorProfile) => {
-    saveOperatorProfile(profile)
-    setIsProfileDialogOpen(false)
+  const handleSaveProfile = async (profile: OperatorProfile) => {
+    try {
+      await saveProfile(profile)
+      setIsProfileDialogOpen(false)
+    } catch (error) {
+      showApiErrorToast({
+        actionLabel: t("settings.myProfile.saveError"),
+        error,
+      })
+    }
   }
 
   return (
@@ -118,7 +128,7 @@ export const AppLayout = () => {
         defaultFullName={operatorProfile?.fullName ?? operator?.fullName ?? ""}
         defaultSavedSignature={operator?.savedSignatureUrl}
         initialProfile={operatorProfile}
-        isSaving={false}
+        isSaving={isSaving}
         showReset={operatorProfile !== undefined}
         onReset={handleResetProfile}
         onSubmit={handleSaveProfile}

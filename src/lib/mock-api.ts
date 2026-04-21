@@ -24,6 +24,8 @@ const mockCompanies = [...companiesMock]
 const mockActivities: Activity[] = activitiesMock.map((activity) => ({ ...activity }))
 const mockTransactions = [...transactionsMock]
 let mockFormCounter = mockTransactions.length
+const mockOperatorProfileBindings = new Map<string, string>()
+const mockOperatorPersonalIdClaims = new Map<string, string>()
 const mockTransactionActivityIds: Record<string, string> = Object.fromEntries(
   mockTransactions.map((transaction) => [transaction.txId, "act1"]),
 )
@@ -141,6 +143,73 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
       email: nextOperator.email,
       fullName: nextOperator.fullName,
       role: nextOperator.role,
+    }
+  },
+  "operators.syncMyProfile": (body) => {
+    const personalId = String(body?.personalId || "")
+    const operator = mockOperators[0]
+    const operatorEmail = operator?.email ?? "dev@mock.local"
+    const canSyncAny =
+      operator?.role === "admin" || operator?.role === "warehouse_operator"
+    const previousPersonalId = mockOperatorProfileBindings.get(operatorEmail)
+    if (previousPersonalId && previousPersonalId !== personalId && !canSyncAny) {
+      throw new Error("Personal ID is already bound to this operator")
+    }
+
+    const claimedBy = mockOperatorPersonalIdClaims.get(personalId)
+    if (claimedBy && claimedBy !== operatorEmail) {
+      throw new Error("Personal ID is already bound to another operator")
+    }
+
+    const existing = soldiersMock.find((soldier) => soldier.personalId === personalId)
+    if (!canSyncAny && !previousPersonalId) {
+      const normalize = (value: unknown) =>
+        String(value || "").trim().replace(/\s+/g, " ").toLowerCase()
+      if (!existing) {
+        throw new Error("Personal ID must already exist before it can be bound to this operator")
+      }
+      if (
+        normalize(existing.fullName) !== normalize(operator?.fullName) ||
+        normalize(body?.fullName) !== normalize(operator?.fullName)
+      ) {
+        throw new Error("Personal ID does not match the authenticated operator")
+      }
+    }
+
+    if (existing) {
+      existing.fullName = String(body?.fullName || "")
+      existing.rank = String(body?.rank || "")
+      existing.company = String(body?.company || "")
+      existing.platoon = body?.platoon ? String(body.platoon) : undefined
+      existing.phone = body?.phone ? String(body.phone) : undefined
+      mockOperatorProfileBindings.set(operatorEmail, personalId)
+      mockOperatorPersonalIdClaims.set(personalId, operatorEmail)
+      return {
+        personalId: existing.personalId,
+        fullName: existing.fullName,
+        created: false,
+      }
+    }
+    if (!canSyncAny) {
+      throw new Error("Personal ID must already exist before it can be bound to this operator")
+    }
+
+    const nextSoldier = {
+      personalId,
+      fullName: String(body?.fullName || ""),
+      rank: String(body?.rank || ""),
+      company: String(body?.company || ""),
+      platoon: body?.platoon ? String(body.platoon) : undefined,
+      phone: body?.phone ? String(body.phone) : undefined,
+      createdAt: new Date().toISOString(),
+    }
+    soldiersMock.push(nextSoldier)
+    mockOperatorProfileBindings.set(operatorEmail, personalId)
+    mockOperatorPersonalIdClaims.set(personalId, operatorEmail)
+    return {
+      personalId: nextSoldier.personalId,
+      fullName: nextSoldier.fullName,
+      created: true,
     }
   },
   "operators.delete": (body) => {
