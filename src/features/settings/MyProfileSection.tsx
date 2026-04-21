@@ -14,10 +14,13 @@ import { OperatorProfileDialog } from "../../components/OperatorProfileDialog"
 import { useAuth } from "../../lib/use-auth"
 import { t } from "../../lib/i18n"
 import { animations } from "../../theme/animations"
+import { showApiErrorToast } from "../../lib/api-error"
+import { useSaveOperatorProfile } from "../operator-profile/useSaveOperatorProfile"
 import type { OperatorProfile } from "../../lib/auth.types"
 
 export const MyProfileSection = () => {
-  const { operator, operatorProfile, saveOperatorProfile, clearOperatorProfile } = useAuth()
+  const { operator, operatorProfile, clearOperatorProfile } = useAuth()
+  const { save, isSaving } = useSaveOperatorProfile()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const handleOpenDialog = () => {
@@ -28,9 +31,16 @@ export const MyProfileSection = () => {
     setIsDialogOpen(details.open)
   }
 
-  const handleSaveProfile = (profile: OperatorProfile) => {
-    saveOperatorProfile(profile)
-    setIsDialogOpen(false)
+  const handleSaveProfile = async (profile: OperatorProfile) => {
+    try {
+      await save(profile)
+      setIsDialogOpen(false)
+    } catch (error) {
+      showApiErrorToast({
+        actionLabel: t("settings.myProfile.saveError"),
+        error,
+      })
+    }
   }
 
   const handleResetProfile = () => {
@@ -155,7 +165,7 @@ export const MyProfileSection = () => {
         defaultFullName={operatorProfile?.fullName ?? operator.fullName}
         defaultSavedSignature={operator.savedSignatureUrl}
         initialProfile={operatorProfile}
-        isSaving={false}
+        isSaving={isSaving}
         showReset={hasProfile}
         onReset={handleResetProfile}
         onSubmit={handleSaveProfile}
