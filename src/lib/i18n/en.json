@@ -36,8 +36,8 @@
       "fullNameTooShort": "Full name must be at least 3 letters",
       "fullNameHasDigits": "Full name cannot contain digits",
       "personalIdDigitsOnly": "Personal ID can contain digits only",
-      "personalIdLength": "Personal ID must be 6 to 9 digits",
-      "phoneInvalid": "Invalid phone number (format: 05X-XXXXXXX)"
+      "personalIdLength": "Invalid personal ID",
+      "phoneInvalid": "Invalid phone number"
     }
   },
   "dashboard": {

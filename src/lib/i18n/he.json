@@ -36,8 +36,8 @@
       "fullNameTooShort": "שם מלא חייב להכיל לפחות 3 אותיות",
       "fullNameHasDigits": "שם מלא לא יכול להכיל ספרות",
       "personalIdDigitsOnly": "מספר אישי יכול להכיל ספרות בלבד",
-      "personalIdLength": "מספר אישי חייב להכיל 6 עד 9 ספרות",
-      "phoneInvalid": "מספר טלפון לא תקין (פורמט: 05X-XXXXXXX)"
+      "personalIdLength": "מספר אישי לא תקין",
+      "phoneInvalid": "מספר טלפון לא תקין"
     }
   },
   "dashboard": {

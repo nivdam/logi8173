@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
 import {
   Button,
   chakra,
@@ -11,12 +11,12 @@ import {
   Portal,
   Stack,
   Text,
-} from "@chakra-ui/react"
-import { RefreshCw } from "lucide-react"
-import { SignatureCanvas } from "./SignatureCanvas"
-import { t } from "../lib/i18n"
-import { RANK_OPTIONS } from "../lib/rank-options"
-import type { OperatorProfile } from "../lib/auth.types"
+} from "@chakra-ui/react";
+import { RefreshCw } from "lucide-react";
+import { SignatureCanvas } from "./SignatureCanvas";
+import { t } from "../lib/i18n";
+import { RANK_OPTIONS } from "../lib/rank-options";
+import type { OperatorProfile } from "../lib/auth.types";
 
 export const OperatorProfileDialog = ({
   open,
@@ -30,32 +30,34 @@ export const OperatorProfileDialog = ({
   onReset,
   onSubmit,
 }: OperatorProfileDialogProps) => {
-  const [fullName, setFullName] = useState(defaultFullName)
-  const [rank, setRank] = useState(initialProfile?.rank ?? "")
-  const [personalId, setPersonalId] = useState(initialProfile?.personalId ?? "")
-  const [phone, setPhone] = useState(initialProfile?.phone ?? "")
+  const [fullName, setFullName] = useState(defaultFullName);
+  const [rank, setRank] = useState(initialProfile?.rank ?? "");
+  const [personalId, setPersonalId] = useState(
+    initialProfile?.personalId ?? "",
+  );
+  const [phone, setPhone] = useState(initialProfile?.phone ?? "");
   const [savedSignature, setSavedSignature] = useState(
     initialProfile?.savedSignature ?? defaultSavedSignature ?? "",
-  )
+  );
   const [isEditingSignature, setIsEditingSignature] = useState(
     (initialProfile?.savedSignature ?? defaultSavedSignature ?? "") === "",
-  )
+  );
 
   useEffect(() => {
-    if (!open) return
-    setFullName(defaultFullName)
-    setRank(initialProfile?.rank ?? "")
-    setPersonalId(initialProfile?.personalId ?? "")
-    setPhone(initialProfile?.phone ?? "")
-    const sig = initialProfile?.savedSignature ?? defaultSavedSignature ?? ""
-    setSavedSignature(sig)
-    setIsEditingSignature(sig === "")
+    if (!open) return;
+    setFullName(defaultFullName);
+    setRank(initialProfile?.rank ?? "");
+    setPersonalId(initialProfile?.personalId ?? "");
+    setPhone(initialProfile?.phone ?? "");
+    const sig = initialProfile?.savedSignature ?? defaultSavedSignature ?? "";
+    setSavedSignature(sig);
+    setIsEditingSignature(sig === "");
     // eslint-disable-next-line react-hooks/exhaustive-deps -- reset state only when dialog opens
-  }, [open])
+  }, [open]);
 
-  const fullNameError = validateFullName(fullName)
-  const personalIdError = validatePersonalId(personalId)
-  const phoneError = validatePhone(phone)
+  const fullNameError = validateFullName(fullName);
+  const personalIdError = validatePersonalId(personalId);
+  const phoneError = validatePhone(phone);
 
   const isValid =
     fullName.trim() !== "" &&
@@ -65,11 +67,11 @@ export const OperatorProfileDialog = ({
     savedSignature !== "" &&
     fullNameError === undefined &&
     personalIdError === undefined &&
-    phoneError === undefined
+    phoneError === undefined;
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    if (!isValid) return
+    event.preventDefault();
+    if (!isValid) return;
 
     onSubmit({
       fullName: fullName.trim(),
@@ -77,34 +79,37 @@ export const OperatorProfileDialog = ({
       personalId: personalId.trim(),
       phone: phone.trim(),
       savedSignature,
-    })
-  }
+    });
+  };
 
   const handleFullNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFullName(event.currentTarget.value)
-  }
+    setFullName(event.currentTarget.value);
+  };
 
   const handleRankChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setRank(event.target.value)
-  }
+    setRank(event.target.value);
+  };
 
-  const handlePersonalIdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const digitsOnly = event.currentTarget.value.replace(/\D/g, "")
-    setPersonalId(digitsOnly)
-  }
+  const handlePersonalIdChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    const digitsOnly = event.currentTarget.value.replace(/\D/g, "");
+    setPersonalId(digitsOnly);
+  };
 
   const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const sanitized = event.currentTarget.value.replace(/[^\d-]/g, "")
-    setPhone(sanitized)
-  }
+    const sanitized = event.currentTarget.value.replace(/[^\d-]/g, "");
+    setPhone(sanitized);
+  };
 
   const handleEditSignature = () => {
-    setIsEditingSignature(true)
-  }
+    setIsEditingSignature(true);
+  };
 
-  const showFullNameError = fullName.length > 0 && fullNameError !== undefined
-  const showPersonalIdError = personalId.length > 0 && personalIdError !== undefined
-  const showPhoneError = phone.length > 0 && phoneError !== undefined
+  const showFullNameError = fullName.length > 0 && fullNameError !== undefined;
+  const showPersonalIdError =
+    personalId.length > 0 && personalIdError !== undefined;
+  const showPhoneError = phone.length > 0 && phoneError !== undefined;
 
   return (
     <Dialog.Root
@@ -117,7 +122,14 @@ export const OperatorProfileDialog = ({
       <Portal>
         <Dialog.Backdrop />
         <Dialog.Positioner>
-          <Dialog.Content mx="4" maxW="2xl" maxH="90vh" display="flex" flexDirection="column" asChild>
+          <Dialog.Content
+            mx="4"
+            maxW="2xl"
+            maxH="90vh"
+            display="flex"
+            flexDirection="column"
+            asChild
+          >
             <chakra.form onSubmit={handleSubmit}>
               <Dialog.Header flexShrink={0}>
                 <Dialog.Title>{t("auth.profileTitle")}</Dialog.Title>
@@ -134,10 +146,7 @@ export const OperatorProfileDialog = ({
 
                   <Field.Root required invalid={showFullNameError}>
                     <Field.Label>{t("soldiers.fullName")}</Field.Label>
-                    <Input
-                      value={fullName}
-                      onChange={handleFullNameChange}
-                    />
+                    <Input value={fullName} onChange={handleFullNameChange} />
                     {showFullNameError ? (
                       <Field.ErrorText>{fullNameError}</Field.ErrorText>
                     ) : null}
@@ -184,7 +193,6 @@ export const OperatorProfileDialog = ({
                       value={phone}
                       onChange={handlePhoneChange}
                       inputMode="tel"
-                      placeholder="05X-XXXXXXX"
                       maxLength={11}
                     />
                     {showPhoneError ? (
@@ -241,7 +249,9 @@ export const OperatorProfileDialog = ({
               <Dialog.Footer flexShrink={0}>
                 {!isBlocking && (
                   <Dialog.ActionTrigger asChild>
-                    <Button type="button" variant="ghost">{t("common.cancel")}</Button>
+                    <Button type="button" variant="ghost">
+                      {t("common.cancel")}
+                    </Button>
                   </Dialog.ActionTrigger>
                 )}
                 {showReset && onReset && (
@@ -254,7 +264,12 @@ export const OperatorProfileDialog = ({
                     {t("auth.clearProfile")}
                   </Button>
                 )}
-                <Button type="submit" colorPalette="sage" loading={isSaving} disabled={!isValid}>
+                <Button
+                  type="submit"
+                  colorPalette="sage"
+                  loading={isSaving}
+                  disabled={!isValid}
+                >
                   {t("common.save")}
                 </Button>
               </Dialog.Footer>
@@ -263,41 +278,43 @@ export const OperatorProfileDialog = ({
         </Dialog.Positioner>
       </Portal>
     </Dialog.Root>
-  )
-}
+  );
+};
 
 const validateFullName = (value: string): string | undefined => {
-  const trimmed = value.trim()
-  if (trimmed === "") return undefined
-  if (/\d/.test(trimmed)) return t("auth.errors.fullNameHasDigits")
-  if (trimmed.replace(/\s/g, "").length < 3) return t("auth.errors.fullNameTooShort")
-  return undefined
-}
+  const trimmed = value.trim();
+  if (trimmed === "") return undefined;
+  if (/\d/.test(trimmed)) return t("auth.errors.fullNameHasDigits");
+  if (trimmed.replace(/\s/g, "").length < 3)
+    return t("auth.errors.fullNameTooShort");
+  return undefined;
+};
 
 const validatePersonalId = (value: string): string | undefined => {
-  const trimmed = value.trim()
-  if (trimmed === "") return undefined
-  if (!/^\d+$/.test(trimmed)) return t("auth.errors.personalIdDigitsOnly")
-  if (trimmed.length < 6 || trimmed.length > 9) return t("auth.errors.personalIdLength")
-  return undefined
-}
+  const trimmed = value.trim();
+  if (trimmed === "") return undefined;
+  if (!/^\d+$/.test(trimmed)) return t("auth.errors.personalIdDigitsOnly");
+  if (trimmed.length < 6 || trimmed.length > 9)
+    return t("auth.errors.personalIdLength");
+  return undefined;
+};
 
 const validatePhone = (value: string): string | undefined => {
-  const trimmed = value.trim()
-  if (trimmed === "") return undefined
-  if (!/^05\d-?\d{7}$/.test(trimmed)) return t("auth.errors.phoneInvalid")
-  return undefined
-}
+  const trimmed = value.trim();
+  if (trimmed === "") return undefined;
+  if (!/^05\d-?\d{7}$/.test(trimmed)) return t("auth.errors.phoneInvalid");
+  return undefined;
+};
 
 type OperatorProfileDialogProps = {
-  open: boolean
-  onOpenChange?: (details: { open: boolean }) => void
-  defaultFullName: string
-  defaultSavedSignature?: string
-  initialProfile: OperatorProfile | undefined
-  isSaving: boolean
-  isBlocking?: boolean
-  showReset?: boolean
-  onReset?: () => void
-  onSubmit: (profile: OperatorProfile) => void
-}
+  open: boolean;
+  onOpenChange?: (details: { open: boolean }) => void;
+  defaultFullName: string;
+  defaultSavedSignature?: string;
+  initialProfile: OperatorProfile | undefined;
+  isSaving: boolean;
+  isBlocking?: boolean;
+  showReset?: boolean;
+  onReset?: () => void;
+  onSubmit: (profile: OperatorProfile) => void;
+};
