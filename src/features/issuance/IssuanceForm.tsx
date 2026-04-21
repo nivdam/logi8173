@@ -93,6 +93,7 @@ export const IssuanceForm = () => {
               overflowVisible
             >
               <IssuanceHeader
+                activityId={form.state.activityId}
                 receiver={form.state.receiver}
                 performedAt={form.state.performedAt}
                 onSelectReceiver={form.handleSelectReceiver}

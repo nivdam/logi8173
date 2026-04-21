@@ -1,19 +1,48 @@
 import { useMemo, useState } from "react"
-import { Box, Button, Combobox, createListCollection, Flex, Portal, Text } from "@chakra-ui/react"
+import {
+  Badge,
+  Box,
+  Button,
+  Combobox,
+  createListCollection,
+  Flex,
+  Portal,
+  Spinner,
+  Text,
+} from "@chakra-ui/react"
 import { X, User } from "lucide-react"
-import { useSoldiers } from "../../api"
+import { useActivitySoldiers, useSoldiers } from "../../api"
 import { useAuth } from "../../lib/use-auth"
 import { t } from "../../lib/i18n"
 import type { Soldier } from "../../types"
 import { AddSoldierDialog } from "./AddSoldierDialog"
 
-export const SoldierAutocomplete = ({ selectedSoldier, onSelect, onClear }: SoldierAutocompleteProps) => {
-  const { data: soldiers = [] } = useSoldiers()
+export const SoldierAutocomplete = ({
+  activityId,
+  selectedSoldier,
+  onSelect,
+  onClear,
+}: SoldierAutocompleteProps) => {
+  const { data: globalSoldiers = [], isLoading: isLoadingGlobalSoldiers } =
+    useSoldiers()
+  const {
+    data: activitySoldiers = [],
+    isLoading: isLoadingActivitySoldiers,
+  } = useActivitySoldiers(activityId)
   const { operatorProfile } = useAuth()
   const operatorPersonalId = operatorProfile?.personalId
+  const isLoadingSoldiers = isLoadingGlobalSoldiers || isLoadingActivitySoldiers
   const [inputValue, setInputValue] = useState("")
   const [isComboboxOpen, setIsComboboxOpen] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const soldiers = useMemo(
+    () => mergeSoldiers(activitySoldiers, globalSoldiers),
+    [activitySoldiers, globalSoldiers],
+  )
+  const activitySoldierIds = useMemo(
+    () => new Set(activitySoldiers.map((soldier) => soldier.personalId)),
+    [activitySoldiers],
+  )
 
   const filtered = useMemo(() => {
     if (!inputValue) return soldiers
@@ -173,6 +202,11 @@ export const SoldierAutocomplete = ({ selectedSoldier, onSelect, onClear }: Sold
                             <Text textStyle="xs" color="fg.muted">
                               {soldier.personalId}
                               {soldier.company && ` · ${soldier.company}`}
+                              {activitySoldierIds.has(soldier.personalId) ? (
+                                <Badge size="xs" colorPalette="sage" ms="2">
+                                  {t("issuance.activitySoldierBadge")}
+                                </Badge>
+                              ) : null}
                             </Text>
                           </Box>
                         </Flex>
@@ -182,19 +216,28 @@ export const SoldierAutocomplete = ({ selectedSoldier, onSelect, onClear }: Sold
                 })}
               </Combobox.List>
               <Combobox.Empty>
-                <Flex direction="column" gap="3" p="3" align="stretch">
-                  <Text textStyle="sm" color="fg.muted" textAlign="center">
-                    {t("issuance.noSoldiersFound")}
-                  </Text>
-                  <Button
-                    variant="outline"
-                    colorPalette="sage"
-                    size="sm"
-                    onClick={handleOpenAddDialog}
-                  >
-                    {t("issuance.addNewSoldier")}
-                  </Button>
-                </Flex>
+                {isLoadingSoldiers ? (
+                  <Flex gap="2" p="3" align="center" justify="center">
+                    <Spinner size="sm" />
+                    <Text textStyle="sm" color="fg.muted">
+                      {t("common.loading")}
+                    </Text>
+                  </Flex>
+                ) : (
+                  <Flex direction="column" gap="3" p="3" align="stretch">
+                    <Text textStyle="sm" color="fg.muted" textAlign="center">
+                      {t("issuance.noSoldiersFound")}
+                    </Text>
+                    <Button
+                      variant="outline"
+                      colorPalette="sage"
+                      size="sm"
+                      onClick={handleOpenAddDialog}
+                    >
+                      {t("issuance.addNewSoldier")}
+                    </Button>
+                  </Flex>
+                )}
               </Combobox.Empty>
             </Combobox.Content>
           </Combobox.Positioner>
@@ -202,6 +245,7 @@ export const SoldierAutocomplete = ({ selectedSoldier, onSelect, onClear }: Sold
       </Combobox.Root>
 
       <AddSoldierDialog
+        activityId={activityId}
         open={isAddDialogOpen}
         initialQuery={inputValue}
         onOpenChange={handleAddDialogOpenChange}
@@ -212,7 +256,24 @@ export const SoldierAutocomplete = ({ selectedSoldier, onSelect, onClear }: Sold
 }
 
 type SoldierAutocompleteProps = {
+  activityId: string | undefined
   selectedSoldier: Soldier | undefined
   onSelect: (soldier: Soldier) => void
   onClear: () => void
+}
+
+const mergeSoldiers = (
+  activitySoldiers: Soldier[],
+  globalSoldiers: Soldier[],
+): Soldier[] => {
+  const byPersonalId = new Map<string, Soldier>()
+
+  globalSoldiers.forEach((soldier) => {
+    byPersonalId.set(soldier.personalId, soldier)
+  })
+  activitySoldiers.forEach((soldier) => {
+    byPersonalId.set(soldier.personalId, soldier)
+  })
+
+  return Array.from(byPersonalId.values())
 }
