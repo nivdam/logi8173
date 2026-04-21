@@ -97,9 +97,51 @@ export const InventoryPage = () => {
   }
 
   return (
-    <VStack align="stretch" gap={{ base: "5", md: "7" }} pb={editable.hasPendingChanges ? "24" : "0"}>
+    <VStack align="stretch" gap={{ base: "5", md: "7" }}>
       <Flex justify="space-between" align="start" flexWrap="wrap" gap="3">
         <PageHeader title={t("inventory.title")} description={t("inventory.description")} />
+        <Flex gap="2" flexWrap="wrap" align="center">
+          <Button
+            size="md"
+            borderRadius="lg"
+            bg="sage.600"
+            color="white"
+            _hover={{ bg: "sage.700" }}
+            onClick={editable.addRow}
+          >
+            <Plus size={14} />
+            {t("inventory.addRow")}
+          </Button>
+          {editable.hasPendingChanges ? (
+            <>
+              <Button
+                size="md"
+                borderRadius="lg"
+                bg="blue.600"
+                color="white"
+                _hover={{ bg: "blue.700" }}
+                disabled={!editable.canSave}
+                loading={batchUpdate.isPending}
+                onClick={handleBatchSave}
+              >
+                <Save size={14} />
+                {t("inventory.saveChanges")}
+                <Text as="span" fontSize="xs" opacity={0.85}>
+                  ({editable.changeCount})
+                </Text>
+              </Button>
+              <Button
+                size="md"
+                variant="outline"
+                borderRadius="lg"
+                onClick={editable.cancelEditing}
+              >
+                <X size={14} />
+                {t("inventory.cancelEdit")}
+              </Button>
+            </>
+          ) : null}
+        </Flex>
       </Flex>
 
       <Flex gap="3" flexWrap="wrap" align="center">
@@ -161,70 +203,6 @@ export const InventoryPage = () => {
         />
       )}
 
-      <Flex
-        position="fixed"
-        bottom={{ base: "4", md: "6" }}
-        left="0"
-        right="0"
-        justify="center"
-        px="4"
-        zIndex="docked"
-        pointerEvents="none"
-      >
-        <Flex
-          gap="2"
-          bg="bg.card"
-          borderRadius="full"
-          boxShadow="lg"
-          borderWidth="1px"
-          borderColor="border"
-          px="3"
-          py="2"
-          align="center"
-          pointerEvents="auto"
-        >
-          <Button
-            size="md"
-            borderRadius="full"
-            bg="sage.600"
-            color="white"
-            _hover={{ bg: "sage.700" }}
-            onClick={editable.addRow}
-          >
-            <Plus size={16} />
-            {t("inventory.addRow")}
-          </Button>
-          {editable.hasPendingChanges ? (
-            <>
-              <Button
-                size="md"
-                borderRadius="full"
-                bg="blue.600"
-                color="white"
-                _hover={{ bg: "blue.700" }}
-                disabled={!editable.canSave}
-                loading={batchUpdate.isPending}
-                onClick={handleBatchSave}
-              >
-                <Save size={16} />
-                {t("inventory.saveChanges")}
-                <Text as="span" fontSize="xs" opacity={0.85}>
-                  ({editable.changeCount})
-                </Text>
-              </Button>
-              <Button
-                size="md"
-                variant="ghost"
-                borderRadius="full"
-                onClick={editable.cancelEditing}
-              >
-                <X size={16} />
-                {t("inventory.cancelEdit")}
-              </Button>
-            </>
-          ) : null}
-        </Flex>
-      </Flex>
     </VStack>
   )
 }
