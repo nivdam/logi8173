@@ -53,6 +53,13 @@ export const EditableInventoryCard = ({
     onFieldChange(row.itemId, "notes", event.currentTarget.value)
   }
 
+  const handleMinThresholdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const parsed = parseInt(event.currentTarget.value, 10)
+    if (!Number.isNaN(parsed) && parsed >= 0) {
+      onFieldChange(row.itemId, "minThreshold", parsed)
+    }
+  }
+
   const handleDeleteClick = () => {
     onDelete(row.itemId)
   }
@@ -183,6 +190,20 @@ export const EditableInventoryCard = ({
             />
           </Box>
         </Grid>
+
+        <Box>
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.minThreshold")}</Text>
+          <Input
+            size="sm"
+            borderRadius="md"
+            type="number"
+            inputMode="numeric"
+            value={row.minThreshold}
+            onChange={handleMinThresholdChange}
+            min={0}
+          />
+          <Text textStyle="xs" color="fg.muted" mt="1">{t("inventory.minThresholdHint")}</Text>
+        </Box>
 
         <Box>
           <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.notes")}</Text>

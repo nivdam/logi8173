@@ -53,6 +53,13 @@ export const EditableInventoryRow = ({
     onFieldChange(row.itemId, "notes", event.currentTarget.value)
   }
 
+  const handleMinThresholdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const parsed = parseInt(event.currentTarget.value, 10)
+    if (!Number.isNaN(parsed) && parsed >= 0) {
+      onFieldChange(row.itemId, "minThreshold", parsed)
+    }
+  }
+
   const handleDeleteClick = () => {
     onDelete(row.itemId)
   }
@@ -82,8 +89,6 @@ export const EditableInventoryRow = ({
       </Grid>
     )
   }
-
-  const showDetailsStrip = row.changeType !== "unchanged"
 
   return (
     <Stack
@@ -159,9 +164,24 @@ export const EditableInventoryRow = ({
         </Button>
       </Grid>
 
-      {showDetailsStrip ? (
-        <Flex gap="2" align="center" pl="1">
-          <Text textStyle="xs" color="fg.muted" minW="16">
+      <Flex gap="3" align="center" pl="1" flexWrap="wrap">
+        <Flex gap="2" align="center">
+          <Text textStyle="xs" color="fg.muted" whiteSpace="nowrap">
+            {t("inventory.minThreshold")}
+          </Text>
+          <Input
+            size="sm"
+            borderRadius="md"
+            type="number"
+            inputMode="numeric"
+            value={row.minThreshold}
+            onChange={handleMinThresholdChange}
+            min={0}
+            w="20"
+          />
+        </Flex>
+        <Flex gap="2" align="center" flex="1" minW="48">
+          <Text textStyle="xs" color="fg.muted" whiteSpace="nowrap">
             {t("inventory.notes")}
           </Text>
           <Input
@@ -172,7 +192,7 @@ export const EditableInventoryRow = ({
             placeholder={t("inventory.notesPlaceholder")}
           />
         </Flex>
-      ) : null}
+      </Flex>
     </Stack>
   )
 }

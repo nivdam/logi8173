@@ -73,6 +73,8 @@
     "category": "Category",
     "qty": "Quantity",
     "unit": "Unit of measure",
+    "minThreshold": "Low stock threshold",
+    "minThresholdHint": "Items are flagged as low stock below this quantity",
     "notes": "Notes",
     "notesPlaceholder": "Notes (optional)...",
     "status": "Status",
