@@ -16,6 +16,7 @@ import { t } from "../../lib/i18n"
 import { animations } from "../../theme/animations"
 import { showApiErrorToast } from "../../lib/api-error"
 import { useSaveOperatorProfile } from "../operator-profile/useSaveOperatorProfile"
+import { isOperatorProfileComplete } from "../../lib/auth.types"
 import type { OperatorProfile } from "../../lib/auth.types"
 
 export const MyProfileSection = () => {
@@ -50,7 +51,7 @@ export const MyProfileSection = () => {
 
   if (!operator) return null
 
-  const hasProfile = operatorProfile !== undefined
+  const hasProfile = isOperatorProfileComplete(operatorProfile)
 
   return (
     <>

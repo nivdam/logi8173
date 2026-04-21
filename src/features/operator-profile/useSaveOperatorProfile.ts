@@ -16,7 +16,7 @@ export const useSaveOperatorProfile = () => {
       rank: normalized.rank,
       company: normalized.company,
       platoon: normalized.platoon,
-      phone: normalized.phone !== "" ? normalized.phone : undefined,
+      phone: normalized.phone || undefined,
     })
     saveOperatorProfile(normalized)
   }
@@ -24,19 +24,12 @@ export const useSaveOperatorProfile = () => {
   return { save, isSaving: upsertSoldier.isPending }
 }
 
-const normalizeProfileForSave = (profile: OperatorProfile): OperatorProfile => {
-  const company = profile.company.trim() !== "" ? profile.company.trim() : DEFAULT_COMPANY
-  const platoon =
-    profile.platoon !== undefined && profile.platoon.trim() !== ""
-      ? profile.platoon.trim()
-      : undefined
-  return {
-    fullName: profile.fullName.trim(),
-    rank: profile.rank.trim(),
-    personalId: profile.personalId.trim(),
-    phone: profile.phone.trim(),
-    company,
-    platoon,
-    savedSignature: profile.savedSignature,
-  }
-}
+const normalizeProfileForSave = (profile: OperatorProfile): OperatorProfile => ({
+  fullName: profile.fullName.trim(),
+  rank: profile.rank.trim(),
+  personalId: profile.personalId.trim(),
+  phone: profile.phone.trim(),
+  company: profile.company.trim() || DEFAULT_COMPANY,
+  platoon: profile.platoon?.trim() || undefined,
+  savedSignature: profile.savedSignature,
+})

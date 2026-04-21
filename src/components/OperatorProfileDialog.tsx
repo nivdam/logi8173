@@ -19,8 +19,6 @@ import { RANK_OPTIONS } from "../lib/rank-options";
 import { useCompanies } from "../api";
 import type { OperatorProfile } from "../lib/auth.types";
 
-const DEFAULT_COMPANY = "פלס״ם";
-
 export const OperatorProfileDialog = ({
   open,
   onOpenChange,
@@ -57,7 +55,7 @@ export const OperatorProfileDialog = ({
     setRank(initialProfile?.rank ?? "");
     setPersonalId(initialProfile?.personalId ?? "");
     setPhone(initialProfile?.phone ?? "");
-    setCompany(initialProfile?.company ?? pickDefaultCompany(companies));
+    setCompany(initialProfile?.company ?? "");
     const sig = initialProfile?.savedSignature ?? defaultSavedSignature ?? "";
     setSavedSignature(sig);
     setIsEditingSignature(sig === "");
@@ -333,17 +331,6 @@ const validatePersonalId = (value: string): string | undefined => {
   if (trimmed.length < 6 || trimmed.length > 9)
     return t("auth.errors.personalIdLength");
   return undefined;
-};
-
-const pickDefaultCompany = (
-  companies: Array<{ name: string; isActive: boolean }>,
-): string => {
-  const active = companies.filter((company) => company.isActive);
-  const hasDefault = active.some((company) => company.name === DEFAULT_COMPANY);
-  if (hasDefault) return DEFAULT_COMPANY;
-  const first = active[0];
-  if (first) return first.name;
-  return "";
 };
 
 const validatePhone = (value: string): string | undefined => {
