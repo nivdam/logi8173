@@ -235,6 +235,15 @@ var TransactionsController = {
       throw createError_('VALIDATION_ERROR', 'giverPersonalId is required for ' + body.txType);
     }
 
+    // Operator cannot issue to or receive from themselves
+    if (
+      body.giverPersonalId &&
+      body.receiverPersonalId &&
+      String(body.giverPersonalId) === String(body.receiverPersonalId)
+    ) {
+      throw createError_('VALIDATION_ERROR', 'Giver and receiver cannot be the same person');
+    }
+
     var transactionsId = getConfigProperty_('ACTIVITY_' + body.activityId + '_TRANSACTIONS_ID');
     if (!transactionsId) {
       throw createError_('NOT_FOUND', 'Activity not found: ' + body.activityId);
