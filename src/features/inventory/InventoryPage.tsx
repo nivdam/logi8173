@@ -96,9 +96,23 @@ export const InventoryPage = () => {
     })
   }
 
+  const isEditMode = editable.expandedRowId !== null || editable.hasPendingChanges
+
   return (
     <VStack align="stretch" gap={{ base: "5", md: "7" }}>
-      <Flex justify="space-between" align="start" flexWrap="wrap" gap="3">
+      <Flex
+        justify="space-between"
+        align="start"
+        flexWrap="wrap"
+        gap="3"
+        position={isEditMode ? "sticky" : "static"}
+        top="0"
+        zIndex={isEditMode ? "docked" : "auto"}
+        bg={isEditMode ? "bg" : "transparent"}
+        py={isEditMode ? "3" : "0"}
+        borderBottomWidth={isEditMode ? "1px" : "0"}
+        borderColor="border"
+      >
         <PageHeader title={t("inventory.title")} description={t("inventory.description")} />
         <Flex gap="2" flexWrap="wrap" align="center">
           <Button
