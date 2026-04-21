@@ -41,7 +41,7 @@ export const AppLayout = () => {
   }
 
   return (
-    <Flex direction="column" minH="100dvh">
+    <Flex direction="column" h="100dvh" overflow="hidden">
       <FetchProgressBar />
       <Flex
         as="header"
@@ -102,7 +102,7 @@ export const AppLayout = () => {
         </Flex>
       </Flex>
 
-      <Flex flex="1">
+      <Flex flex="1" minH="0">
         <AppNav />
         <Box
           as="main"

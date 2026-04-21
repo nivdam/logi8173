@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Button, Flex, Spinner, Text, VStack } from "@chakra-ui/react"
+import { Box, Button, Flex, Spinner, Text, VStack } from "@chakra-ui/react"
 import { PackageSearch, Plus, Save, X } from "lucide-react"
 import { PageHeader } from "../../components/PageHeader"
 import { ApiErrorState } from "../../components/ApiErrorState"
@@ -100,20 +100,21 @@ export const InventoryPage = () => {
 
   return (
     <VStack align="stretch" gap={{ base: "5", md: "7" }}>
-      <Flex
-        justify="space-between"
-        align="start"
-        flexWrap="wrap"
-        gap="3"
+      <Box
         position={isEditMode ? "sticky" : "static"}
         top="0"
+        mx={isEditMode ? { base: "-4", md: "-8" } : "0"}
+        px={isEditMode ? { base: "4", md: "8" } : "0"}
+        mt={isEditMode ? { base: "-4", md: "-8" } : "0"}
+        pt={isEditMode ? { base: "4", md: "8" } : "0"}
+        pb={isEditMode ? "3" : "0"}
         zIndex={isEditMode ? "docked" : "auto"}
-        bg={isEditMode ? "bg" : "transparent"}
-        py={isEditMode ? "3" : "0"}
+        bg={isEditMode ? "bg.card" : "transparent"}
         borderBottomWidth={isEditMode ? "1px" : "0"}
         borderColor="border"
       >
-        <PageHeader title={t("inventory.title")} description={t("inventory.description")} />
+        <Flex justify="space-between" align="start" flexWrap="wrap" gap="3">
+          <PageHeader title={t("inventory.title")} description={t("inventory.description")} />
         <Flex gap="2" flexWrap="wrap" align="center">
           <Button
             size="md"
@@ -156,7 +157,8 @@ export const InventoryPage = () => {
             </>
           ) : null}
         </Flex>
-      </Flex>
+        </Flex>
+      </Box>
 
       <Flex gap="3" flexWrap="wrap" align="center">
         <SearchInput placeholder={t("inventory.searchPlaceholder")} onSearch={setSearchQuery} />
