@@ -17,6 +17,8 @@
     "loginPrompt": "Please sign in with your Google account to continue",
     "noAccess": "Access Denied",
     "noAccessDescription": "You do not have permission to view this page.",
+    "sessionExpiredTitle": "Session expired",
+    "sessionExpiredDescription": "Please sign in again to continue.",
     "loginFailed": "Google sign-in failed. Please try again.",
     "loading": "Loading...",
     "profileTitle": "Account Details For This Device",
@@ -208,14 +210,12 @@
     "errorTitle": "Initialization Error",
     "checking": "Checking system status...",
     "backendCheckFailed": "Backend setup check failed",
-    "tokenErrorTitle": "The system forgot who you are",
-    "tokenErrorDescription": "Happens to the best of us. Just sign in again and we'll carry on.",
+    "permissionErrorTitle": "You don't have access",
+    "permissionErrorDescription": "This account is not authorized. Contact an admin or sign out and try another account.",
     "genericErrorTitle": "The server took a break",
     "genericErrorDescription": "Probably temporary. Let's try again and hope it's back from coffee.",
     "backendErrorDetailsTitle": "For the tech-curious",
-    "backendErrorRetryAction": "Let's go again",
-    "backendErrorReloginAction": "Sign in again",
-    "backendErrorRetrySecondary": "Try again without signing out"
+    "backendErrorRetryAction": "Let's go again"
   },
   "settings": {
     "title": "Settings",
