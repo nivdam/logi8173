@@ -5,7 +5,7 @@ import { FilterSelect } from "../../components/FilterSelect"
 import { getItemStatusLabel } from "../../lib/formatters"
 import { t } from "../../lib/i18n"
 import { animations } from "../../theme/animations"
-import { CATEGORY_OPTIONS } from "./inventory.constants"
+import { CATEGORY_OPTIONS, getCategoryLabel } from "./inventory.constants"
 import type { EditableRow, EditableField } from "./useEditableInventory"
 
 const getRowBackground = (changeType: EditableRow["changeType"]): string | undefined => {
@@ -65,7 +65,7 @@ export const EditableInventoryRow = ({
       >
         <Text textStyle="sm" fontWeight="500" role="cell">{row.name}</Text>
         <Text textStyle="sm" color="fg.muted" role="cell">{row.itemNumber}</Text>
-        <Text textStyle="sm" color="fg.muted" role="cell">{row.category}</Text>
+        <Text textStyle="sm" color="fg.muted" role="cell">{getCategoryLabel(row.category)}</Text>
         <Text textStyle="sm" fontWeight="500" role="cell">{row.currentQty} {row.unitOfMeasure}</Text>
         <StatusBadge status={row.status} label={getItemStatusLabel(row.status)} />
       </Grid>

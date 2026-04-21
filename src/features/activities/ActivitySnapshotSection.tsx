@@ -7,6 +7,7 @@ import { t } from "../../lib/i18n"
 import type { SortConfig } from "../../components/SortableHeader"
 import type { InventoryItem, ItemCategory, ItemStatus } from "../../types"
 import { InventoryTable } from "../inventory/InventoryTable"
+import { getCategoryLabel } from "../inventory/inventory.constants"
 import { getInventoryStatusOptions } from "./activity-helpers"
 
 export const ActivitySnapshotSection = ({
@@ -40,7 +41,7 @@ export const ActivitySnapshotSection = ({
         value={categoryFilter}
         options={categories.map((category) => ({
           value: category,
-          label: category,
+          label: getCategoryLabel(category),
         }))}
         onChange={onCategoryChange}
       />

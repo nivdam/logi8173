@@ -5,7 +5,7 @@ import { FilterSelect } from "../../components/FilterSelect"
 import { getItemStatusLabel } from "../../lib/formatters"
 import { t } from "../../lib/i18n"
 import { animations } from "../../theme/animations"
-import { CATEGORY_OPTIONS } from "./inventory.constants"
+import { CATEGORY_OPTIONS, getCategoryLabel } from "./inventory.constants"
 import type { EditableRow, EditableField } from "./useEditableInventory"
 
 const getCardBorderColor = (changeType: EditableRow["changeType"]): string => {
@@ -71,7 +71,7 @@ export const EditableInventoryCard = ({
           </Flex>
           <Flex direction="column">
             <Text textStyle="xs" color="fg.muted">{t("inventory.category")}</Text>
-            <Text textStyle="sm">{row.category}</Text>
+            <Text textStyle="sm">{getCategoryLabel(row.category)}</Text>
           </Flex>
           <Flex direction="column">
             <Text textStyle="xs" color="fg.muted">{t("inventory.qty")}</Text>
