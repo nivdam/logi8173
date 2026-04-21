@@ -1,4 +1,5 @@
-import { Flex, Heading, Image, Text, VStack } from "@chakra-ui/react"
+import { useState } from "react"
+import { Flex, Heading, Image, Spinner, Text, VStack } from "@chakra-ui/react"
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google"
 import { useNavigate } from "react-router-dom"
 import { jwtDecode } from "./login-helpers"
@@ -14,14 +15,19 @@ export const LoginPage = () => {
   const navigate = useNavigate()
   const onLoginSuccess = useAuthLogin()
   const { error, showError, clearError } = useErrorBanner()
+  const [isSigningIn, setIsSigningIn] = useState(false)
 
   const handleGoogleError = () => {
+    setIsSigningIn(false)
     showError(t("auth.loginFailed"))
   }
 
   const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
     const idToken = credentialResponse.credential
     if (!idToken) return
+
+    setIsSigningIn(true)
+    clearError()
 
     try {
       const decoded = jwtDecode(idToken)
@@ -36,6 +42,7 @@ export const LoginPage = () => {
       })
       navigate("/", { replace: true })
     } catch (loginError) {
+      setIsSigningIn(false)
       showError(getApiErrorMessage(loginError, t("auth.loginFailed")))
     }
   }
@@ -62,14 +69,23 @@ export const LoginPage = () => {
             </Text>
           </VStack>
 
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleError}
-            theme="outline"
-            size="large"
-            text="signin_with"
-            width="300"
-          />
+          {isSigningIn ? (
+            <VStack gap="3" role="status" aria-live="polite">
+              <Spinner size="lg" color="sage.400" />
+              <Text textStyle="sm" color="fg.muted">
+                {t("auth.signingIn")}
+              </Text>
+            </VStack>
+          ) : (
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              theme="outline"
+              size="large"
+              text="signin_with"
+              width="300"
+            />
+          )}
 
           <Text textStyle="xs" color="fg.muted">
             {t("app.battalion")}

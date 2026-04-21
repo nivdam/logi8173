@@ -20,6 +20,7 @@
     "sessionExpiredTitle": "Session expired",
     "sessionExpiredDescription": "Please sign in again to continue.",
     "loginFailed": "Google sign-in failed. Please try again.",
+    "signingIn": "Signing in...",
     "loading": "Loading...",
     "profileTitle": "Account Details For This Device",
     "profileDescription": "Complete the local details used by forms on this device.",

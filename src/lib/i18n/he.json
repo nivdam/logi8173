@@ -20,6 +20,7 @@
     "sessionExpiredTitle": "הסשן פג",
     "sessionExpiredDescription": "התחבר מחדש כדי להמשיך.",
     "loginFailed": "התחברות עם Google נכשלה. נסה שוב.",
+    "signingIn": "מתחבר...",
     "loading": "טוען...",
     "profileTitle": "פרטי החשבון במכשיר זה",
     "profileDescription": "השלם פרטים מקומיים שישמשו את הטפסים במכשיר הנוכחי.",
