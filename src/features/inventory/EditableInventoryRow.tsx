@@ -98,7 +98,7 @@ export const EditableInventoryRow = ({
       css={{ transition: "background 0.2s ease" }}
     >
       <Grid
-        templateColumns="2fr 1fr 1fr 1.2fr 1fr auto"
+        templateColumns="2fr 1fr 1fr 1fr 1fr auto"
         gap="2"
         alignItems="center"
       >
@@ -130,26 +130,17 @@ export const EditableInventoryRow = ({
             onChange={handleCategoryChange}
           />
         </Box>
-        <Flex gap="1" onClick={stopPropagation}>
-          <Input
-            size="sm"
-            borderRadius="md"
-            type="number"
-            inputMode="numeric"
-            value={row.currentQty}
-            onChange={handleQtyChange}
-            min={0}
-            flex="1"
-          />
-          <Box minW="24">
-            <FilterSelect
-              label={t("inventory.unit")}
-              value={row.unitOfMeasure}
-              options={UNIT_OPTIONS}
-              onChange={handleUnitChange}
-            />
-          </Box>
-        </Flex>
+        <Input
+          size="sm"
+          borderRadius="md"
+          type="number"
+          inputMode="numeric"
+          value={row.currentQty}
+          onChange={handleQtyChange}
+          onClick={stopPropagation}
+          min={0}
+          placeholder={t("inventory.qty")}
+        />
         <StatusBadge status={row.status} label={getItemStatusLabel(row.status)} />
         <Flex gap="1">
           <Button
@@ -180,6 +171,19 @@ export const EditableInventoryRow = ({
       </Grid>
 
       <Flex gap="3" align="center" pl="1" flexWrap="wrap" onClick={stopPropagation}>
+        <Flex gap="2" align="center">
+          <Text textStyle="xs" color="fg.muted" whiteSpace="nowrap">
+            {t("inventory.unit")}
+          </Text>
+          <Box minW="28">
+            <FilterSelect
+              label={t("inventory.unit")}
+              value={row.unitOfMeasure}
+              options={UNIT_OPTIONS}
+              onChange={handleUnitChange}
+            />
+          </Box>
+        </Flex>
         <Flex gap="2" align="center">
           <Text textStyle="xs" color="fg.muted" whiteSpace="nowrap">
             {t("inventory.minThreshold")}
