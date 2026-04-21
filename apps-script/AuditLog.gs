@@ -3,7 +3,17 @@
  * Audit is mandatory: if logging fails, the operation fails.
  */
 
-var SENSITIVE_FIELDS = ['signatureBase64', 'idToken', 'password', 'token'];
+var SENSITIVE_FIELDS = [
+  'signatureBase64',
+  'idToken',
+  'password',
+  'token',
+  'personalId',
+  'personal_id',
+  'phone',
+  'fullName',
+  'full_name'
+];
 
 function sanitizeDetails_(details) {
   if (!details || typeof details !== 'object') return details;

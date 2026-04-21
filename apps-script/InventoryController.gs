@@ -20,7 +20,7 @@ var InventoryController = {
 
       return {
         itemId: row.item_id,
-        itemNumber: row.item_number,
+        itemNumber: String(row.item_number || ''),
         name: row.name,
         category: row.category,
         tags: row.tags ? String(row.tags).split(',') : [],

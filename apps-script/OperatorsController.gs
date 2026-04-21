@@ -2,6 +2,81 @@
  * Operator management — current user profile, list, add/update.
  */
 
+function buildOperatorProfilePropertyKey_(email) {
+  return 'OPERATOR_PROFILE_' + buildStablePropertyKey_(email);
+}
+
+function buildOperatorPersonalIdClaimKey_(personalId) {
+  return 'OPERATOR_PERSONAL_ID_' + buildStablePropertyKey_(personalId);
+}
+
+function buildStablePropertyKey_(value) {
+  var digest = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    String(value || '').toLowerCase()
+  );
+  var parts = [];
+  for (var i = 0; i < digest.length; i++) {
+    var byteValue = digest[i];
+    parts.push(('0' + ((byteValue + 256) % 256).toString(16)).slice(-2));
+  }
+  return parts.join('');
+}
+
+function canSyncDifferentPersonalId_(operator) {
+  return operator.role === 'admin' || operator.role === 'warehouse_operator';
+}
+
+function normalizeComparableText_(value) {
+  return String(value || '').trim().replace(/\s+/g, ' ').toLowerCase();
+}
+
+function readOperatorProfileBinding_(properties, email) {
+  var raw = properties.getProperty(buildOperatorProfilePropertyKey_(email));
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    return null;
+  }
+}
+
+function getOperatorPersonalId_(operator) {
+  var email = String(operator && operator.email || '').toLowerCase();
+  if (!email) return '';
+  var binding = readOperatorProfileBinding_(
+    PropertiesService.getScriptProperties(),
+    email
+  );
+  return binding ? String(binding.personalId || '').trim() : '';
+}
+
+function assertCanSyncProfilePersonalId_(context, previousPersonalId, personalId, claimedBy, operatorEmail, existing) {
+  if (claimedBy && claimedBy !== operatorEmail) {
+    throw createError_('VALIDATION_ERROR', 'Personal ID is already bound to another operator');
+  }
+
+  if (canSyncDifferentPersonalId_(context.operator)) return;
+
+  if (previousPersonalId) {
+    if (previousPersonalId !== personalId) {
+      throw createError_('VALIDATION_ERROR', 'Personal ID is already bound to this operator');
+    }
+    return;
+  }
+
+  if (!existing) {
+    throw createError_('VALIDATION_ERROR', 'Personal ID must already exist before it can be bound to this operator');
+  }
+
+  var operatorName = normalizeComparableText_(context.operator.fullName);
+  var soldierName = normalizeComparableText_(existing.row.full_name);
+  var requestedName = normalizeComparableText_(context.request.body.fullName);
+  if (!operatorName || soldierName !== operatorName || requestedName !== operatorName) {
+    throw createError_('VALIDATION_ERROR', 'Personal ID does not match the authenticated operator');
+  }
+}
+
 var OperatorsController = {
   me: function(context) {
     return {
@@ -12,6 +87,103 @@ var OperatorsController = {
       avatarUrl: context.operator.avatarUrl,
       savedSignatureUrl: context.operator.savedSignatureUrl
     };
+  },
+
+  syncMyProfile: function(context) {
+    var body = context.request.body;
+    validateSoldierBody_(body);
+    var operatorEmail = String(context.operator.email || '').toLowerCase();
+    var personalId = String(body.personalId || '').trim();
+
+    var lock = LockService.getScriptLock();
+    if (!lock.tryLock(15000)) {
+      throw createError_('BUSY', 'Another profile sync is being processed, please wait');
+    }
+
+    try {
+      var properties = PropertiesService.getScriptProperties();
+      var previousBinding = readOperatorProfileBinding_(properties, operatorEmail);
+      var previousPersonalId = previousBinding ? String(previousBinding.personalId || '') : '';
+      if (
+        previousPersonalId &&
+        previousPersonalId !== personalId &&
+        !canSyncDifferentPersonalId_(context.operator)
+      ) {
+        throw createError_('VALIDATION_ERROR', 'Personal ID is already bound to this operator');
+      }
+
+      var claimKey = buildOperatorPersonalIdClaimKey_(personalId);
+      var claimedBy = String(properties.getProperty(claimKey) || '').toLowerCase();
+
+      var sheetId = getConfigProperty_('SOLDIERS_SHEET_ID');
+      ensureSheetHeaders_(sheetId, 'soldiers', SHEET_HEADERS['soldiers']);
+
+      var existing = findRow_(sheetId, 'soldiers', 'personal_id', personalId);
+      assertCanSyncProfilePersonalId_(
+        context,
+        previousPersonalId,
+        personalId,
+        claimedBy,
+        operatorEmail,
+        existing
+      );
+
+      var created = false;
+      var now = new Date().toISOString();
+      var fullName = String(body.fullName || '').trim();
+      if (existing) {
+        var updatedSoldier = buildSoldierRecord_(body, existing.row.created_at, now);
+        updateRow_(sheetId, 'soldiers', existing.index, updatedSoldier);
+        logGlobalAudit_('operators.syncMyProfile.updateSoldier', context.operator.email, {
+          personalId: personalId
+        });
+        clearCachedSoldiersList_(sheetId);
+        fullName = updatedSoldier.full_name;
+      } else if (canSyncDifferentPersonalId_(context.operator)) {
+        var newSoldier = buildSoldierRecord_(
+          {
+            personalId: personalId,
+            fullName: body.fullName,
+            rank: body.rank,
+            company: body.company,
+            platoon: body.platoon,
+            phone: body.phone
+          },
+          now,
+          now
+        );
+
+        appendRow_(sheetId, 'soldiers', newSoldier);
+        logGlobalAudit_('operators.syncMyProfile.createSoldier', context.operator.email, {
+          personalId: personalId
+        });
+        clearCachedSoldiersList_(sheetId);
+        created = true;
+        fullName = newSoldier.full_name;
+      }
+
+      properties.setProperty(buildOperatorProfilePropertyKey_(operatorEmail), JSON.stringify({
+        personalId: personalId,
+        fullName: String(body.fullName || '').trim(),
+        rank: String(body.rank || '').trim(),
+        company: String(body.company || '').trim(),
+        platoon: String(body.platoon || '').trim(),
+        phone: normalizeSoldierPhone_(body.phone),
+        updatedAt: new Date().toISOString()
+      }));
+      properties.setProperty(claimKey, operatorEmail);
+      if (previousPersonalId && previousPersonalId !== personalId) {
+        properties.deleteProperty(buildOperatorPersonalIdClaimKey_(previousPersonalId));
+      }
+
+      return {
+        personalId: personalId,
+        fullName: fullName,
+        created: created
+      };
+    } finally {
+      lock.releaseLock();
+    }
   },
 
   list: function(context) {

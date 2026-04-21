@@ -60,6 +60,15 @@ function getNextFormNumber_() {
   return '1008-' + padded;
 }
 
+function buildPublicSoldierDetails_(row) {
+  return {
+    personalId: String(row.personal_id || '').trim(),
+    fullName: String(row.full_name || '').trim(),
+    rank: String(row.rank || '').trim(),
+    company: String(row.company || '').trim()
+  };
+}
+
 var TransactionsController = {
   list: function(context) {
     var activityId = context.request.body.activityId;
@@ -87,9 +96,9 @@ var TransactionsController = {
         txId: row.tx_id,
         formNumber: row.form_number || '',
         txType: row.tx_type,
-        giverPersonalId: row.giver_personal_id,
+        giverPersonalId: String(row.giver_personal_id || ''),
         giverName: row.giver_name,
-        receiverPersonalId: row.receiver_personal_id,
+        receiverPersonalId: String(row.receiver_personal_id || ''),
         receiverName: row.receiver_name,
         performedBy: row.performed_by,
         performedAt: row.performed_at,
@@ -154,18 +163,21 @@ var TransactionsController = {
     var soldiersSheetId = getConfigProperty_('SOLDIERS_SHEET_ID');
     var isIssuanceType = row.tx_type === 'issue' || row.tx_type === 'borrow_in';
     var soldierPersonalId = isIssuanceType
-      ? row.receiver_personal_id
-      : row.giver_personal_id;
+      ? String(row.receiver_personal_id || '').trim()
+      : String(row.giver_personal_id || '').trim();
     var soldierDetails = null;
-    if (soldiersSheetId && soldierPersonalId) {
-      var soldierRow = findRow_(soldiersSheetId, 'soldiers', 'personal_id', soldierPersonalId);
-      if (soldierRow) {
-        soldierDetails = {
-          personalId: String(soldierRow.row.personal_id),
-          fullName: soldierRow.row.full_name || '',
-          rank: soldierRow.row.rank || '',
-          company: soldierRow.row.company || ''
-        };
+    if (soldierPersonalId) {
+      var activitySoldiersSheetId = getActivitySoldiersSheetId_(body.activityId, false);
+      var activitySoldierRow = activitySoldiersSheetId
+        ? findRow_(activitySoldiersSheetId, 'activity-soldiers', 'personal_id', soldierPersonalId)
+        : null;
+      if (activitySoldierRow) {
+        soldierDetails = buildPublicSoldierDetails_(activitySoldierRow.row);
+      } else if (soldiersSheetId) {
+        var soldierRow = findRow_(soldiersSheetId, 'soldiers', 'personal_id', soldierPersonalId);
+        if (soldierRow) {
+          soldierDetails = buildPublicSoldierDetails_(soldierRow.row);
+        }
       }
     }
 
@@ -202,9 +214,9 @@ var TransactionsController = {
       txId: row.tx_id,
       formNumber: row.form_number || '',
       txType: row.tx_type,
-      giverPersonalId: String(row.giver_personal_id),
+      giverPersonalId: String(row.giver_personal_id || ''),
       giverName: row.giver_name || '',
-      receiverPersonalId: String(row.receiver_personal_id),
+      receiverPersonalId: String(row.receiver_personal_id || ''),
       receiverName: row.receiver_name || '',
       performedAt: row.performed_at || '',
       items: items,
@@ -219,6 +231,8 @@ var TransactionsController = {
   _doCreate: function(context) {
     var body = context.request.body;
     var now = new Date().toISOString();
+    var giverPersonalId = String(body.giverPersonalId || '').trim();
+    var receiverPersonalId = String(body.receiverPersonalId || '').trim();
 
     var validTypes = ['issue', 'return', 'borrow_in', 'return_borrow', 'count_adjustment', 'write_off'];
     if (validTypes.indexOf(body.txType) === -1) {
@@ -226,22 +240,48 @@ var TransactionsController = {
     }
 
     // For issue/borrow_in: receiver must be specified
-    if ((body.txType === 'issue' || body.txType === 'borrow_in') && !body.receiverPersonalId) {
+    if ((body.txType === 'issue' || body.txType === 'borrow_in') && !receiverPersonalId) {
       throw createError_('VALIDATION_ERROR', 'receiverPersonalId is required for ' + body.txType);
     }
-
-    // For return/return_borrow: giver must be specified
-    if ((body.txType === 'return' || body.txType === 'return_borrow') && !body.giverPersonalId) {
+    if ((body.txType === 'issue' || body.txType === 'borrow_in') && !giverPersonalId) {
       throw createError_('VALIDATION_ERROR', 'giverPersonalId is required for ' + body.txType);
     }
 
+    // For return/return_borrow: giver must be specified
+    if ((body.txType === 'return' || body.txType === 'return_borrow') && !giverPersonalId) {
+      throw createError_('VALIDATION_ERROR', 'giverPersonalId is required for ' + body.txType);
+    }
+    if ((body.txType === 'return' || body.txType === 'return_borrow') && !receiverPersonalId) {
+      throw createError_('VALIDATION_ERROR', 'receiverPersonalId is required for ' + body.txType);
+    }
+
     // Operator cannot issue to or receive from themselves
-    if (
-      body.giverPersonalId &&
-      body.receiverPersonalId &&
-      String(body.giverPersonalId) === String(body.receiverPersonalId)
-    ) {
+    if (giverPersonalId && receiverPersonalId && giverPersonalId === receiverPersonalId) {
       throw createError_('VALIDATION_ERROR', 'Giver and receiver cannot be the same person');
+    }
+    var operatorPersonalId = getOperatorPersonalId_(context.operator);
+    if (
+      !operatorPersonalId &&
+      (body.txType === 'issue' ||
+        body.txType === 'borrow_in' ||
+        body.txType === 'return' ||
+        body.txType === 'return_borrow')
+    ) {
+      throw createError_('VALIDATION_ERROR', 'Operator profile must be synced before creating transactions');
+    }
+    if (
+      operatorPersonalId &&
+      (body.txType === 'issue' || body.txType === 'borrow_in') &&
+      receiverPersonalId === operatorPersonalId
+    ) {
+      throw createError_('VALIDATION_ERROR', 'Operator cannot issue to themselves');
+    }
+    if (
+      operatorPersonalId &&
+      (body.txType === 'return' || body.txType === 'return_borrow') &&
+      giverPersonalId === operatorPersonalId
+    ) {
+      throw createError_('VALIDATION_ERROR', 'Operator cannot return from themselves');
     }
 
     var transactionsId = getConfigProperty_('ACTIVITY_' + body.activityId + '_TRANSACTIONS_ID');
@@ -291,9 +331,9 @@ var TransactionsController = {
       tx_id: txId,
       form_number: formNumber,
       tx_type: body.txType,
-      giver_personal_id: body.giverPersonalId || '',
+      giver_personal_id: giverPersonalId,
       giver_name: body.giverName || '',
-      receiver_personal_id: body.receiverPersonalId || '',
+      receiver_personal_id: receiverPersonalId,
       receiver_name: body.receiverName || '',
       performed_by: context.operator.email,
       performed_at: now,
