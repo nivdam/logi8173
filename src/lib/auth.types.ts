@@ -5,7 +5,23 @@ type OperatorProfile = {
   rank: string
   personalId: string
   phone: string
+  company: string
+  platoon: string | undefined
   savedSignature: string
+}
+
+const isOperatorProfileComplete = (
+  profile: OperatorProfile | undefined,
+): profile is OperatorProfile => {
+  if (!profile) return false
+  return (
+    profile.fullName.trim() !== "" &&
+    profile.rank.trim() !== "" &&
+    profile.personalId.trim() !== "" &&
+    profile.phone.trim() !== "" &&
+    profile.company.trim() !== "" &&
+    profile.savedSignature !== ""
+  )
 }
 
 type AuthenticatedOperator = {
@@ -28,3 +44,4 @@ type AuthState = {
 }
 
 export type { OperatorRole, OperatorProfile, AuthenticatedOperator, AuthState }
+export { isOperatorProfileComplete }

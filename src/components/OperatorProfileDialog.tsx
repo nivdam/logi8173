@@ -16,7 +16,10 @@ import { RefreshCw } from "lucide-react";
 import { SignatureCanvas } from "./SignatureCanvas";
 import { t } from "../lib/i18n";
 import { RANK_OPTIONS } from "../lib/rank-options";
+import { useCompanies } from "../api";
 import type { OperatorProfile } from "../lib/auth.types";
+
+const DEFAULT_COMPANY = "פלס״ם";
 
 export const OperatorProfileDialog = ({
   open,
@@ -30,12 +33,17 @@ export const OperatorProfileDialog = ({
   onReset,
   onSubmit,
 }: OperatorProfileDialogProps) => {
+  const { data: companies = [] } = useCompanies();
+  const companyOptions = companies
+    .filter((companyRecord) => companyRecord.isActive)
+    .map((companyRecord) => companyRecord.name);
   const [fullName, setFullName] = useState(defaultFullName);
   const [rank, setRank] = useState(initialProfile?.rank ?? "");
   const [personalId, setPersonalId] = useState(
     initialProfile?.personalId ?? "",
   );
   const [phone, setPhone] = useState(initialProfile?.phone ?? "");
+  const [company, setCompany] = useState(initialProfile?.company ?? "");
   const [savedSignature, setSavedSignature] = useState(
     initialProfile?.savedSignature ?? defaultSavedSignature ?? "",
   );
@@ -49,6 +57,7 @@ export const OperatorProfileDialog = ({
     setRank(initialProfile?.rank ?? "");
     setPersonalId(initialProfile?.personalId ?? "");
     setPhone(initialProfile?.phone ?? "");
+    setCompany(initialProfile?.company ?? pickDefaultCompany(companies));
     const sig = initialProfile?.savedSignature ?? defaultSavedSignature ?? "";
     setSavedSignature(sig);
     setIsEditingSignature(sig === "");
@@ -64,6 +73,7 @@ export const OperatorProfileDialog = ({
     rank.trim() !== "" &&
     personalId.trim() !== "" &&
     phone.trim() !== "" &&
+    company.trim() !== "" &&
     savedSignature !== "" &&
     fullNameError === undefined &&
     personalIdError === undefined &&
@@ -78,6 +88,8 @@ export const OperatorProfileDialog = ({
       rank: rank.trim(),
       personalId: personalId.trim(),
       phone: phone.trim(),
+      company: company.trim(),
+      platoon: initialProfile?.platoon,
       savedSignature,
     });
   };
@@ -100,6 +112,10 @@ export const OperatorProfileDialog = ({
   const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const sanitized = event.currentTarget.value.replace(/[^\d-]/g, "");
     setPhone(sanitized);
+  };
+
+  const handleCompanyChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setCompany(event.target.value);
   };
 
   const handleEditSignature = () => {
@@ -186,19 +202,39 @@ export const OperatorProfileDialog = ({
                     </Field.Root>
                   </Flex>
 
-                  <Field.Root required invalid={showPhoneError}>
-                    <Field.Label>{t("soldiers.phone")}</Field.Label>
-                    <Input
-                      type="tel"
-                      value={phone}
-                      onChange={handlePhoneChange}
-                      inputMode="tel"
-                      maxLength={11}
-                    />
-                    {showPhoneError ? (
-                      <Field.ErrorText>{phoneError}</Field.ErrorText>
-                    ) : null}
-                  </Field.Root>
+                  <Flex gap="4" direction={{ base: "column", md: "row" }}>
+                    <Field.Root required flex="1" invalid={showPhoneError}>
+                      <Field.Label>{t("soldiers.phone")}</Field.Label>
+                      <Input
+                        type="tel"
+                        value={phone}
+                        onChange={handlePhoneChange}
+                        inputMode="tel"
+                        maxLength={11}
+                      />
+                      {showPhoneError ? (
+                        <Field.ErrorText>{phoneError}</Field.ErrorText>
+                      ) : null}
+                    </Field.Root>
+
+                    <Field.Root required flex="1">
+                      <Field.Label>{t("auth.company")}</Field.Label>
+                      <NativeSelect.Root>
+                        <NativeSelect.Field
+                          value={company}
+                          onChange={handleCompanyChange}
+                        >
+                          <option value="">{t("auth.selectCompany")}</option>
+                          {companyOptions.map((name) => (
+                            <option key={name} value={name}>
+                              {name}
+                            </option>
+                          ))}
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator />
+                      </NativeSelect.Root>
+                    </Field.Root>
+                  </Flex>
 
                   <Field.Root required>
                     <Field.Label>{t("issuance.savedSignature")}</Field.Label>
@@ -297,6 +333,17 @@ const validatePersonalId = (value: string): string | undefined => {
   if (trimmed.length < 6 || trimmed.length > 9)
     return t("auth.errors.personalIdLength");
   return undefined;
+};
+
+const pickDefaultCompany = (
+  companies: Array<{ name: string; isActive: boolean }>,
+): string => {
+  const active = companies.filter((company) => company.isActive);
+  const hasDefault = active.some((company) => company.name === DEFAULT_COMPANY);
+  if (hasDefault) return DEFAULT_COMPANY;
+  const first = active[0];
+  if (first) return first.name;
+  return "";
 };
 
 const validatePhone = (value: string): string | undefined => {

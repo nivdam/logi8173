@@ -26,6 +26,8 @@
     "profileDescription": "השלם פרטים מקומיים שישמשו את הטפסים במכשיר הנוכחי.",
     "profileDeviceOnly": "המידע נשמר מקומית בדפדפן הזה בלבד, לצורכי נוחות שימוש.",
     "rank": "דרגה",
+    "company": "פלוגה",
+    "selectCompany": "בחר פלוגה",
     "accountNameFallback": "חשבון",
     "selectRank": "בחר דרגה",
     "editProfile": "פרטי החשבון",
@@ -220,7 +222,8 @@
       "title": "הפרופיל שלי",
       "description": "פרטי המנפיק ששמורים מקומית על המכשיר הזה.",
       "notSet": "טרם הוגדר",
-      "editAction": "ערוך פרופיל"
+      "editAction": "ערוך פרופיל",
+      "saveError": "שמירת הפרופיל נכשלה"
     },
     "operators": {
       "title": "מנפיקים",
@@ -366,6 +369,7 @@
     "searchSoldier": "חיפוש חייל לפי שם או מספר אישי...",
     "selectSoldier": "בחר חייל",
     "noSoldiersFound": "לא נמצאו חיילים",
+    "cannotSignSelf": "לא ניתן להחתים את עצמך",
     "selectedItems": "פריטים שנבחרו",
     "noItemsSelected": "לא נבחרו פריטים",
     "addItems": "הוסף פריטים מהמלאי",
