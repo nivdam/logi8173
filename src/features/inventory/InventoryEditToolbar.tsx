@@ -15,12 +15,14 @@ export const InventoryEditToolbar = ({
   if (!isEditing) {
     return (
       <Button
-        size="sm"
-        variant="outline"
+        size="md"
         borderRadius="lg"
+        bg="sage.600"
+        color="white"
+        _hover={{ bg: "sage.700" }}
         onClick={onStartEditing}
       >
-        <Pencil size={14} />
+        <Pencil size={16} />
         {t("inventory.editMode")}
       </Button>
     )
@@ -29,18 +31,18 @@ export const InventoryEditToolbar = ({
   return (
     <Flex gap="2" flexWrap="wrap" align="center">
       <Button
-        size="sm"
+        size="md"
         borderRadius="lg"
         bg="sage.600"
         color="white"
         _hover={{ bg: "sage.700" }}
         onClick={onAddRow}
       >
-        <Plus size={14} />
+        <Plus size={16} />
         {t("inventory.addRow")}
       </Button>
       <Button
-        size="sm"
+        size="md"
         borderRadius="lg"
         bg="blue.600"
         color="white"
@@ -49,7 +51,7 @@ export const InventoryEditToolbar = ({
         loading={isSaving}
         onClick={onSave}
       >
-        <Save size={14} />
+        <Save size={16} />
         {t("inventory.saveChanges")}
         {changeCount > 0 ? (
           <Text as="span" fontSize="xs" opacity={0.8}>
@@ -58,12 +60,12 @@ export const InventoryEditToolbar = ({
         ) : null}
       </Button>
       <Button
-        size="sm"
+        size="md"
         variant="outline"
         borderRadius="lg"
         onClick={onCancelEditing}
       >
-        <X size={14} />
+        <X size={16} />
         {t("inventory.cancelEdit")}
       </Button>
     </Flex>
