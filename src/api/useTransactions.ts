@@ -1,8 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "../lib/api"
+import { LIVE_POLL_MS } from "./polling"
 import type { Transaction, TransactionType, TransactionLineItem, PublicTransaction } from "../types"
-
-const TRANSACTIONS_POLL_MS = 10_000
 
 export const useTransactions = (activityId: string) =>
   useQuery({
@@ -10,8 +9,8 @@ export const useTransactions = (activityId: string) =>
     queryFn: () =>
       api.post<Transaction[]>("tx.list", { activityId }),
     enabled: !!activityId,
-    refetchInterval: TRANSACTIONS_POLL_MS,
-    staleTime: TRANSACTIONS_POLL_MS,
+    refetchInterval: LIVE_POLL_MS,
+    staleTime: LIVE_POLL_MS,
   })
 
 export const useCreateTransaction = () => {

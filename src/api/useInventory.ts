@@ -1,15 +1,14 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "../lib/api"
+import { ACTIVE_POLL_MS } from "./polling"
 import type { InventoryItem } from "../types"
-
-const INVENTORY_POLL_MS = 30_000
 
 export const useInventory = () =>
   useQuery({
     queryKey: ["inventory"],
     queryFn: () => api.get<InventoryItem[]>("inventory.list"),
-    refetchInterval: INVENTORY_POLL_MS,
-    staleTime: INVENTORY_POLL_MS,
+    refetchInterval: ACTIVE_POLL_MS,
+    staleTime: ACTIVE_POLL_MS,
   })
 
 export const useUpsertInventoryItem = () => {
