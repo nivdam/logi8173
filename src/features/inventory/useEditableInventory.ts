@@ -27,7 +27,6 @@ const isRowValid = (row: EditableRow): boolean => {
   if (row.name.trim() === "") return false
   if (row.category.trim() === "") return false
   if (row.currentQty < 0) return false
-  if (row.changeType === "added" && row.itemNumber.trim() === "") return false
   return true
 }
 
