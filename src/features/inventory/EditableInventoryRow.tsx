@@ -88,59 +88,17 @@ export const EditableInventoryRow = ({
 
   return (
     <Stack
-      gap="2"
-      py="2"
+      gap="3"
+      py="3"
       px="4"
       borderBottomWidth="1px"
       borderColor="border"
       role="row"
       bg={rowBackground}
       css={{ transition: "background 0.2s ease" }}
+      onClick={stopPropagation}
     >
-      <Grid
-        templateColumns="2fr 1fr 1fr 1fr 1fr auto"
-        gap="2"
-        alignItems="center"
-      >
-        <Input
-          size="sm"
-          borderRadius="md"
-          value={row.name}
-          onChange={handleNameChange}
-          onClick={stopPropagation}
-          placeholder={t("inventory.name")}
-          autoFocus
-        />
-        <Input
-          size="sm"
-          borderRadius="md"
-          type="tel"
-          inputMode="numeric"
-          pattern="[0-9]*"
-          value={row.itemNumber}
-          onChange={handleItemNumberChange}
-          onClick={stopPropagation}
-          placeholder={t("inventory.itemNumber")}
-        />
-        <Box onClick={stopPropagation}>
-          <FilterSelect
-            label={t("inventory.category")}
-            value={row.category}
-            options={CATEGORY_OPTIONS}
-            onChange={handleCategoryChange}
-          />
-        </Box>
-        <Input
-          size="sm"
-          borderRadius="md"
-          type="number"
-          inputMode="numeric"
-          value={row.currentQty}
-          onChange={handleQtyChange}
-          onClick={stopPropagation}
-          min={0}
-          placeholder={t("inventory.qty")}
-        />
+      <Flex justify="space-between" align="center">
         <StatusBadge status={row.status} label={getItemStatusLabel(row.status)} />
         <Flex gap="1">
           <Button
@@ -168,26 +126,34 @@ export const EditableInventoryRow = ({
             <ChevronUp size={14} />
           </Button>
         </Flex>
-      </Grid>
+      </Flex>
 
-      <Flex gap="3" align="center" pl="1" flexWrap="wrap" onClick={stopPropagation}>
-        <Flex gap="2" align="center">
-          <Text textStyle="xs" color="fg.muted" whiteSpace="nowrap">
-            {t("inventory.unit")}
-          </Text>
-          <Box minW="28">
-            <FilterSelect
-              label={t("inventory.unit")}
-              value={row.unitOfMeasure}
-              options={UNIT_OPTIONS}
-              onChange={handleUnitChange}
-            />
-          </Box>
-        </Flex>
-        <Flex gap="2" align="center">
-          <Text textStyle="xs" color="fg.muted" whiteSpace="nowrap">
-            {t("inventory.minThreshold")}
-          </Text>
+      <Grid templateColumns="2fr 1fr 1fr" gap="3">
+        <Box>
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.name")}</Text>
+          <Input
+            size="sm"
+            borderRadius="md"
+            value={row.name}
+            onChange={handleNameChange}
+            placeholder={t("inventory.name")}
+            autoFocus
+          />
+        </Box>
+        <Box>
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.qty")}</Text>
+          <Input
+            size="sm"
+            borderRadius="md"
+            type="number"
+            inputMode="numeric"
+            value={row.currentQty}
+            onChange={handleQtyChange}
+            min={0}
+          />
+        </Box>
+        <Box>
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.minThreshold")}</Text>
           <Input
             size="sm"
             borderRadius="md"
@@ -196,22 +162,54 @@ export const EditableInventoryRow = ({
             value={row.minThreshold}
             onChange={handleMinThresholdChange}
             min={0}
-            w="20"
           />
-        </Flex>
-        <Flex gap="2" align="center" flex="1" minW="48">
-          <Text textStyle="xs" color="fg.muted" whiteSpace="nowrap">
-            {t("inventory.notes")}
-          </Text>
+        </Box>
+      </Grid>
+
+      <Grid templateColumns="1fr 1fr 1fr" gap="3">
+        <Box>
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.category")}</Text>
+          <FilterSelect
+            label={t("inventory.category")}
+            value={row.category}
+            options={CATEGORY_OPTIONS}
+            onChange={handleCategoryChange}
+          />
+        </Box>
+        <Box>
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.unit")}</Text>
+          <FilterSelect
+            label={t("inventory.unit")}
+            value={row.unitOfMeasure}
+            options={UNIT_OPTIONS}
+            onChange={handleUnitChange}
+          />
+        </Box>
+        <Box>
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.itemNumber")}</Text>
           <Input
             size="sm"
             borderRadius="md"
-            value={row.notes ?? ""}
-            onChange={handleNotesChange}
-            placeholder={t("inventory.notesPlaceholder")}
+            type="tel"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={row.itemNumber}
+            onChange={handleItemNumberChange}
+            placeholder={t("inventory.itemNumber")}
           />
-        </Flex>
-      </Flex>
+        </Box>
+      </Grid>
+
+      <Box>
+        <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.notes")}</Text>
+        <Input
+          size="sm"
+          borderRadius="md"
+          value={row.notes ?? ""}
+          onChange={handleNotesChange}
+          placeholder={t("inventory.notesPlaceholder")}
+        />
+      </Box>
     </Stack>
   )
 }

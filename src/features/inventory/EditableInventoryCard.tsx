@@ -147,31 +147,6 @@ export const EditableInventoryCard = ({
 
         <Grid templateColumns="1fr 1fr" gap="3">
           <Box>
-            <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.itemNumber")}</Text>
-            <Input
-              size="sm"
-              borderRadius="md"
-              type="tel"
-              inputMode="numeric"
-              pattern="[0-9]*"
-              value={row.itemNumber}
-              onChange={handleItemNumberChange}
-              placeholder={t("inventory.itemNumber")}
-            />
-          </Box>
-          <Box>
-            <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.category")}</Text>
-            <FilterSelect
-              label={t("inventory.category")}
-              value={row.category}
-              options={CATEGORY_OPTIONS}
-              onChange={handleCategoryChange}
-            />
-          </Box>
-        </Grid>
-
-        <Grid templateColumns="1fr 1fr" gap="3">
-          <Box>
             <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.qty")}</Text>
             <Input
               size="sm"
@@ -181,6 +156,30 @@ export const EditableInventoryCard = ({
               value={row.currentQty}
               onChange={handleQtyChange}
               min={0}
+            />
+          </Box>
+          <Box>
+            <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.minThreshold")}</Text>
+            <Input
+              size="sm"
+              borderRadius="md"
+              type="number"
+              inputMode="numeric"
+              value={row.minThreshold}
+              onChange={handleMinThresholdChange}
+              min={0}
+            />
+          </Box>
+        </Grid>
+
+        <Grid templateColumns="1fr 1fr" gap="3">
+          <Box>
+            <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.category")}</Text>
+            <FilterSelect
+              label={t("inventory.category")}
+              value={row.category}
+              options={CATEGORY_OPTIONS}
+              onChange={handleCategoryChange}
             />
           </Box>
           <Box>
@@ -195,17 +194,17 @@ export const EditableInventoryCard = ({
         </Grid>
 
         <Box>
-          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.minThreshold")}</Text>
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.itemNumber")}</Text>
           <Input
             size="sm"
             borderRadius="md"
-            type="number"
+            type="tel"
             inputMode="numeric"
-            value={row.minThreshold}
-            onChange={handleMinThresholdChange}
-            min={0}
+            pattern="[0-9]*"
+            value={row.itemNumber}
+            onChange={handleItemNumberChange}
+            placeholder={t("inventory.itemNumber")}
           />
-          <Text textStyle="xs" color="fg.muted" mt="1">{t("inventory.minThresholdHint")}</Text>
         </Box>
 
         <Box>
