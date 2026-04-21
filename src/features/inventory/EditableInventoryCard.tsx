@@ -5,7 +5,7 @@ import { FilterSelect } from "../../components/FilterSelect"
 import { getItemStatusLabel } from "../../lib/formatters"
 import { t } from "../../lib/i18n"
 import { animations } from "../../theme/animations"
-import { CATEGORY_OPTIONS, getCategoryLabel } from "./inventory.constants"
+import { CATEGORY_OPTIONS, UNIT_OPTIONS, getCategoryLabel } from "./inventory.constants"
 import type { EditableRow, EditableField } from "./useEditableInventory"
 
 const getCardBorderColor = (changeType: EditableRow["changeType"]): string => {
@@ -40,6 +40,16 @@ export const EditableInventoryCard = ({
     if (!Number.isNaN(parsedQuantity) && parsedQuantity >= 0) {
       onFieldChange(row.itemId, "currentQty", parsedQuantity)
     }
+  }
+
+  const handleUnitChange = (value: string | undefined) => {
+    if (value) {
+      onFieldChange(row.itemId, "unitOfMeasure", value)
+    }
+  }
+
+  const handleNotesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onFieldChange(row.itemId, "notes", event.currentTarget.value)
   }
 
   const handleDeleteClick = () => {
@@ -78,6 +88,12 @@ export const EditableInventoryCard = ({
             <Text textStyle="sm" fontWeight="500">{row.currentQty} {row.unitOfMeasure}</Text>
           </Flex>
         </Flex>
+        {row.notes ? (
+          <Flex direction="column" mt="3">
+            <Text textStyle="xs" color="fg.muted">{t("inventory.notes")}</Text>
+            <Text textStyle="sm">{row.notes}</Text>
+          </Flex>
+        ) : null}
       </Box>
     )
   }
@@ -114,7 +130,7 @@ export const EditableInventoryCard = ({
             borderRadius="md"
             value={row.name}
             onChange={handleNameChange}
-            placeholder="שם הפריט"
+            placeholder={t("inventory.name")}
           />
         </Box>
 
@@ -126,13 +142,13 @@ export const EditableInventoryCard = ({
               borderRadius="md"
               value={row.itemNumber}
               onChange={handleItemNumberChange}
-              placeholder="מק״ט"
+              placeholder={t("inventory.itemNumber")}
             />
           </Box>
           <Box>
             <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.category")}</Text>
             <FilterSelect
-              label="קטגוריה"
+              label={t("inventory.category")}
               value={row.category}
               options={CATEGORY_OPTIONS}
               onChange={handleCategoryChange}
@@ -140,16 +156,38 @@ export const EditableInventoryCard = ({
           </Box>
         </Grid>
 
+        <Grid templateColumns="1fr 1fr" gap="3">
+          <Box>
+            <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.qty")}</Text>
+            <Input
+              size="sm"
+              borderRadius="md"
+              type="number"
+              inputMode="numeric"
+              value={row.currentQty}
+              onChange={handleQtyChange}
+              min={0}
+            />
+          </Box>
+          <Box>
+            <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.unit")}</Text>
+            <FilterSelect
+              label={t("inventory.unit")}
+              value={row.unitOfMeasure}
+              options={UNIT_OPTIONS}
+              onChange={handleUnitChange}
+            />
+          </Box>
+        </Grid>
+
         <Box>
-          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.qty")}</Text>
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.notes")}</Text>
           <Input
             size="sm"
             borderRadius="md"
-            type="number"
-            inputMode="numeric"
-            value={row.currentQty}
-            onChange={handleQtyChange}
-            min={0}
+            value={row.notes ?? ""}
+            onChange={handleNotesChange}
+            placeholder={t("inventory.notesPlaceholder")}
           />
         </Box>
       </Flex>

@@ -1,11 +1,11 @@
-import { Button, Grid, Input, Text } from "@chakra-ui/react"
+import { Box, Button, Flex, Grid, Input, Stack, Text } from "@chakra-ui/react"
 import { Trash2 } from "lucide-react"
 import { StatusBadge } from "../../components/StatusBadge"
 import { FilterSelect } from "../../components/FilterSelect"
 import { getItemStatusLabel } from "../../lib/formatters"
 import { t } from "../../lib/i18n"
 import { animations } from "../../theme/animations"
-import { CATEGORY_OPTIONS, getCategoryLabel } from "./inventory.constants"
+import { CATEGORY_OPTIONS, UNIT_OPTIONS, getCategoryLabel } from "./inventory.constants"
 import type { EditableRow, EditableField } from "./useEditableInventory"
 
 const getRowBackground = (changeType: EditableRow["changeType"]): string | undefined => {
@@ -42,6 +42,16 @@ export const EditableInventoryRow = ({
     }
   }
 
+  const handleUnitChange = (value: string | undefined) => {
+    if (value) {
+      onFieldChange(row.itemId, "unitOfMeasure", value)
+    }
+  }
+
+  const handleNotesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onFieldChange(row.itemId, "notes", event.currentTarget.value)
+  }
+
   const handleDeleteClick = () => {
     onDelete(row.itemId)
   }
@@ -72,64 +82,94 @@ export const EditableInventoryRow = ({
     )
   }
 
+  const showDetailsStrip = row.changeType !== "unchanged"
+
   return (
-    <Grid
-      templateColumns="2fr 1fr 1fr 1fr 1fr auto"
+    <Stack
       gap="2"
       py="2"
       px="4"
       borderBottomWidth="1px"
       borderColor="border"
       role="row"
-      alignItems="center"
       bg={getRowBackground(row.changeType)}
-      css={{
-        transition: "background 0.2s ease",
-      }}
+      css={{ transition: "background 0.2s ease" }}
     >
-      <Input
-        size="sm"
-        borderRadius="md"
-        value={row.name}
-        onChange={handleNameChange}
-        placeholder="שם הפריט"
-      />
-      <Input
-        size="sm"
-        borderRadius="md"
-        value={row.itemNumber}
-        onChange={handleItemNumberChange}
-        placeholder="מק״ט"
-      />
-      <FilterSelect
-        label="קטגוריה"
-        value={row.category}
-        options={CATEGORY_OPTIONS}
-        onChange={handleCategoryChange}
-      />
-      <Input
-        size="sm"
-        borderRadius="md"
-        type="number"
-        inputMode="numeric"
-        value={row.currentQty}
-        onChange={handleQtyChange}
-        min={0}
-      />
-      <StatusBadge status={row.status} label={getItemStatusLabel(row.status)} />
-      <Button
-        size="xs"
-        variant="ghost"
-        color="red.500"
-        minW="8"
-        minH="8"
-        p="0"
-        onClick={handleDeleteClick}
-        aria-label={t("inventory.deleteRow")}
+      <Grid
+        templateColumns="2fr 1fr 1fr 1.2fr 1fr auto"
+        gap="2"
+        alignItems="center"
       >
-        <Trash2 size={14} />
-      </Button>
-    </Grid>
+        <Input
+          size="sm"
+          borderRadius="md"
+          value={row.name}
+          onChange={handleNameChange}
+          placeholder={t("inventory.name")}
+        />
+        <Input
+          size="sm"
+          borderRadius="md"
+          value={row.itemNumber}
+          onChange={handleItemNumberChange}
+          placeholder={t("inventory.itemNumber")}
+        />
+        <FilterSelect
+          label={t("inventory.category")}
+          value={row.category}
+          options={CATEGORY_OPTIONS}
+          onChange={handleCategoryChange}
+        />
+        <Flex gap="1">
+          <Input
+            size="sm"
+            borderRadius="md"
+            type="number"
+            inputMode="numeric"
+            value={row.currentQty}
+            onChange={handleQtyChange}
+            min={0}
+            flex="1"
+          />
+          <Box minW="24">
+            <FilterSelect
+              label={t("inventory.unit")}
+              value={row.unitOfMeasure}
+              options={UNIT_OPTIONS}
+              onChange={handleUnitChange}
+            />
+          </Box>
+        </Flex>
+        <StatusBadge status={row.status} label={getItemStatusLabel(row.status)} />
+        <Button
+          size="xs"
+          variant="ghost"
+          color="red.500"
+          minW="8"
+          minH="8"
+          p="0"
+          onClick={handleDeleteClick}
+          aria-label={t("inventory.deleteRow")}
+        >
+          <Trash2 size={14} />
+        </Button>
+      </Grid>
+
+      {showDetailsStrip ? (
+        <Flex gap="2" align="center" pl="1">
+          <Text textStyle="xs" color="fg.muted" minW="16">
+            {t("inventory.notes")}
+          </Text>
+          <Input
+            size="sm"
+            borderRadius="md"
+            value={row.notes ?? ""}
+            onChange={handleNotesChange}
+            placeholder={t("inventory.notesPlaceholder")}
+          />
+        </Flex>
+      ) : null}
+    </Stack>
   )
 }
 

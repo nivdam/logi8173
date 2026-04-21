@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { Button, Flex, Spinner, Text, VStack } from "@chakra-ui/react"
-import { PackageSearch, Plus } from "lucide-react"
+import { Flex, Spinner, Text, VStack } from "@chakra-ui/react"
+import { PackageSearch } from "lucide-react"
 import { PageHeader } from "../../components/PageHeader"
 import { ApiErrorState } from "../../components/ApiErrorState"
 import { SearchInput } from "../../components/SearchInput"
@@ -9,10 +9,9 @@ import { EmptyState } from "../../components/EmptyState"
 import { t } from "../../lib/i18n"
 import { toaster } from "../../lib/toaster"
 import { filterInventory, sortInventory } from "../../lib/filters"
-import { useInventory, useUpsertInventoryItem, useBatchUpdateInventory } from "../../api"
+import { useInventory, useBatchUpdateInventory } from "../../api"
 import { InventoryTable } from "./InventoryTable"
 import { InventoryEditToolbar } from "./InventoryEditToolbar"
-import { AddInventoryItemDialog } from "./AddInventoryItemDialog"
 import { useEditableInventory } from "./useEditableInventory"
 import type { SortConfig } from "../../components/SortableHeader"
 import { CATEGORY_OPTIONS, CATEGORY_VALUES } from "./inventory.constants"
@@ -37,13 +36,11 @@ export const InventoryPage = () => {
     isPending: isLoading,
     refetch,
   } = useInventory()
-  const upsertItem = useUpsertInventoryItem()
   const batchUpdate = useBatchUpdateInventory()
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<ItemCategory | undefined>(undefined)
   const [statusFilter, setStatusFilter] = useState<ItemStatus | undefined>(undefined)
   const [sort, setSort] = useState<SortConfig>({ key: "name", direction: "asc" })
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
   const editable = useEditableInventory(inventoryItems)
 
@@ -68,36 +65,6 @@ export const InventoryPage = () => {
     setSearchQuery("")
     setCategoryFilter(undefined)
     setStatusFilter(undefined)
-  }
-
-  const handleOpenAddDialog = () => {
-    setIsAddDialogOpen(true)
-  }
-
-  const handleAddDialogOpenChange = (details: { open: boolean }) => {
-    setIsAddDialogOpen(details.open)
-  }
-
-  const handleAddItem = (values: Parameters<typeof upsertItem.mutate>[0]) => {
-    upsertItem.mutate(values, {
-      onSuccess: (result) => {
-        setIsAddDialogOpen(false)
-        toaster.create({
-          title: t("inventory.addItemSuccess"),
-          description: result.name,
-          type: "success",
-          duration: 3000,
-        })
-      },
-      onError: () => {
-        toaster.create({
-          title: t("common.error"),
-          description: t("inventory.addItemError"),
-          type: "error",
-          duration: 5000,
-        })
-      },
-    })
   }
 
   const handleBatchSave = () => {
@@ -145,19 +112,6 @@ export const InventoryPage = () => {
             onAddRow={editable.addRow}
             onSave={handleBatchSave}
           />
-          {!editable.isEditing ? (
-            <Button
-              size="sm"
-              borderRadius="lg"
-              bg="sage.600"
-              color="white"
-              _hover={{ bg: "sage.700" }}
-              onClick={handleOpenAddDialog}
-            >
-              <Plus size={16} />
-              {t("inventory.addItem")}
-            </Button>
-          ) : null}
         </Flex>
       </Flex>
 
@@ -222,12 +176,6 @@ export const InventoryPage = () => {
         />
       )}
 
-      <AddInventoryItemDialog
-        open={isAddDialogOpen}
-        isSaving={upsertItem.isPending}
-        onOpenChange={handleAddDialogOpenChange}
-        onSubmit={handleAddItem}
-      />
     </VStack>
   )
 }
