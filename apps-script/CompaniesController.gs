@@ -2,12 +2,52 @@
  * Companies management — list, add/update.
  */
 
+var COMPANIES_LIST_CACHE_TTL_SECONDS = 60;
+
+function getCompaniesListCacheKey_(sheetId) {
+  return 'companies_list_' + sheetId;
+}
+
+function readCachedCompaniesList_(sheetId) {
+  try {
+    var raw = CacheService.getScriptCache().get(getCompaniesListCacheKey_(sheetId));
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function writeCachedCompaniesList_(sheetId, companies) {
+  try {
+    CacheService
+      .getScriptCache()
+      .put(
+        getCompaniesListCacheKey_(sheetId),
+        JSON.stringify(companies),
+        COMPANIES_LIST_CACHE_TTL_SECONDS
+      );
+  } catch (error) {
+    // Cache is an optimization only.
+  }
+}
+
+function clearCachedCompaniesList_(sheetId) {
+  try {
+    CacheService.getScriptCache().remove(getCompaniesListCacheKey_(sheetId));
+  } catch (error) {
+    // Cache is an optimization only.
+  }
+}
+
 var CompaniesController = {
   list: function(context) {
     var sheetId = getConfigProperty_('COMPANIES_SHEET_ID');
+    var cached = readCachedCompaniesList_(sheetId);
+    if (cached) return cached;
+
     var rows = readAllRows_(sheetId, 'companies');
 
-    return rows.map(function(row) {
+    var companies = rows.map(function(row) {
       return {
         companyId: row.company_id,
         name: row.name,
@@ -15,6 +55,9 @@ var CompaniesController = {
         createdAt: row.created_at
       };
     });
+
+    writeCachedCompaniesList_(sheetId, companies);
+    return companies;
   },
 
   upsert: function(context) {
@@ -43,6 +86,7 @@ var CompaniesController = {
         companyId: body.companyId
       });
 
+      clearCachedCompaniesList_(sheetId);
       return { companyId: updated.company_id, name: updated.name };
     }
 
@@ -58,6 +102,7 @@ var CompaniesController = {
       companyId: newCompany.company_id
     });
 
+    clearCachedCompaniesList_(sheetId);
     return { companyId: newCompany.company_id, name: newCompany.name };
   }
 };

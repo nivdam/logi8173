@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Flex, Spinner, Text, VStack } from "@chakra-ui/react"
 import { UserSearch } from "lucide-react"
 import { PageHeader } from "../../components/PageHeader"
@@ -31,18 +31,32 @@ export const SoldiersPage = () => {
   const [platoonFilter, setPlatoonFilter] = useState<string | undefined>(undefined)
   const [sort, setSort] = useState<SortConfig>({ key: "fullName", direction: "asc" })
 
-  const companyOptions = companies.map((company) => ({
-    value: company.name,
-    label: company.name,
-  }))
+  const companyOptions = useMemo(
+    () =>
+      companies.map((company) => ({
+        value: company.name,
+        label: company.name,
+      })),
+    [companies],
+  )
 
-  const platoonOptions = getUniquePlatoons(soldiers, companyFilter).map((platoon) => ({
-    value: platoon,
-    label: platoon,
-  }))
+  const platoonOptions = useMemo(
+    () =>
+      getUniquePlatoons(soldiers, companyFilter).map((platoon) => ({
+        value: platoon,
+        label: platoon,
+      })),
+    [soldiers, companyFilter],
+  )
 
-  const filtered = filterSoldiers(soldiers, searchQuery, companyFilter, platoonFilter)
-  const sortedSoldiers = sortSoldiers(filtered, sort)
+  const filtered = useMemo(
+    () => filterSoldiers(soldiers, searchQuery, companyFilter, platoonFilter),
+    [soldiers, searchQuery, companyFilter, platoonFilter],
+  )
+  const sortedSoldiers = useMemo(
+    () => sortSoldiers(filtered, sort),
+    [filtered, sort],
+  )
 
   const hasActiveFilters = searchQuery || companyFilter || platoonFilter
 
