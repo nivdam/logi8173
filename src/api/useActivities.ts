@@ -2,10 +2,15 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "../lib/api"
 import type { Activity, ActivityDetails, ActivityType } from "../types"
 
+const LIST_POLL_MS = 30_000
+const DETAIL_POLL_MS = 30_000
+
 export const useActivities = () =>
   useQuery({
     queryKey: ["activities"],
     queryFn: () => api.get<Activity[]>("activities.list"),
+    refetchInterval: LIST_POLL_MS,
+    staleTime: LIST_POLL_MS,
   })
 
 export const useActivity = (activityId: string | undefined) =>
@@ -13,6 +18,8 @@ export const useActivity = (activityId: string | undefined) =>
     queryKey: ["activities", activityId],
     queryFn: () => api.post<ActivityDetails>("activities.get", { activityId }),
     enabled: !!activityId,
+    refetchInterval: DETAIL_POLL_MS,
+    staleTime: DETAIL_POLL_MS,
   })
 
 export const useOpenActivity = () => {

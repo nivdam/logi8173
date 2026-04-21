@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { api } from "../lib/api"
 import type { DashboardSummary } from "../types"
 
-const POLL_INTERVAL_MS = 60_000
+const POLL_INTERVAL_MS = 30_000
 
 export const useDashboard = () =>
   useQuery({
