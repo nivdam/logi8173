@@ -1,4 +1,4 @@
-import { Flex, Grid } from "@chakra-ui/react"
+import { Flex, Grid, Text } from "@chakra-ui/react"
 import { SortableHeader, type SortConfig } from "../../components/SortableHeader"
 import { t } from "../../lib/i18n"
 import { EditableInventoryRow } from "./EditableInventoryRow"
@@ -42,7 +42,7 @@ export const InventoryTable = ({
           borderRadius="lg"
         >
           <SortableHeader label={t("inventory.name")} sortKey="name" currentSort={sort} onSort={onSort} />
-          <SortableHeader label={t("inventory.itemNumber")} sortKey="itemNumber" currentSort={sort} onSort={onSort} />
+          <Text textStyle="xs" color="fg.muted" fontWeight="500">{t("inventory.notes")}</Text>
           <SortableHeader label={t("inventory.category")} sortKey="category" currentSort={sort} onSort={onSort} />
           <SortableHeader label={t("inventory.qty")} sortKey="currentQty" currentSort={sort} onSort={onSort} />
           <SortableHeader label={t("inventory.status")} sortKey="status" currentSort={sort} onSort={onSort} />

@@ -73,7 +73,7 @@
     "category": "קטגוריה",
     "qty": "כמות",
     "unit": "יחידת מידה",
-    "minThreshold": "סף מלאי נמוך",
+    "minThreshold": "כמות מינימום",
     "minThresholdHint": "מתחת לכמות הזו הפריט יסומן כמלאי נמוך",
     "notes": "הערות",
     "notesPlaceholder": "הערות לפריט (אופציונלי)...",

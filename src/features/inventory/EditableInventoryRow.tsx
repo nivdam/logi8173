@@ -68,7 +68,16 @@ export const EditableInventoryRow = ({
         }}
       >
         <Text textStyle="sm" fontWeight="500" role="cell">{row.name}</Text>
-        <Text textStyle="sm" color="fg.muted" role="cell">{row.itemNumber}</Text>
+        <Text
+          textStyle="sm"
+          color="fg.muted"
+          role="cell"
+          overflow="hidden"
+          textOverflow="ellipsis"
+          whiteSpace="nowrap"
+        >
+          {row.notes}
+        </Text>
         <Text textStyle="sm" color="fg.muted" role="cell">{getCategoryLabel(row.category)}</Text>
         <Text textStyle="sm" fontWeight="500" role="cell">{row.currentQty} {row.unitOfMeasure}</Text>
         <StatusBadge status={row.status} label={getItemStatusLabel(row.status)} />
