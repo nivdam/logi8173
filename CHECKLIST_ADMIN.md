@@ -44,7 +44,7 @@
 3. הגדר **Script Properties** (הגדרות → מאפייני סקריפט):
    - `SETUP_ADMIN_EMAIL` = כתובת המייל של החשבון הגדודי
    - `WEB_CLIENT_ID` = ה-Client ID שקיבלת בשלב 1
-   - `BREAK_GLASS_ADMIN_EMAIL` = `nivdam@gmail.com` (גישת חירום מרחוק)
+   - `BREAK_GLASS_ADMIN_EMAIL` = כתובת תמיכה ייעודית (גישת חירום מרחוק — ערך זה נשמר רק ב-Script Properties, לא ב-ריפו)
 4. לך ל-**Deploy → New deployment**
 5. בחר **Web app**
 6. הגדרות:
@@ -253,7 +253,7 @@
 ## פקודות חירום
 
 ### מפעיל נעול בחוץ
-1. התחבר עם חשבון `nivdam@gmail.com` (break-glass admin)
+1. התחבר עם חשבון ה-break-glass admin (הערך שהוגדר ב-`BREAK_GLASS_ADMIN_EMAIL` ב-Script Properties)
 2. לך להגדרות → מפעילים
 3. הוסף/ערוך את המפעיל
 
