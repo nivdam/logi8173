@@ -8,6 +8,7 @@ import {
   Input,
   NativeSelect,
   Portal,
+  Spinner,
   Stack,
   Text,
 } from "@chakra-ui/react";
@@ -27,6 +28,7 @@ export const OperatorProfileFormFields = ({
   savedSignature,
   isEditingSignature,
   filteredSoldiers,
+  isLoadingSoldiers,
   companyOptions,
   fullNameError,
   personalIdError,
@@ -75,7 +77,7 @@ export const OperatorProfileFormFields = ({
           openOnClick
         >
           <Combobox.Control>
-            <Combobox.Input />
+            <Combobox.Input aria-label={t("soldiers.fullName")} />
             <Combobox.Trigger />
           </Combobox.Control>
           <Portal>
@@ -100,9 +102,15 @@ export const OperatorProfileFormFields = ({
                   ))}
                 </Combobox.List>
                 <Combobox.Empty>
-                  <Text textStyle="sm" color="fg.muted" p="3">
-                    {t("issuance.noSoldiersFound")}
-                  </Text>
+                  {isLoadingSoldiers ? (
+                    <Flex justify="center" p="3">
+                      <Spinner size="sm" color="sage.400" />
+                    </Flex>
+                  ) : (
+                    <Text textStyle="sm" color="fg.muted" p="3">
+                      {t("issuance.noSoldiersFound")}
+                    </Text>
+                  )}
                 </Combobox.Empty>
               </Combobox.Content>
             </Combobox.Positioner>
@@ -236,6 +244,7 @@ type OperatorProfileFormFieldsProps = {
   savedSignature: string;
   isEditingSignature: boolean;
   filteredSoldiers: Soldier[];
+  isLoadingSoldiers: boolean;
   companyOptions: string[];
   fullNameError: string | undefined;
   personalIdError: string | undefined;

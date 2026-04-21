@@ -31,7 +31,7 @@ export const OperatorProfileDialog = ({
   onSubmit,
 }: OperatorProfileDialogProps) => {
   const { data: companies = [] } = useCompanies();
-  const { data: soldiers = [] } = useSoldiers();
+  const { data: soldiers = [], isLoading: isLoadingSoldiers } = useSoldiers();
   const [fullName, setFullName] = useState(defaultFullName);
   const [rank, setRank] = useState(initialProfile?.rank ?? "");
   const [personalId, setPersonalId] = useState(
@@ -184,6 +184,7 @@ export const OperatorProfileDialog = ({
                   savedSignature={savedSignature}
                   isEditingSignature={isEditingSignature}
                   filteredSoldiers={filteredSoldiers}
+                  isLoadingSoldiers={isLoadingSoldiers}
                   companyOptions={companyOptions}
                   fullNameError={fullNameError}
                   personalIdError={personalIdError}

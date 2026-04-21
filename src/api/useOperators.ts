@@ -44,6 +44,7 @@ export const useSyncMyProfileSoldier = () => {
       ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["soldiers"] })
+      await queryClient.invalidateQueries({ queryKey: ["activitySoldiers"] })
       await queryClient.invalidateQueries({ queryKey: ["dashboard"] })
     },
   })

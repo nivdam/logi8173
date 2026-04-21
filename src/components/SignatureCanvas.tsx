@@ -5,6 +5,10 @@ import { Eraser } from "lucide-react";
 import { t } from "../lib/i18n";
 
 const CANVAS_HEIGHT = 160;
+// Mirrors theme tokens: SIGNATURE_STROKE_COLOR === colors.gray.900, SIGNATURE_BG_COLOR === white.
+// Kept as raw hex because SVG strings and react-signature-canvas props don't accept Chakra tokens.
+const SIGNATURE_STROKE_COLOR = "#1a1a1a";
+const SIGNATURE_BG_COLOR = "#ffffff";
 
 const pointGroupsToSvg = (
   pointGroups: Array<Array<{ x: number; y: number }>>,
@@ -26,7 +30,7 @@ const pointGroupsToSvg = (
     })
     .filter((path) => path !== "");
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><path d="${paths.join(" ")}" stroke="#1a1a1a" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><path d="${paths.join(" ")}" stroke="${SIGNATURE_STROKE_COLOR}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 };
 
 export const SignatureCanvas = ({ onSign, signatureData }: Props) => {
@@ -80,11 +84,12 @@ export const SignatureCanvas = ({ onSign, signatureData }: Props) => {
         {signatureData && (
           <Button
             variant="ghost"
-            size="xs"
+            size="sm"
+            minH="44px"
             color="fg.muted"
             onClick={handleClear}
           >
-            <Eraser size={14} />
+            <Eraser size={16} />
             {t("issuance.clearSignature")}
           </Button>
         )}
@@ -104,8 +109,8 @@ export const SignatureCanvas = ({ onSign, signatureData }: Props) => {
       >
         <ReactSignatureCanvas
           ref={canvasRef}
-          penColor="#1a1a1a"
-          backgroundColor="#ffffff"
+          penColor={SIGNATURE_STROKE_COLOR}
+          backgroundColor={SIGNATURE_BG_COLOR}
           canvasProps={{
             width: canvasWidth || 1,
             height: CANVAS_HEIGHT,
