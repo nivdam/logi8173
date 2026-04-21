@@ -1,0 +1,65 @@
+// Mock data lifted from the repo's src/mocks/*
+const MOCK = {
+  dashboard: {
+    totalItems: 18,
+    lowStockCount: 4,
+    gapCount: 3,
+    activeActivities: 1,
+    companyBreakdown: [
+      { companyName: "פלוגה א'", issuedCount: 42 },
+      { companyName: "פלוגה ב'", issuedCount: 38 },
+      { companyName: "פלוגה ג'", issuedCount: 25 },
+      { companyName: "מפקדה", issuedCount: 15 },
+      { companyName: "סיירת", issuedCount: 31 },
+    ],
+    damageBreakdown: [
+      { companyName: "פלוגה א'", totalDamagedQty: 19 },
+      { companyName: "פלוגה ב'", totalDamagedQty: 7 },
+      { companyName: "פלוגה ג'", totalDamagedQty: 12 },
+      { companyName: "מפקדה", totalDamagedQty: 2 },
+      { companyName: "סיירת", totalDamagedQty: 9 },
+    ],
+  },
+  activities: [
+    { activityId: "act1", name: "אימון פלסם אפריל 2026", activityType: "training", status: "active",
+      startDate: "2026-04-01", selectedItemCount: 12, openedBy: "ניב דמיאנוביץ'", txCount: 47, soldierCount: 34 },
+    { activityId: "act2", name: "תעסוקה מרץ 2026", activityType: "training", status: "closed",
+      startDate: "2026-03-10", endDate: "2026-03-14", selectedItemCount: 8, openedBy: "ניב דמיאנוביץ'", txCount: 82, soldierCount: 52 },
+    { activityId: "act3", name: "כוננות קיץ 2026", activityType: "operation", status: "draft",
+      startDate: "2026-06-01", selectedItemCount: 5, openedBy: "ניב דמיאנוביץ'", txCount: 0, soldierCount: 0 },
+  ],
+  inventory: [
+    { id: "i1", num: "5001", name: "וסט מגן", category: "רספאי", uom: "יחידה", qty: 120, min: 100, status: "ok" },
+    { id: "i2", num: "5002", name: "קסדה קרבית", category: "רספאי", uom: "יחידה", qty: 95, min: 100, status: "low", note: "הזמנה בדרך" },
+    { id: "i3", num: "5003", name: "מכשיר קשר מוטורולה", category: "תקשורת", uom: "יחידה", qty: 30, min: 25, status: "ok" },
+    { id: "i4", num: "5004", name: "סוללות CR123", category: "אנרגיה", uom: "קופסה", qty: 8, min: 20, status: "gap", note: "חוסר קריטי" },
+    { id: "i5", num: "5005", name: "פנס טקטי", category: "ציוד אישי", uom: "יחידה", qty: 60, min: 50, status: "ok" },
+    { id: "i6", num: "5006", name: "שק שינה", category: "ציוד אישי", uom: "יחידה", qty: 200, min: 150, status: "ok" },
+    { id: "i7", num: "5007", name: "מטען USB נייד", category: "אנרגיה", uom: "יחידה", qty: 15, min: 20, status: "low" },
+    { id: "i8", num: "5008", name: "ערכת עזרה ראשונה", category: "כללי", uom: "ערכה", qty: 25, min: 20, status: "ok" },
+    { id: "i9", num: "5009", name: "משקפת לילה", category: "רספאי", uom: "יחידה", qty: 5, min: 10, status: "gap", note: "ממתין לאישור" },
+    { id: "i10", num: "5010", name: "חבל גרירה 10מ'", category: "כללי", uom: "יחידה", qty: 40, min: 30, status: "ok" },
+    { id: "i11", num: "5011", name: "אוזניות תקשורת", category: "תקשורת", uom: "זוג", qty: 18, min: 20, status: "low" },
+    { id: "i12", num: "5012", name: "כפפות עבודה", category: "ציוד אישי", uom: "זוג", qty: 300, min: 200, status: "ok" },
+    { id: "i15", num: "5015", name: "קבלר קרביות מלא", category: "קבלר קרביות", uom: "סט", qty: 0, min: 50, status: "gap", note: "לא קיים במחסן" },
+    { id: "i16", num: "5016", name: "מים — מיכל 20 ליטר", category: "כללי", uom: "יחידה", qty: 50, min: 40, status: "ok" },
+  ],
+  soldiers: [
+    { id: "8001001", name: "יוסי כהן", rank: "סמל", company: "פלוגה א'", platoon: "מחלקה 1" },
+    { id: "8001002", name: "דניאל לוי", rank: "סמ״ר", company: "פלוגה א'", platoon: "מחלקה 1" },
+    { id: "8002001", name: "רון אביב", rank: "סמל", company: "פלוגה ב'", platoon: "מחלקה 1" },
+    { id: "8002002", name: "גיל מזרחי", rank: "סמ״ר", company: "פלוגה ב'", platoon: "מחלקה 1" },
+    { id: "8003001", name: "איתי רוזן", rank: "סגן", company: "פלוגה ג'", platoon: "מחלקה 1" },
+    { id: "8005001", name: "מתן סגל", rank: "סמל", company: "סיירת", platoon: "צוות א'" },
+    { id: "8005002", name: "עומר חזן", rank: "סמ״ר", company: "סיירת", platoon: "צוות א'" },
+  ],
+  recentTx: [
+    { id: "t1", type: "issue", item: "וסט מגן", qty: 4, soldier: "יוסי כהן", ago: "לפני 3 דק׳" },
+    { id: "t2", type: "issue", item: "פנס טקטי", qty: 6, soldier: "מתן סגל", ago: "לפני 12 דק׳" },
+    { id: "t3", type: "return", item: "מכשיר קשר מוטורולה", qty: 2, soldier: "דניאל לוי", ago: "לפני 40 דק׳" },
+    { id: "t4", type: "issue", item: "אוזניות תקשורת", qty: 8, soldier: "רון אביב", ago: "לפני שעה" },
+    { id: "t5", type: "return", item: "שק שינה", qty: 3, soldier: "איתי רוזן", ago: "לפני שעתיים" },
+  ],
+};
+
+window.MOCK = MOCK;
