@@ -27,7 +27,12 @@ export const useInventoryRowHandlers = ({
   }
 
   const handleQtyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const parsedQuantity = parseInt(event.currentTarget.value, 10)
+    const rawValue = event.currentTarget.value
+    if (rawValue === "") {
+      onFieldChange(itemId, "currentQty", 0)
+      return
+    }
+    const parsedQuantity = parseInt(rawValue, 10)
     if (Number.isNaN(parsedQuantity) || parsedQuantity < 0) return
     onFieldChange(itemId, "currentQty", parsedQuantity)
   }
@@ -38,7 +43,12 @@ export const useInventoryRowHandlers = ({
   }
 
   const handleMinThresholdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const parsed = parseInt(event.currentTarget.value, 10)
+    const rawValue = event.currentTarget.value
+    if (rawValue === "") {
+      onFieldChange(itemId, "minThreshold", 0)
+      return
+    }
+    const parsed = parseInt(rawValue, 10)
     if (Number.isNaN(parsed) || parsed < 0) return
     onFieldChange(itemId, "minThreshold", parsed)
   }
