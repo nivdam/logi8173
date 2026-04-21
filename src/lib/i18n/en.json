@@ -31,7 +31,14 @@
     "editProfile": "Account Details",
     "clearProfile": "Clear Device Account Details",
     "editSignature": "Edit Signature",
-    "resetSession": "Reset local session"
+    "resetSession": "Reset local session",
+    "errors": {
+      "fullNameTooShort": "Full name must be at least 3 letters",
+      "fullNameHasDigits": "Full name cannot contain digits",
+      "personalIdDigitsOnly": "Personal ID can contain digits only",
+      "personalIdLength": "Personal ID must be 6 to 9 digits",
+      "phoneInvalid": "Invalid phone number (format: 05X-XXXXXXX)"
+    }
   },
   "dashboard": {
     "title": "Dashboard",
