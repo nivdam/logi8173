@@ -22,7 +22,7 @@ export const InventoryEditToolbar = ({
         _hover={{ bg: "sage.700" }}
         onClick={onStartEditing}
       >
-        <Pencil size={16} />
+        <Pencil size={14} />
         {t("inventory.editMode")}
       </Button>
     )
@@ -38,7 +38,7 @@ export const InventoryEditToolbar = ({
         _hover={{ bg: "sage.700" }}
         onClick={onAddRow}
       >
-        <Plus size={16} />
+        <Plus size={14} />
         {t("inventory.addRow")}
       </Button>
       <Button
@@ -51,7 +51,7 @@ export const InventoryEditToolbar = ({
         loading={isSaving}
         onClick={onSave}
       >
-        <Save size={16} />
+        <Save size={14} />
         {t("inventory.saveChanges")}
         {changeCount > 0 ? (
           <Text as="span" fontSize="xs" opacity={0.8}>
@@ -65,7 +65,7 @@ export const InventoryEditToolbar = ({
         borderRadius="lg"
         onClick={onCancelEditing}
       >
-        <X size={16} />
+        <X size={14} />
         {t("inventory.cancelEdit")}
       </Button>
     </Flex>
