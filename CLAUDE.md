@@ -33,7 +33,7 @@ Logi8173 is a digital logistics system for IDF Reserve Engineering Battalion 817
 - Initial setup should be run once by a battalion-owned admin Google account.
 - That account becomes the primary system owner and creates the Drive/Sheets structure.
 - A persistent remote support admin can also be configured through the Script Property `BREAK_GLASS_ADMIN_EMAIL`.
-- When `BREAK_GLASS_ADMIN_EMAIL` is set to `nivdam@gmail.com`, that account is always allowed to regain admin access and is auto-seeded as an admin operator during setup if needed.
+- When `BREAK_GLASS_ADMIN_EMAIL` is set to a configured email (value stored only in Script Properties), that account is always allowed to regain admin access and is auto-seeded as an admin operator during setup if needed.
 
 ## Required Script Properties
 

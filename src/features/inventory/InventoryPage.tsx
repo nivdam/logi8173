@@ -1,6 +1,6 @@
 import { useState } from "react"
-import { Button, Flex, Spinner, Text, VStack } from "@chakra-ui/react"
-import { PackageSearch, Plus } from "lucide-react"
+import { Box, Button, Flex, Spinner, Text, VStack } from "@chakra-ui/react"
+import { PackageSearch, Plus, Save, X } from "lucide-react"
 import { PageHeader } from "../../components/PageHeader"
 import { ApiErrorState } from "../../components/ApiErrorState"
 import { SearchInput } from "../../components/SearchInput"
@@ -9,10 +9,8 @@ import { EmptyState } from "../../components/EmptyState"
 import { t } from "../../lib/i18n"
 import { toaster } from "../../lib/toaster"
 import { filterInventory, sortInventory } from "../../lib/filters"
-import { useInventory, useUpsertInventoryItem, useBatchUpdateInventory } from "../../api"
+import { useInventory, useBatchUpdateInventory } from "../../api"
 import { InventoryTable } from "./InventoryTable"
-import { InventoryEditToolbar } from "./InventoryEditToolbar"
-import { AddInventoryItemDialog } from "./AddInventoryItemDialog"
 import { useEditableInventory } from "./useEditableInventory"
 import type { SortConfig } from "../../components/SortableHeader"
 import { CATEGORY_OPTIONS, CATEGORY_VALUES } from "./inventory.constants"
@@ -37,18 +35,16 @@ export const InventoryPage = () => {
     isPending: isLoading,
     refetch,
   } = useInventory()
-  const upsertItem = useUpsertInventoryItem()
   const batchUpdate = useBatchUpdateInventory()
   const [searchQuery, setSearchQuery] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<ItemCategory | undefined>(undefined)
   const [statusFilter, setStatusFilter] = useState<ItemStatus | undefined>(undefined)
   const [sort, setSort] = useState<SortConfig>({ key: "name", direction: "asc" })
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
 
   const editable = useEditableInventory(inventoryItems)
 
-  const filtered = filterInventory(inventoryItems, searchQuery, categoryFilter, statusFilter)
-  const sortedItems = sortInventory(filtered, sort)
+  const filtered = filterInventory(editable.editableRows, searchQuery, categoryFilter, statusFilter)
+  const sortedRows = sortInventory(filtered, sort)
 
   const hasActiveFilters = searchQuery || categoryFilter || statusFilter
 
@@ -68,36 +64,6 @@ export const InventoryPage = () => {
     setSearchQuery("")
     setCategoryFilter(undefined)
     setStatusFilter(undefined)
-  }
-
-  const handleOpenAddDialog = () => {
-    setIsAddDialogOpen(true)
-  }
-
-  const handleAddDialogOpenChange = (details: { open: boolean }) => {
-    setIsAddDialogOpen(details.open)
-  }
-
-  const handleAddItem = (values: Parameters<typeof upsertItem.mutate>[0]) => {
-    upsertItem.mutate(values, {
-      onSuccess: (result) => {
-        setIsAddDialogOpen(false)
-        toaster.create({
-          title: t("inventory.addItemSuccess"),
-          description: result.name,
-          type: "success",
-          duration: 3000,
-        })
-      },
-      onError: () => {
-        toaster.create({
-          title: t("common.error"),
-          description: t("inventory.addItemError"),
-          type: "error",
-          duration: 5000,
-        })
-      },
-    })
   }
 
   const handleBatchSave = () => {
@@ -130,65 +96,96 @@ export const InventoryPage = () => {
     })
   }
 
+  const isEditMode = editable.expandedRowId !== null || editable.hasPendingChanges
+
   return (
     <VStack align="stretch" gap={{ base: "5", md: "7" }}>
-      <Flex justify="space-between" align="start" flexWrap="wrap" gap="3">
-        <PageHeader title={t("inventory.title")} description={t("inventory.description")} />
+      <Box
+        position={isEditMode ? "sticky" : "static"}
+        top="0"
+        mx={isEditMode ? { base: "-4", md: "-8" } : "0"}
+        px={isEditMode ? { base: "4", md: "8" } : "0"}
+        mt={isEditMode ? { base: "-4", md: "-8" } : "0"}
+        pt={isEditMode ? { base: "4", md: "8" } : "0"}
+        pb={isEditMode ? "3" : "0"}
+        zIndex={isEditMode ? "docked" : "auto"}
+        bg={isEditMode ? "bg.card" : "transparent"}
+        borderBottomWidth={isEditMode ? "1px" : "0"}
+        borderColor="border"
+      >
+        <Flex justify="space-between" align="start" flexWrap="wrap" gap="3">
+          <PageHeader title={t("inventory.title")} description={t("inventory.description")} />
         <Flex gap="2" flexWrap="wrap" align="center">
-          <InventoryEditToolbar
-            isEditing={editable.isEditing}
-            changeCount={editable.changeCount}
-            canSave={editable.canSave}
-            isSaving={batchUpdate.isPending}
-            onStartEditing={editable.startEditing}
-            onCancelEditing={editable.cancelEditing}
-            onAddRow={editable.addRow}
-            onSave={handleBatchSave}
-          />
-          {!editable.isEditing ? (
-            <Button
-              size="sm"
-              borderRadius="lg"
-              bg="sage.600"
-              color="white"
-              _hover={{ bg: "sage.700" }}
-              onClick={handleOpenAddDialog}
-            >
-              <Plus size={16} />
-              {t("inventory.addItem")}
-            </Button>
+          <Button
+            size="md"
+            borderRadius="lg"
+            bg="sage.600"
+            color="white"
+            _hover={{ bg: "sage.700" }}
+            onClick={editable.addRow}
+          >
+            <Plus size={14} />
+            {t("inventory.addRow")}
+          </Button>
+          {editable.hasPendingChanges ? (
+            <>
+              <Button
+                size="md"
+                borderRadius="lg"
+                bg="blue.600"
+                color="white"
+                _hover={{ bg: "blue.700" }}
+                disabled={!editable.canSave}
+                loading={batchUpdate.isPending}
+                onClick={handleBatchSave}
+              >
+                <Save size={14} />
+                {t("inventory.saveChanges")}
+                <Text as="span" fontSize="xs" opacity={0.85}>
+                  ({editable.changeCount})
+                </Text>
+              </Button>
+              <Button
+                size="md"
+                variant="outline"
+                borderRadius="lg"
+                onClick={editable.cancelEditing}
+              >
+                <X size={14} />
+                {t("inventory.cancelEdit")}
+              </Button>
+            </>
           ) : null}
         </Flex>
-      </Flex>
+        </Flex>
+      </Box>
 
-      {!editable.isEditing ? (
-        <Flex gap="3" flexWrap="wrap" align="center">
-          <SearchInput placeholder={t("inventory.searchPlaceholder")} onSearch={setSearchQuery} />
-          <FilterSelect
-            label={t("inventory.allCategories")}
-            value={categoryFilter}
-            options={CATEGORY_OPTIONS}
-            onChange={handleCategoryChange}
-          />
-          <FilterSelect
-            label={t("inventory.allStatuses")}
-            value={statusFilter}
-            options={[...STATUS_OPTIONS]}
-            onChange={handleStatusChange}
-          />
-          {hasActiveFilters ? (
-            <Text
-              textStyle="xs"
-              color="sage.600"
-              cursor="pointer"
-              _hover={{ textDecoration: "underline" }}
-              onClick={clearAll}
-            >
-              {t("inventory.clearFilters")}
-            </Text>
-          ) : null}
-        </Flex>
-      ) : null}
+      <Flex gap="3" flexWrap="wrap" align="center">
+        <SearchInput placeholder={t("inventory.searchPlaceholder")} onSearch={setSearchQuery} />
+        <FilterSelect
+          label={t("inventory.allCategories")}
+          value={categoryFilter}
+          options={CATEGORY_OPTIONS}
+          onChange={handleCategoryChange}
+        />
+        <FilterSelect
+          label={t("inventory.allStatuses")}
+          value={statusFilter}
+          options={[...STATUS_OPTIONS]}
+          onChange={handleStatusChange}
+        />
+        {hasActiveFilters ? (
+          <Text
+            textStyle="xs"
+            color="sage.600"
+            cursor="pointer"
+            _hover={{ textDecoration: "underline" }}
+            onClick={clearAll}
+          >
+            {t("inventory.clearFilters")}
+          </Text>
+        ) : null}
+      </Flex>
 
       {isLoading ? (
         <Flex justify="center" py="16">
@@ -202,11 +199,11 @@ export const InventoryPage = () => {
           actionLabel={t("common.retry")}
           onAction={handleRetry}
         />
-      ) : editable.isEditing || sortedItems.length > 0 ? (
+      ) : sortedRows.length > 0 ? (
         <InventoryTable
-          items={sortedItems}
-          editableRows={editable.editableRows}
-          isEditing={editable.isEditing}
+          rows={sortedRows}
+          expandedRowId={editable.expandedRowId}
+          onToggleExpand={editable.toggleExpanded}
           sort={sort}
           onSort={setSort}
           onFieldChange={editable.updateField}
@@ -222,12 +219,6 @@ export const InventoryPage = () => {
         />
       )}
 
-      <AddInventoryItemDialog
-        open={isAddDialogOpen}
-        isSaving={upsertItem.isPending}
-        onOpenChange={handleAddDialogOpenChange}
-        onSubmit={handleAddItem}
-      />
     </VStack>
   )
 }

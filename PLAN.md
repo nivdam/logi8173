@@ -149,7 +149,7 @@ Documentation delivered:
 ## Acceptance Criteria for Unit Handoff
 
 - A battalion admin can initialize the system from scratch.
-- `nivdam@gmail.com` can recover admin access remotely through `BREAK_GLASS_ADMIN_EMAIL`.
+- The configured break-glass admin can recover admin access remotely through `BREAK_GLASS_ADMIN_EMAIL` (value set in Script Properties only).
 - An admin can onboard operators and companies through Settings UI.
 - An admin can import inventory and soldiers from Excel/Sheets data.
 - Operators can open an activity with only relevant inventory items.

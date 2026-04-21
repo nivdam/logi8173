@@ -1,11 +1,13 @@
-import { Button, Grid, Input, Text } from "@chakra-ui/react"
-import { Trash2 } from "lucide-react"
+import { memo } from "react"
+import { Box, Button, Flex, Grid, Input, Stack, Text } from "@chakra-ui/react"
+import { ChevronDown, ChevronUp, Trash2 } from "lucide-react"
 import { StatusBadge } from "../../components/StatusBadge"
 import { FilterSelect } from "../../components/FilterSelect"
 import { getItemStatusLabel } from "../../lib/formatters"
 import { t } from "../../lib/i18n"
 import { animations } from "../../theme/animations"
-import { CATEGORY_OPTIONS } from "./inventory.constants"
+import { CATEGORY_OPTIONS, UNIT_OPTIONS, getCategoryLabel } from "./inventory.constants"
+import { useInventoryRowHandlers } from "./useInventoryRowHandlers"
 import type { EditableRow, EditableField } from "./useEditableInventory"
 
 const getRowBackground = (changeType: EditableRow["changeType"]): string | undefined => {
@@ -14,129 +16,216 @@ const getRowBackground = (changeType: EditableRow["changeType"]): string | undef
   return undefined
 }
 
-export const EditableInventoryRow = ({
+export const EditableInventoryRow = memo(function EditableInventoryRow({
   row,
   index,
-  isEditing,
+  isExpanded,
+  isReadOnly = false,
+  onToggleExpand,
   onFieldChange,
   onDelete,
-}: EditableInventoryRowProps) => {
-  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onFieldChange(row.itemId, "name", event.currentTarget.value)
-  }
+}: EditableInventoryRowProps) {
+  const {
+    handleToggle,
+    handleNameChange,
+    handleItemNumberChange,
+    handleCategoryChange,
+    handleQtyChange,
+    handleUnitChange,
+    handleMinThresholdChange,
+    handleNotesChange,
+    handleDeleteClick,
+    stopPropagation,
+  } = useInventoryRowHandlers({
+    itemId: row.itemId,
+    isReadOnly,
+    onFieldChange,
+    onDelete,
+    onToggleExpand,
+  })
 
-  const handleItemNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onFieldChange(row.itemId, "itemNumber", event.currentTarget.value)
-  }
+  const rowBackground = getRowBackground(row.changeType)
 
-  const handleCategoryChange = (value: string | undefined) => {
-    if (value) {
-      onFieldChange(row.itemId, "category", value)
-    }
-  }
-
-  const handleQtyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const parsedQuantity = parseInt(event.currentTarget.value, 10)
-    if (!Number.isNaN(parsedQuantity) && parsedQuantity >= 0) {
-      onFieldChange(row.itemId, "currentQty", parsedQuantity)
-    }
-  }
-
-  const handleDeleteClick = () => {
-    onDelete(row.itemId)
-  }
-
-  if (!isEditing) {
+  if (!isExpanded) {
     return (
       <Grid
-        templateColumns="2fr 1fr 1fr 1fr 1fr"
+        templateColumns="2fr 1fr 1fr 1fr 1fr auto"
         gap="3"
         py="3"
         px="4"
         borderBottomWidth="1px"
         borderColor="border"
         role="row"
-        cursor="pointer"
+        cursor={isReadOnly ? "default" : "pointer"}
+        bg={rowBackground}
+        onClick={handleToggle}
+        alignItems="center"
         css={{
           ...animations.listItem(index),
-          transition: "background 0.15s ease, transform 0.15s ease",
-          "&:hover": { background: "var(--chakra-colors-bg-muted)", transform: "scale(1.005)" },
+          transition: "background 0.15s ease",
+          "&:hover": isReadOnly
+            ? undefined
+            : { background: rowBackground ?? "var(--chakra-colors-bg-muted)" },
         }}
       >
         <Text textStyle="sm" fontWeight="500" role="cell">{row.name}</Text>
-        <Text textStyle="sm" color="fg.muted" role="cell">{row.itemNumber}</Text>
-        <Text textStyle="sm" color="fg.muted" role="cell">{row.category}</Text>
+        <Text
+          textStyle="sm"
+          color="fg.muted"
+          role="cell"
+          overflow="hidden"
+          textOverflow="ellipsis"
+          whiteSpace="nowrap"
+        >
+          {row.notes}
+        </Text>
+        <Text textStyle="sm" color="fg.muted" role="cell">{getCategoryLabel(row.category)}</Text>
         <Text textStyle="sm" fontWeight="500" role="cell">{row.currentQty} {row.unitOfMeasure}</Text>
         <StatusBadge status={row.status} label={getItemStatusLabel(row.status)} />
+        {isReadOnly ? <Box /> : <ChevronDown size={14} color="var(--chakra-colors-fg-muted)" />}
       </Grid>
     )
   }
 
   return (
-    <Grid
-      templateColumns="2fr 1fr 1fr 1fr 1fr auto"
-      gap="2"
-      py="2"
+    <Stack
+      gap="3"
+      py="3"
       px="4"
       borderBottomWidth="1px"
       borderColor="border"
       role="row"
-      alignItems="center"
-      bg={getRowBackground(row.changeType)}
-      css={{
-        transition: "background 0.2s ease",
-      }}
+      bg={rowBackground}
+      css={{ transition: "background 0.2s ease" }}
+      onClick={stopPropagation}
     >
-      <Input
-        size="sm"
-        borderRadius="md"
-        value={row.name}
-        onChange={handleNameChange}
-        placeholder="שם הפריט"
-      />
-      <Input
-        size="sm"
-        borderRadius="md"
-        value={row.itemNumber}
-        onChange={handleItemNumberChange}
-        placeholder="מק״ט"
-      />
-      <FilterSelect
-        label="קטגוריה"
-        value={row.category}
-        options={CATEGORY_OPTIONS}
-        onChange={handleCategoryChange}
-      />
-      <Input
-        size="sm"
-        borderRadius="md"
-        type="number"
-        inputMode="numeric"
-        value={row.currentQty}
-        onChange={handleQtyChange}
-        min={0}
-      />
-      <StatusBadge status={row.status} label={getItemStatusLabel(row.status)} />
-      <Button
-        size="xs"
-        variant="ghost"
-        color="red.500"
-        minW="8"
-        minH="8"
-        p="0"
-        onClick={handleDeleteClick}
-        aria-label={t("inventory.deleteRow")}
-      >
-        <Trash2 size={14} />
-      </Button>
-    </Grid>
+      <Flex justify="space-between" align="center">
+        <StatusBadge status={row.status} label={getItemStatusLabel(row.status)} />
+        <Flex gap="1">
+          <Button
+            size="xs"
+            variant="ghost"
+            color="red.500"
+            minW="8"
+            minH="8"
+            p="0"
+            onClick={handleDeleteClick}
+            aria-label={t("inventory.deleteRow")}
+          >
+            <Trash2 size={14} />
+          </Button>
+          <Button
+            size="xs"
+            variant="ghost"
+            color="fg.muted"
+            minW="8"
+            minH="8"
+            p="0"
+            onClick={handleToggle}
+            aria-label={t("inventory.collapseRow")}
+          >
+            <ChevronUp size={14} />
+          </Button>
+        </Flex>
+      </Flex>
+
+      <Grid templateColumns="1fr 2fr" gap="3">
+        <Box>
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.itemNumber")}</Text>
+          <Input
+            size="sm"
+            borderRadius="md"
+            bg="white"
+            type="tel"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={row.itemNumber}
+            onChange={handleItemNumberChange}
+            placeholder={t("inventory.itemNumber")}
+          />
+        </Box>
+        <Box>
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.name")}</Text>
+          <Input
+            size="sm"
+            borderRadius="md"
+            bg="white"
+            value={row.name}
+            onChange={handleNameChange}
+            placeholder={t("inventory.name")}
+            autoFocus
+          />
+        </Box>
+      </Grid>
+
+      <Grid templateColumns="1fr 1fr 1fr 1fr" gap="3">
+        <Box>
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.qty")}</Text>
+          <Input
+            size="sm"
+            borderRadius="md"
+            bg="white"
+            type="number"
+            inputMode="numeric"
+            value={row.currentQty}
+            onChange={handleQtyChange}
+            min={0}
+          />
+        </Box>
+        <Box>
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.minThreshold")}</Text>
+          <Input
+            size="sm"
+            borderRadius="md"
+            bg="white"
+            type="number"
+            inputMode="numeric"
+            value={row.minThreshold}
+            onChange={handleMinThresholdChange}
+            min={0}
+          />
+        </Box>
+        <Box>
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.unit")}</Text>
+          <FilterSelect
+            label={t("inventory.unit")}
+            value={row.unitOfMeasure}
+            options={UNIT_OPTIONS}
+            onChange={handleUnitChange}
+          />
+        </Box>
+        <Box>
+          <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.category")}</Text>
+          <FilterSelect
+            label={t("inventory.category")}
+            value={row.category}
+            options={CATEGORY_OPTIONS}
+            onChange={handleCategoryChange}
+          />
+        </Box>
+      </Grid>
+
+      <Box>
+        <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.notes")}</Text>
+        <Input
+          size="sm"
+          borderRadius="md"
+          bg="white"
+          value={row.notes ?? ""}
+          onChange={handleNotesChange}
+          placeholder={t("inventory.notesPlaceholder")}
+        />
+      </Box>
+    </Stack>
   )
-}
+})
 
 type EditableInventoryRowProps = {
   row: EditableRow
   index: number
-  isEditing: boolean
+  isExpanded: boolean
+  isReadOnly?: boolean
+  onToggleExpand: (itemId: string) => void
   onFieldChange: (itemId: string, field: EditableField, value: string | number) => void
   onDelete: (itemId: string) => void
 }

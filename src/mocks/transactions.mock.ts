@@ -9,7 +9,7 @@ export const transactionsMock: Transaction[] = [
     giverPersonalId: "8004001",
     receiverName: "יוסי כהן",
     receiverPersonalId: "8001001",
-    performedBy: "niv.damianovich@gmail.com",
+    performedBy: "dev@mock.local",
     performedAt: "2026-04-04T08:30:00Z",
     items: [
       { itemId: "i1", name: "וסט מגן", qty: 1, condition: "new" },
@@ -26,7 +26,7 @@ export const transactionsMock: Transaction[] = [
     giverPersonalId: "8004001",
     receiverName: "דניאל לוי",
     receiverPersonalId: "8001002",
-    performedBy: "niv.damianovich@gmail.com",
+    performedBy: "dev@mock.local",
     performedAt: "2026-04-04T08:35:00Z",
     items: [
       { itemId: "i1", name: "וסט מגן", qty: 1, condition: "new" },
@@ -43,7 +43,7 @@ export const transactionsMock: Transaction[] = [
     giverPersonalId: "8004001",
     receiverName: "רון אביב",
     receiverPersonalId: "8002001",
-    performedBy: "niv.damianovich@gmail.com",
+    performedBy: "dev@mock.local",
     performedAt: "2026-04-04T09:00:00Z",
     items: [
       { itemId: "i3", name: "מכשיר קשר מוטורולה", qty: 2, condition: "new" },
@@ -59,7 +59,7 @@ export const transactionsMock: Transaction[] = [
     giverPersonalId: "8002002",
     receiverName: "ערן שפירא",
     receiverPersonalId: "8004001",
-    performedBy: "niv.damianovich@gmail.com",
+    performedBy: "dev@mock.local",
     performedAt: "2026-04-03T16:00:00Z",
     items: [
       { itemId: "i1", name: "וסט מגן", qty: 1, condition: "used" },
@@ -75,7 +75,7 @@ export const transactionsMock: Transaction[] = [
     giverPersonalId: "8004002",
     receiverName: "מתן סגל",
     receiverPersonalId: "8005001",
-    performedBy: "niv.damianovich@gmail.com",
+    performedBy: "dev@mock.local",
     performedAt: "2026-04-03T14:00:00Z",
     items: [
       { itemId: "i9", name: "משקפת לילה", qty: 1, condition: "new" },
@@ -92,7 +92,7 @@ export const transactionsMock: Transaction[] = [
     giverPersonalId: "8004001",
     receiverName: "איתי רוזן",
     receiverPersonalId: "8003001",
-    performedBy: "niv.damianovich@gmail.com",
+    performedBy: "dev@mock.local",
     performedAt: "2026-04-02T10:00:00Z",
     items: [
       { itemId: "i11", name: "אוזניות תקשורת", qty: 1, condition: "new" },
@@ -108,7 +108,7 @@ export const transactionsMock: Transaction[] = [
     giverPersonalId: "8003002",
     receiverName: "ערן שפירא",
     receiverPersonalId: "8004001",
-    performedBy: "niv.damianovich@gmail.com",
+    performedBy: "dev@mock.local",
     performedAt: "2026-04-02T09:30:00Z",
     items: [
       { itemId: "i6", name: "שק שינה", qty: 1, condition: "used" },
@@ -125,7 +125,7 @@ export const transactionsMock: Transaction[] = [
     giverPersonalId: "8004001",
     receiverName: "ערן שפירא",
     receiverPersonalId: "8004001",
-    performedBy: "niv.damianovich@gmail.com",
+    performedBy: "dev@mock.local",
     performedAt: "2026-04-01T08:00:00Z",
     items: [
       { itemId: "i4", name: "סוללות CR123", qty: -5, condition: "new" },
@@ -141,7 +141,7 @@ export const transactionsMock: Transaction[] = [
     giverPersonalId: "8004002",
     receiverName: "עומר חזן",
     receiverPersonalId: "8005002",
-    performedBy: "niv.damianovich@gmail.com",
+    performedBy: "dev@mock.local",
     performedAt: "2026-03-31T11:00:00Z",
     items: [
       { itemId: "i8", name: "ערכת עזרה ראשונה", qty: 1, condition: "new" },
@@ -157,7 +157,7 @@ export const transactionsMock: Transaction[] = [
     giverPersonalId: "8004001",
     receiverName: "ערן שפירא",
     receiverPersonalId: "8004001",
-    performedBy: "niv.damianovich@gmail.com",
+    performedBy: "dev@mock.local",
     performedAt: "2026-03-30T15:00:00Z",
     items: [
       { itemId: "i7", name: "מטען USB נייד", qty: 2, condition: "damaged" },

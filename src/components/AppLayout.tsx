@@ -2,13 +2,11 @@ import { useState } from "react";
 import { Box, Button, Flex, Heading, Image, Menu, Portal, Text } from "@chakra-ui/react";
 import { Outlet } from "react-router-dom";
 import { useAuth } from "../lib/use-auth";
-import { useAdaptivePolling } from "../lib/useAdaptivePolling";
 import { useHeartbeat } from "../lib/useHeartbeat";
 import { t } from "../lib/i18n";
 import logo from "../assets/logo.png";
 import { AppNav } from "./AppNav";
 import { BottomNav } from "./BottomNav";
-import { FetchProgressBar } from "./FetchProgressBar";
 import { OnlineOperatorsBadge } from "./OnlineOperatorsBadge";
 import { OperatorProfileDialog } from "./OperatorProfileDialog";
 import { RefreshDataButton } from "./RefreshDataButton";
@@ -16,7 +14,6 @@ import { UserAvatar } from "./UserAvatar";
 import type { OperatorProfile } from "../lib/auth.types";
 
 export const AppLayout = () => {
-  useAdaptivePolling();
   useHeartbeat();
   const { operator, operatorProfile, saveOperatorProfile, clearOperatorProfile, logout } = useAuth();
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
@@ -41,8 +38,7 @@ export const AppLayout = () => {
   }
 
   return (
-    <Flex direction="column" minH="100dvh">
-      <FetchProgressBar />
+    <Flex direction="column" h="100dvh" overflow="hidden">
       <Flex
         as="header"
         align="center"
@@ -102,7 +98,7 @@ export const AppLayout = () => {
         </Flex>
       </Flex>
 
-      <Flex flex="1">
+      <Flex flex="1" minH="0">
         <AppNav />
         <Box
           as="main"

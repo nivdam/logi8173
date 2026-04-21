@@ -2,13 +2,52 @@
  * Soldiers management — list, add/update.
  */
 
+var SOLDIERS_LIST_CACHE_TTL_SECONDS = 60;
+
+function getSoldiersListCacheKey_(sheetId) {
+  return 'soldiers_list_' + sheetId;
+}
+
+function readCachedSoldiersList_(sheetId) {
+  try {
+    var raw = CacheService.getScriptCache().get(getSoldiersListCacheKey_(sheetId));
+    return raw ? JSON.parse(raw) : null;
+  } catch (error) {
+    return null;
+  }
+}
+
+function writeCachedSoldiersList_(sheetId, soldiers) {
+  try {
+    CacheService
+      .getScriptCache()
+      .put(
+        getSoldiersListCacheKey_(sheetId),
+        JSON.stringify(soldiers),
+        SOLDIERS_LIST_CACHE_TTL_SECONDS
+      );
+  } catch (error) {
+    // Cache is an optimization only.
+  }
+}
+
+function clearCachedSoldiersList_(sheetId) {
+  try {
+    CacheService.getScriptCache().remove(getSoldiersListCacheKey_(sheetId));
+  } catch (error) {
+    // Cache is an optimization only.
+  }
+}
+
 var SoldiersController = {
   list: function(context) {
     var sheetId = getConfigProperty_('SOLDIERS_SHEET_ID');
-    ensureSheetHeaders_(sheetId, 'soldiers', SHEET_HEADERS['soldiers']);
+    var cached = readCachedSoldiersList_(sheetId);
+    if (cached) return cached;
+
     var rows = readAllRows_(sheetId, 'soldiers');
 
-    return rows.map(function(row) {
+    var soldiers = rows.map(function(row) {
       return {
         personalId: row.personal_id,
         fullName: row.full_name,
@@ -19,6 +58,9 @@ var SoldiersController = {
         createdAt: row.created_at
       };
     });
+
+    writeCachedSoldiersList_(sheetId, soldiers);
+    return soldiers;
   },
 
   upsert: function(context) {
@@ -50,6 +92,7 @@ var SoldiersController = {
         personalId: body.personalId
       });
 
+      clearCachedSoldiersList_(sheetId);
       return { personalId: updated.personal_id, fullName: updated.full_name };
     }
 
@@ -69,6 +112,7 @@ var SoldiersController = {
       personalId: body.personalId
     });
 
+    clearCachedSoldiersList_(sheetId);
     return { personalId: newSoldier.personal_id, fullName: newSoldier.full_name };
   }
 };
