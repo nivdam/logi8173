@@ -1,16 +1,13 @@
-import { getStoredSession, clearSession } from "./auth-helpers"
+import { getStoredSession, notifySessionLost } from "./auth-helpers"
 import { mockApiRequest } from "./mock-api"
 import type { AuthenticatedOperator } from "./auth.types"
 
 const API_BASE = import.meta.env.VITE_API_BASE || "/api/gas"
 const USE_MOCK = import.meta.env.VITE_API_BASE === "mock"
 const REQUEST_TIMEOUT_MS = 60_000
+const SESSION_INVALID_CODES = ["TOKEN_EXPIRED", "INVALID_ID_TOKEN"]
 
-const getIdToken = (): string => {
-  const session = getStoredSession()
-  if (!session) throw new Error("Not authenticated")
-  return session.idToken
-}
+const getStoredIdToken = (): string | undefined => getStoredSession()?.idToken
 
 const fetchAndParse = async <T>(
   action: string,
@@ -78,21 +75,28 @@ const handleNetworkError = <T>(action: string, body: Record<string, unknown>, er
 const appsScriptRequest = async <T>(
   action: string,
   body: Record<string, unknown> = {},
-  idToken?: string,
+  explicitIdToken?: string,
 ): Promise<T> => {
   if (USE_MOCK) {
     return mockApiRequest<T>(action, body)
   }
 
+  const idToken = explicitIdToken ?? getStoredIdToken()
+  if (!idToken) {
+    notifySessionLost()
+    throw new ApiError("SESSION_EXPIRED", "Session expired")
+  }
+
   try {
-    const result = await fetchAndParse<T>(action, {
-      ...body,
-      idToken: idToken ?? getIdToken(),
-    })
-    return result
+    return await fetchAndParse<T>(action, { ...body, idToken })
   } catch (error) {
-    if (error instanceof ApiError && error.code === "TOKEN_EXPIRED") {
-      return handleTokenExpired(() => appsScriptRequest<T>(action, body))
+    if (
+      !explicitIdToken &&
+      error instanceof ApiError &&
+      SESSION_INVALID_CODES.includes(error.code)
+    ) {
+      notifySessionLost()
+      throw new ApiError("SESSION_EXPIRED", "Session expired")
     }
     return handleNetworkError<T>(action, body, error)
   }
@@ -113,59 +117,11 @@ const publicRequest = async <T>(
   }
 }
 
-let refreshAttemptInProgress = false
-
-const handleTokenExpired = async <T>(retryFn: () => Promise<T>): Promise<T> => {
-  if (refreshAttemptInProgress) {
-    clearSession()
-    window.location.reload()
-    throw new ApiError("TOKEN_EXPIRED", "Session expired")
-  }
-
-  refreshAttemptInProgress = true
-
-  try {
-    const newToken = await silentReAuth()
-    if (!newToken) {
-      throw new Error("No token received")
-    }
-    refreshAttemptInProgress = false
-    return retryFn()
-  } catch {
-    refreshAttemptInProgress = false
-    clearSession()
-    window.location.reload()
-    throw new ApiError("TOKEN_EXPIRED", "Session expired")
-  }
-}
-
-const silentReAuth = (): Promise<string | undefined> => {
-  return new Promise((resolve, reject) => {
-    if (!window.google?.accounts?.id) {
-      reject(new Error("Google Identity Services not loaded"))
-      return
-    }
-
-    const timeoutId = setTimeout(() => {
-      reject(new Error("Silent re-auth timed out"))
-    }, 5000)
-
-    window.google.accounts.id.prompt((notification) => {
-      if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-        clearTimeout(timeoutId)
-        reject(new Error("Silent re-auth failed"))
-      }
-      clearTimeout(timeoutId)
-      const session = getStoredSession()
-      resolve(session?.idToken)
-    })
-  })
-}
-
 export const api = {
   get: <T>(action: string, params?: Record<string, unknown>) =>
     appsScriptRequest<T>(action, params ?? {}),
-  post: appsScriptRequest,
+  post: <T>(action: string, body?: Record<string, unknown>) =>
+    appsScriptRequest<T>(action, body ?? {}),
   publicPost: publicRequest,
   authenticateWithGoogleToken: (idToken: string) =>
     appsScriptRequest<AuthenticatedOperator>("auth.me", {}, idToken),

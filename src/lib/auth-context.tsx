@@ -1,5 +1,6 @@
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { googleLogout } from "@react-oauth/google"
+import { useQueryClient } from "@tanstack/react-query"
 import type { AuthState, AuthenticatedOperator, OperatorProfile } from "./auth.types"
 import {
   getStoredSession,
@@ -9,12 +10,20 @@ import {
   storeSession,
   clearSession,
   updateStoredSessionProfile,
+  onSessionLost,
+  notifySessionLost,
+  markSessionActive,
+  markSessionDispatched,
+  SESSION_KEY,
 } from "./auth-helpers"
 import { clearAllDrafts } from "./use-draft-persistence"
 import type { StoredSession } from "./auth-helpers"
 import { AuthContext, AuthLoginContext } from "./auth-store"
+import { toaster } from "./toaster"
+import { t } from "./i18n"
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const queryClient = useQueryClient()
   const initialSession = getStoredSession()
   const [status, setStatus] = useState<AuthState["status"]>(() => {
     return initialSession ? "authenticated" : "unauthenticated"
@@ -30,6 +39,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const nextProfile =
       session.operatorProfile ?? getStoredOperatorProfile(session.operator.email)
     storeSession({ ...session, operatorProfile: nextProfile })
+    markSessionActive()
     setOperator(session.operator)
     setOperatorProfile(nextProfile)
     setStatus("authenticated")
@@ -54,9 +64,37 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const resetSession = useCallback(() => {
     clearSession()
+    markSessionDispatched()
     setOperator(undefined)
     setOperatorProfile(undefined)
     setStatus("unauthenticated")
+  }, [])
+
+  useEffect(() => {
+    return onSessionLost(() => {
+      void queryClient.cancelQueries()
+      queryClient.clear()
+      clearAllDrafts()
+      resetSession()
+      toaster.create({
+        title: t("auth.sessionExpiredTitle"),
+        description: t("auth.sessionExpiredDescription"),
+        type: "info",
+        duration: 4000,
+      })
+    })
+  }, [queryClient, resetSession])
+
+  useEffect(() => {
+    const handleStorage = (event: StorageEvent) => {
+      if (event.key === SESSION_KEY && event.newValue === null) {
+        notifySessionLost()
+      }
+    }
+    window.addEventListener("storage", handleStorage)
+    return () => {
+      window.removeEventListener("storage", handleStorage)
+    }
   }, [])
 
   const logout = useCallback(() => {
