@@ -1,79 +1,95 @@
-import { useState } from "react"
-import { Box, Button, Flex, Spinner, Text, VStack } from "@chakra-ui/react"
-import { PackageSearch, Plus, Save, X } from "lucide-react"
-import { PageHeader } from "../../components/PageHeader"
-import { ApiErrorState } from "../../components/ApiErrorState"
-import { SearchInput } from "../../components/SearchInput"
-import { FilterSelect } from "../../components/FilterSelect"
-import { EmptyState } from "../../components/EmptyState"
-import { t } from "../../lib/i18n"
-import { toaster } from "../../lib/toaster"
-import { filterInventory, sortInventory } from "../../lib/filters"
-import { useInventory, useBatchUpdateInventory } from "../../api"
-import { InventoryTable } from "./InventoryTable"
-import { useEditableInventory } from "./useEditableInventory"
-import type { SortConfig } from "../../components/SortableHeader"
-import { CATEGORY_OPTIONS, CATEGORY_VALUES } from "./inventory.constants"
-import type { ItemCategory, ItemStatus } from "../../types"
+import { useState } from "react";
+import { Box, Button, Flex, Spinner, Text, VStack } from "@chakra-ui/react";
+import { PackageSearch, Plus, Save, X } from "lucide-react";
+import { PageHeader } from "../../components/PageHeader";
+import { ApiErrorState } from "../../components/ApiErrorState";
+import { SearchInput } from "../../components/SearchInput";
+import { FilterSelect } from "../../components/FilterSelect";
+import { EmptyState } from "../../components/EmptyState";
+import { t } from "../../lib/i18n";
+import { toaster } from "../../lib/toaster";
+import { filterInventory, sortInventory } from "../../lib/filters";
+import { useInventory, useBatchUpdateInventory } from "../../api";
+import { InventoryTable } from "./InventoryTable";
+import { useEditableInventory } from "./useEditableInventory";
+import type { SortConfig } from "../../components/SortableHeader";
+import { CATEGORY_OPTIONS, CATEGORY_VALUES } from "./inventory.constants";
+import type { InventoryItem, ItemCategory, ItemStatus } from "../../types";
 
 const STATUS_OPTIONS = [
   { value: "ok", label: "תקין" },
   { value: "low", label: "מלאי נמוך" },
   { value: "gap", label: "חוסר" },
-] as const
+] as const;
+
+const EMPTY_INVENTORY_ITEMS: InventoryItem[] = [];
 
 const parseCategory = (value: string | undefined): ItemCategory | undefined =>
-  CATEGORY_VALUES.includes(value ?? "") ? (value as ItemCategory) : undefined
+  CATEGORY_VALUES.includes(value ?? "") ? (value as ItemCategory) : undefined;
 
 const parseStatus = (value: string | undefined): ItemStatus | undefined =>
-  STATUS_OPTIONS.find((option) => option.value === value)?.value
+  STATUS_OPTIONS.find((option) => option.value === value)?.value;
 
 export const InventoryPage = () => {
   const {
-    data: inventoryItems = [],
+    data: inventoryData,
     error,
     isPending: isLoading,
     refetch,
-  } = useInventory()
-  const batchUpdate = useBatchUpdateInventory()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [categoryFilter, setCategoryFilter] = useState<ItemCategory | undefined>(undefined)
-  const [statusFilter, setStatusFilter] = useState<ItemStatus | undefined>(undefined)
-  const [sort, setSort] = useState<SortConfig>({ key: "name", direction: "asc" })
+  } = useInventory();
+  const inventoryItems = inventoryData ?? EMPTY_INVENTORY_ITEMS;
+  const batchUpdate = useBatchUpdateInventory();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<
+    ItemCategory | undefined
+  >(undefined);
+  const [statusFilter, setStatusFilter] = useState<ItemStatus | undefined>(
+    undefined,
+  );
+  const [sort, setSort] = useState<SortConfig>({
+    key: "name",
+    direction: "asc",
+  });
 
-  const editable = useEditableInventory(inventoryItems)
+  const editable = useEditableInventory(inventoryItems);
 
-  const filtered = filterInventory(editable.editableRows, searchQuery, categoryFilter, statusFilter)
-  const sortedRows = sortInventory(filtered, sort)
+  const filtered = filterInventory(
+    editable.editableRows,
+    searchQuery,
+    categoryFilter,
+    statusFilter,
+  );
+  const sortedRows = sortInventory(filtered, sort);
 
-  const hasActiveFilters = searchQuery || categoryFilter || statusFilter
+  const hasActiveFilters = searchQuery || categoryFilter || statusFilter;
 
   const handleCategoryChange = (value: string | undefined) => {
-    setCategoryFilter(parseCategory(value))
-  }
+    setCategoryFilter(parseCategory(value));
+  };
 
   const handleStatusChange = (value: string | undefined) => {
-    setStatusFilter(parseStatus(value))
-  }
+    setStatusFilter(parseStatus(value));
+  };
 
   const handleRetry = () => {
-    void refetch()
-  }
+    void refetch();
+  };
 
   const clearAll = () => {
-    setSearchQuery("")
-    setCategoryFilter(undefined)
-    setStatusFilter(undefined)
-  }
+    setSearchQuery("");
+    setCategoryFilter(undefined);
+    setStatusFilter(undefined);
+  };
 
   const handleBatchSave = () => {
-    const payload = editable.buildPayload()
-    const expectedTotal = payload.modified.length + payload.added.length + payload.deleted.length
+    const payload = editable.buildPayload();
+    const expectedTotal =
+      payload.modified.length + payload.added.length + payload.deleted.length;
     batchUpdate.mutate(payload, {
       onSuccess: (result) => {
-        const actualTotal = result.modified + result.added + result.deleted
-        const hasSkipped = actualTotal < expectedTotal
-        editable.cancelEditing()
+        const actualTotal = result.modified + result.added + result.deleted;
+        const hasSkipped = actualTotal < expectedTotal;
+        editable.cancelEditing();
         toaster.create({
           title: hasSkipped
             ? t("inventory.batchSavePartial")
@@ -83,7 +99,7 @@ export const InventoryPage = () => {
             : undefined,
           type: hasSkipped ? "warning" : "success",
           duration: hasSkipped ? 6000 : 3000,
-        })
+        });
       },
       onError: () => {
         toaster.create({
@@ -91,18 +107,19 @@ export const InventoryPage = () => {
           description: t("inventory.batchSaveError"),
           type: "error",
           duration: 5000,
-        })
+        });
       },
-    })
-  }
+    });
+  };
 
-  const isEditMode = editable.expandedRowId !== null || editable.hasPendingChanges
+  const isEditMode =
+    editable.expandedRowId !== null || editable.hasPendingChanges;
 
   return (
     <VStack align="stretch" gap={{ base: "5", md: "7" }}>
       <Box
         position={isEditMode ? "sticky" : "static"}
-        top="0"
+        top={-4}
         mx={isEditMode ? { base: "-4", md: "-8" } : "0"}
         px={isEditMode ? { base: "4", md: "8" } : "0"}
         mt={isEditMode ? { base: "-4", md: "-8" } : "0"}
@@ -114,54 +131,60 @@ export const InventoryPage = () => {
         borderColor="border"
       >
         <Flex justify="space-between" align="start" flexWrap="wrap" gap="3">
-          <PageHeader title={t("inventory.title")} description={t("inventory.description")} />
-        <Flex gap="2" flexWrap="wrap" align="center">
-          <Button
-            size="md"
-            borderRadius="lg"
-            bg="sage.600"
-            color="white"
-            _hover={{ bg: "sage.700" }}
-            onClick={editable.addRow}
-          >
-            <Plus size={14} />
-            {t("inventory.addRow")}
-          </Button>
-          {editable.hasPendingChanges ? (
-            <>
-              <Button
-                size="md"
-                borderRadius="lg"
-                bg="blue.600"
-                color="white"
-                _hover={{ bg: "blue.700" }}
-                disabled={!editable.canSave}
-                loading={batchUpdate.isPending}
-                onClick={handleBatchSave}
-              >
-                <Save size={14} />
-                {t("inventory.saveChanges")}
-                <Text as="span" fontSize="xs" opacity={0.85}>
-                  ({editable.changeCount})
-                </Text>
-              </Button>
-              <Button
-                size="md"
-                variant="outline"
-                borderRadius="lg"
-                onClick={editable.cancelEditing}
-              >
-                <X size={14} />
-                {t("inventory.cancelEdit")}
-              </Button>
-            </>
-          ) : null}
-        </Flex>
+          <PageHeader
+            title={t("inventory.title")}
+            description={t("inventory.description")}
+          />
+          <Flex gap="2" flexWrap="wrap" align="center">
+            <Button
+              size="md"
+              borderRadius="lg"
+              bg="sage.600"
+              color="white"
+              _hover={{ bg: "sage.700" }}
+              onClick={editable.addRow}
+            >
+              <Plus size={14} />
+              {t("inventory.addRow")}
+            </Button>
+            {editable.hasPendingChanges ? (
+              <>
+                <Button
+                  size="md"
+                  borderRadius="lg"
+                  bg="blue.600"
+                  color="white"
+                  _hover={{ bg: "blue.700" }}
+                  disabled={!editable.canSave}
+                  loading={batchUpdate.isPending}
+                  onClick={handleBatchSave}
+                >
+                  <Save size={14} />
+                  {t("inventory.saveChanges")}
+                  <Text as="span" fontSize="xs" opacity={0.85}>
+                    ({editable.changeCount})
+                  </Text>
+                </Button>
+                <Button
+                  size="md"
+                  variant="outline"
+                  borderRadius="lg"
+                  onClick={editable.cancelEditing}
+                >
+                  <X size={14} />
+                  {t("inventory.cancelEdit")}
+                </Button>
+              </>
+            ) : null}
+          </Flex>
         </Flex>
       </Box>
 
       <Flex gap="3" flexWrap="wrap" align="center">
-        <SearchInput placeholder={t("inventory.searchPlaceholder")} onSearch={setSearchQuery} />
+        <SearchInput
+          placeholder={t("inventory.searchPlaceholder")}
+          onSearch={setSearchQuery}
+        />
         <FilterSelect
           label={t("inventory.allCategories")}
           value={categoryFilter}
@@ -218,7 +241,6 @@ export const InventoryPage = () => {
           onAction={clearAll}
         />
       )}
-
     </VStack>
-  )
-}
+  );
+};

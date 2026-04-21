@@ -5,7 +5,26 @@ type OperatorProfile = {
   rank: string
   personalId: string
   phone: string
+  company: string
+  platoon: string | undefined
   savedSignature: string
+}
+
+const isNonEmptyString = (value: unknown): value is string =>
+  typeof value === "string" && value.trim() !== ""
+
+const isOperatorProfileComplete = (
+  profile: Partial<OperatorProfile> | undefined,
+): profile is OperatorProfile => {
+  if (!profile) return false
+  return (
+    isNonEmptyString(profile.fullName) &&
+    isNonEmptyString(profile.rank) &&
+    isNonEmptyString(profile.personalId) &&
+    isNonEmptyString(profile.phone) &&
+    isNonEmptyString(profile.company) &&
+    isNonEmptyString(profile.savedSignature)
+  )
 }
 
 type AuthenticatedOperator = {
@@ -28,3 +47,4 @@ type AuthState = {
 }
 
 export type { OperatorRole, OperatorProfile, AuthenticatedOperator, AuthState }
+export { isOperatorProfileComplete }

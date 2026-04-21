@@ -32,6 +32,7 @@ const formatDateTime = (date: CalendarDateTime): string => {
 }
 
 export const ReturnHeader = ({
+  activityId,
   giver,
   performedAt,
   onSelectGiver,
@@ -77,6 +78,7 @@ export const ReturnHeader = ({
             {t("returns.giverSection")}
           </Heading>
           <SoldierAutocomplete
+            activityId={activityId}
             selectedSoldier={giver}
             onSelect={onSelectGiver}
             onClear={onClearGiver}
@@ -174,6 +176,7 @@ export const ReturnHeader = ({
 }
 
 type ReturnHeaderProps = {
+  activityId: string | undefined
   giver: Soldier | undefined
   performedAt: string
   onSelectGiver: (soldier: Soldier) => void

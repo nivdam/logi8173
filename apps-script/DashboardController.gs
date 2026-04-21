@@ -57,9 +57,9 @@ var DashboardController = {
             formNumber: row.form_number || '',
             txType: row.tx_type,
             giverName: row.giver_name,
-            giverPersonalId: row.giver_personal_id,
+            giverPersonalId: String(row.giver_personal_id || ''),
             receiverName: row.receiver_name,
-            receiverPersonalId: row.receiver_personal_id,
+            receiverPersonalId: String(row.receiver_personal_id || ''),
             performedBy: row.performed_by,
             performedAt: row.performed_at,
             items: items,
@@ -86,7 +86,7 @@ var DashboardController = {
         var soldiers = readAllRows_(soldiersSheetId, 'soldiers');
         for (var s = 0; s < soldiers.length; s++) {
           if (soldiers[s].personal_id && soldiers[s].company) {
-            soldierCompanyMap[soldiers[s].personal_id] = soldiers[s].company;
+            soldierCompanyMap[String(soldiers[s].personal_id)] = soldiers[s].company;
           }
         }
       }

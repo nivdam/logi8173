@@ -12,6 +12,7 @@ function getRoutes_() {
 
     // Auth
     'auth.me':            { handler: OperatorsController.me,     roles: null },
+    'operators.syncMyProfile': { handler: OperatorsController.syncMyProfile, roles: null },
 
     // Operators
     'operators.list':     { handler: OperatorsController.list,   roles: ['admin'] },
@@ -26,6 +27,8 @@ function getRoutes_() {
     // Soldiers
     'soldiers.list':      { handler: SoldiersController.list,    roles: null },
     'soldiers.upsert':    { handler: SoldiersController.upsert,  roles: ['admin', 'warehouse_operator'] },
+    'activitySoldiers.list':   { handler: SoldiersController.listActivity,   roles: null },
+    'activitySoldiers.upsert': { handler: SoldiersController.upsertActivity, roles: ['admin', 'warehouse_operator'] },
 
     // Imports
     'imports.fetchSheetText': { handler: ImportController.fetchSheetText, roles: ['admin'] },

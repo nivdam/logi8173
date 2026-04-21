@@ -1,15 +1,21 @@
+import { useState } from "react"
 import { IconButton, Spinner, Tooltip } from "@chakra-ui/react"
 import { RotateCw } from "lucide-react"
-import { useIsFetching, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
 import { t } from "../lib/i18n"
 
 export const RefreshDataButton = () => {
   const queryClient = useQueryClient()
-  const fetchingCount = useIsFetching()
-  const isFetching = fetchingCount > 0
+  const [isRefreshing, setIsRefreshing] = useState(false)
 
-  const handleRefresh = () => {
-    queryClient.invalidateQueries()
+  const handleRefresh = async () => {
+    if (isRefreshing) return
+    setIsRefreshing(true)
+    try {
+      await queryClient.invalidateQueries()
+    } finally {
+      setIsRefreshing(false)
+    }
   }
 
   return (
@@ -21,18 +27,18 @@ export const RefreshDataButton = () => {
           size="sm"
           borderRadius="full"
           onClick={handleRefresh}
-          disabled={isFetching}
+          disabled={isRefreshing}
           css={{
             transition: "all 0.2s ease",
             "& svg": {
               transition: "transform 0.3s ease",
             },
             "&:hover svg": {
-              transform: isFetching ? undefined : "rotate(45deg)",
+              transform: isRefreshing ? undefined : "rotate(45deg)",
             },
           }}
         >
-          {isFetching ? (
+          {isRefreshing ? (
             <Spinner size="xs" color="sage.400" />
           ) : (
             <RotateCw size={16} />

@@ -2,7 +2,7 @@ import { useState } from "react"
 import { Flex, Heading, Image, Spinner, Text, VStack } from "@chakra-ui/react"
 import { GoogleLogin, type CredentialResponse } from "@react-oauth/google"
 import { useNavigate } from "react-router-dom"
-import { jwtDecode } from "./login-helpers"
+import { decodeGoogleIdToken } from "./login-helpers"
 import { useAuthLogin } from "../lib/use-auth"
 import { ErrorBanner } from "../components/ErrorBanner"
 import { useErrorBanner } from "../components/use-error-banner"
@@ -30,7 +30,7 @@ export const LoginPage = () => {
     clearError()
 
     try {
-      const decoded = jwtDecode(idToken)
+      const decoded = decodeGoogleIdToken(idToken)
       const operator = await api.authenticateWithGoogleToken(idToken)
 
       onLoginSuccess({
@@ -39,6 +39,7 @@ export const LoginPage = () => {
           avatarUrl: operator.avatarUrl || decoded.picture,
         },
         idToken,
+        tokenExpiresAt: decoded.exp * 1000,
       })
       navigate("/", { replace: true })
     } catch (loginError) {
