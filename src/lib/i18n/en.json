@@ -39,6 +39,7 @@
       "fullNameHasDigits": "Full name cannot contain digits",
       "personalIdDigitsOnly": "Personal ID can contain digits only",
       "personalIdLength": "Invalid personal ID",
+      "personalIdTaken": "This personal ID is already registered",
       "phoneInvalid": "Invalid phone number"
     }
   },
@@ -439,6 +440,10 @@
     "addSoldierTitle": "Add New Soldier",
     "addSoldierDescription": "Create a new soldier directly from the issuance form.",
     "addSoldierError": "Saving the soldier failed. Please try again.",
+    "addSoldierScopeLabel": "Save soldier",
+    "addSoldierScopeActivity": "This activity only",
+    "addSoldierScopeGlobal": "Battalion directory",
+    "activitySoldierBadge": "Activity",
     "companyPlaceholder": "Select company",
     "noCompaniesFound": "No active companies found",
     "duplicatePersonalId": "This personal ID already exists",

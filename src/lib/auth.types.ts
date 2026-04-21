@@ -10,17 +10,20 @@ type OperatorProfile = {
   savedSignature: string
 }
 
+const isNonEmptyString = (value: unknown): value is string =>
+  typeof value === "string" && value.trim() !== ""
+
 const isOperatorProfileComplete = (
-  profile: OperatorProfile | undefined,
+  profile: Partial<OperatorProfile> | undefined,
 ): profile is OperatorProfile => {
   if (!profile) return false
   return (
-    profile.fullName.trim() !== "" &&
-    profile.rank.trim() !== "" &&
-    profile.personalId.trim() !== "" &&
-    profile.phone.trim() !== "" &&
-    profile.company.trim() !== "" &&
-    profile.savedSignature !== ""
+    isNonEmptyString(profile.fullName) &&
+    isNonEmptyString(profile.rank) &&
+    isNonEmptyString(profile.personalId) &&
+    isNonEmptyString(profile.phone) &&
+    isNonEmptyString(profile.company) &&
+    isNonEmptyString(profile.savedSignature)
   )
 }
 

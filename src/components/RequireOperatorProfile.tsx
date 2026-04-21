@@ -3,6 +3,7 @@ import { useAuth } from "../lib/use-auth"
 import { showApiErrorToast } from "../lib/api-error"
 import { t } from "../lib/i18n"
 import { useSaveOperatorProfile } from "../features/operator-profile/useSaveOperatorProfile"
+import { useEnsureOperatorProfileSynced } from "../features/operator-profile/useEnsureOperatorProfileSynced"
 import { isOperatorProfileComplete } from "../lib/auth.types"
 import type { OperatorProfile } from "../lib/auth.types"
 
@@ -13,6 +14,7 @@ export const RequireOperatorProfile = ({
 }) => {
   const { status, operator, operatorProfile } = useAuth()
   const { saveProfile, isSaving } = useSaveOperatorProfile()
+  useEnsureOperatorProfileSynced()
 
   const isMissingProfile =
     status === "authenticated" &&

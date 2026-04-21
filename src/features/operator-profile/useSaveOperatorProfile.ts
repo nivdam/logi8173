@@ -1,4 +1,4 @@
-import { useUpsertSoldier } from "../../api"
+import { useSyncMyProfileSoldier } from "../../api"
 import { useAuth } from "../../lib/use-auth"
 import type { OperatorProfile } from "../../lib/auth.types"
 
@@ -6,11 +6,11 @@ const FALLBACK_OPERATOR_COMPANY = "פלס״ם"
 
 export const useSaveOperatorProfile = () => {
   const { saveOperatorProfile } = useAuth()
-  const upsertSoldier = useUpsertSoldier()
+  const syncMyProfileSoldier = useSyncMyProfileSoldier()
 
   const saveProfile = async (profile: OperatorProfile) => {
     const normalized = normalizeProfileForSave(profile)
-    await upsertSoldier.mutateAsync({
+    await syncMyProfileSoldier.mutateAsync({
       personalId: normalized.personalId,
       fullName: normalized.fullName,
       rank: normalized.rank,
@@ -18,13 +18,16 @@ export const useSaveOperatorProfile = () => {
       platoon: normalized.platoon,
       phone: normalized.phone === "" ? undefined : normalized.phone,
     })
+
     saveOperatorProfile(normalized)
   }
 
-  return { saveProfile, isSaving: upsertSoldier.isPending }
+  return { saveProfile, isSaving: syncMyProfileSoldier.isPending }
 }
 
-const normalizeProfileForSave = (profile: OperatorProfile): OperatorProfile => {
+export const normalizeProfileForSave = (
+  profile: OperatorProfile,
+): OperatorProfile => {
   const trimmedCompany = profile.company.trim()
   const trimmedPlatoon = profile.platoon?.trim() ?? ""
   return {

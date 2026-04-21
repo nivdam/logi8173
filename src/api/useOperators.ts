@@ -33,6 +33,22 @@ export const useUpsertOperator = () => {
   })
 }
 
+export const useSyncMyProfileSoldier = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (input: SyncMyProfileSoldierInput) =>
+      api.post<{ personalId: string; fullName: string; created: boolean }>(
+        "operators.syncMyProfile",
+        input,
+      ),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["soldiers"] })
+      await queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+    },
+  })
+}
+
 export const useDeleteOperator = () => {
   const queryClient = useQueryClient()
 
@@ -50,4 +66,13 @@ type UpsertOperatorInput = {
   fullName: string
   role: OperatorRole
   savedSignatureUrl?: string
+}
+
+type SyncMyProfileSoldierInput = {
+  personalId: string
+  fullName: string
+  rank: string
+  company: string
+  platoon?: string
+  phone?: string
 }

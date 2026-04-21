@@ -39,6 +39,7 @@
       "fullNameHasDigits": "שם מלא לא יכול להכיל ספרות",
       "personalIdDigitsOnly": "מספר אישי יכול להכיל ספרות בלבד",
       "personalIdLength": "מספר אישי לא תקין",
+      "personalIdTaken": "מספר אישי זה כבר רשום במערכת",
       "phoneInvalid": "מספר טלפון לא תקין"
     }
   },
@@ -439,6 +440,10 @@
     "addSoldierTitle": "הוספת חייל חדש",
     "addSoldierDescription": "צור חייל חדש ישירות מתוך טופס ההנפקה.",
     "addSoldierError": "שמירת החייל נכשלה. נסה שוב.",
+    "addSoldierScopeLabel": "שמירת החייל",
+    "addSoldierScopeActivity": "רק לפעילות הזו",
+    "addSoldierScopeGlobal": "מאגר גדודי",
+    "activitySoldierBadge": "פעילות",
     "companyPlaceholder": "בחר פלוגה",
     "noCompaniesFound": "לא נמצאו פלוגות פעילות",
     "duplicatePersonalId": "מספר אישי כבר קיים במערכת",

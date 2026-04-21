@@ -1,23 +1,22 @@
-import { useEffect, useState } from "react";
 import {
   Button,
   chakra,
   Dialog,
-  Field,
-  Flex,
-  Image,
-  Input,
-  NativeSelect,
   Portal,
-  Stack,
-  Text,
 } from "@chakra-ui/react";
-import { RefreshCw } from "lucide-react";
-import { SignatureCanvas } from "./SignatureCanvas";
-import { t } from "../lib/i18n";
-import { RANK_OPTIONS } from "../lib/rank-options";
-import { useCompanies } from "../api";
+import { useEffect, useMemo, useState } from "react";
+import { useCompanies, useSoldiers } from "../api";
+import { OperatorProfileFormFields } from "../features/operator-profile/OperatorProfileFormFields";
+import {
+  filterSoldiersForProfile,
+  findPersonalIdConflict,
+  getCompanyOptions,
+  validateFullName,
+  validatePersonalId,
+  validatePhone,
+} from "../features/operator-profile/profile-dialog-utils";
 import type { OperatorProfile } from "../lib/auth.types";
+import { t } from "../lib/i18n";
 
 export const OperatorProfileDialog = ({
   open,
@@ -32,9 +31,7 @@ export const OperatorProfileDialog = ({
   onSubmit,
 }: OperatorProfileDialogProps) => {
   const { data: companies = [] } = useCompanies();
-  const companyOptions = companies
-    .filter((company) => company.isActive)
-    .map((company) => company.name);
+  const { data: soldiers = [] } = useSoldiers();
   const [fullName, setFullName] = useState(defaultFullName);
   const [rank, setRank] = useState(initialProfile?.rank ?? "");
   const [personalId, setPersonalId] = useState(
@@ -42,6 +39,7 @@ export const OperatorProfileDialog = ({
   );
   const [phone, setPhone] = useState(initialProfile?.phone ?? "");
   const [company, setCompany] = useState(initialProfile?.company ?? "");
+  const [platoon, setPlatoon] = useState(initialProfile?.platoon);
   const [savedSignature, setSavedSignature] = useState(
     initialProfile?.savedSignature ?? defaultSavedSignature ?? "",
   );
@@ -56,6 +54,7 @@ export const OperatorProfileDialog = ({
     setPersonalId(initialProfile?.personalId ?? "");
     setPhone(initialProfile?.phone ?? "");
     setCompany(initialProfile?.company ?? "");
+    setPlatoon(initialProfile?.platoon);
     const sig = initialProfile?.savedSignature ?? defaultSavedSignature ?? "";
     setSavedSignature(sig);
     setIsEditingSignature(sig === "");
@@ -65,6 +64,19 @@ export const OperatorProfileDialog = ({
   const fullNameError = validateFullName(fullName);
   const personalIdError = validatePersonalId(personalId);
   const phoneError = validatePhone(phone);
+  const personalIdConflict = findPersonalIdConflict(
+    personalId,
+    soldiers,
+    initialProfile?.personalId,
+  );
+  const filteredSoldiers = useMemo(
+    () => filterSoldiersForProfile(fullName, soldiers),
+    [fullName, soldiers],
+  );
+  const companyOptions = useMemo(
+    () => getCompanyOptions(companies, company),
+    [companies, company],
+  );
 
   const isValid =
     fullName.trim() !== "" &&
@@ -87,13 +99,28 @@ export const OperatorProfileDialog = ({
       personalId: personalId.trim(),
       phone: phone.trim(),
       company: company.trim(),
-      platoon: initialProfile?.platoon,
+      platoon,
       savedSignature,
     });
   };
 
-  const handleFullNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setFullName(event.currentTarget.value);
+  const handleFullNameChange = (details: { inputValue: string }) => {
+    setFullName(details.inputValue);
+  };
+
+  const handleSoldierSelect = (details: { value: string[] }) => {
+    const selectedPersonalId = details.value[0];
+    const soldier = soldiers.find(
+      (item) => item.personalId === selectedPersonalId,
+    );
+    if (!soldier) return;
+
+    setFullName(soldier.fullName);
+    setRank(soldier.rank);
+    setPersonalId(soldier.personalId);
+    setPhone(String(soldier.phone || ""));
+    setCompany(soldier.company);
+    setPlatoon(soldier.platoon);
   };
 
   const handleRankChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -119,11 +146,6 @@ export const OperatorProfileDialog = ({
   const handleEditSignature = () => {
     setIsEditingSignature(true);
   };
-
-  const showFullNameError = fullName.length > 0 && fullNameError !== undefined;
-  const showPersonalIdError =
-    personalId.length > 0 && personalIdError !== undefined;
-  const showPhoneError = phone.length > 0 && phoneError !== undefined;
 
   return (
     <Dialog.Root
@@ -153,131 +175,29 @@ export const OperatorProfileDialog = ({
               </Dialog.Header>
 
               <Dialog.Body overflowY="auto" flex="1">
-                <Stack gap="4">
-                  <Text textStyle="sm" color="fg.muted">
-                    {t("auth.profileDeviceOnly")}
-                  </Text>
-
-                  <Field.Root required invalid={showFullNameError}>
-                    <Field.Label>{t("soldiers.fullName")}</Field.Label>
-                    <Input value={fullName} onChange={handleFullNameChange} />
-                    {showFullNameError ? (
-                      <Field.ErrorText>{fullNameError}</Field.ErrorText>
-                    ) : null}
-                  </Field.Root>
-
-                  <Flex gap="4" direction={{ base: "column", md: "row" }}>
-                    <Field.Root required flex="1">
-                      <Field.Label>{t("auth.rank")}</Field.Label>
-                      <NativeSelect.Root>
-                        <NativeSelect.Field
-                          value={rank}
-                          onChange={handleRankChange}
-                        >
-                          <option value="">{t("auth.selectRank")}</option>
-                          {RANK_OPTIONS.map((option) => (
-                            <option key={option} value={option}>
-                              {option}
-                            </option>
-                          ))}
-                        </NativeSelect.Field>
-                        <NativeSelect.Indicator />
-                      </NativeSelect.Root>
-                    </Field.Root>
-                    <Field.Root required flex="1" invalid={showPersonalIdError}>
-                      <Field.Label>{t("soldiers.personalId")}</Field.Label>
-                      <Input
-                        type="tel"
-                        value={personalId}
-                        onChange={handlePersonalIdChange}
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                        maxLength={9}
-                      />
-                      {showPersonalIdError ? (
-                        <Field.ErrorText>{personalIdError}</Field.ErrorText>
-                      ) : null}
-                    </Field.Root>
-                  </Flex>
-
-                  <Flex gap="4" direction={{ base: "column", md: "row" }}>
-                    <Field.Root required flex="1" invalid={showPhoneError}>
-                      <Field.Label>{t("soldiers.phone")}</Field.Label>
-                      <Input
-                        type="tel"
-                        value={phone}
-                        onChange={handlePhoneChange}
-                        inputMode="tel"
-                        maxLength={11}
-                      />
-                      {showPhoneError ? (
-                        <Field.ErrorText>{phoneError}</Field.ErrorText>
-                      ) : null}
-                    </Field.Root>
-
-                    <Field.Root required flex="1">
-                      <Field.Label>{t("auth.company")}</Field.Label>
-                      <NativeSelect.Root>
-                        <NativeSelect.Field
-                          value={company}
-                          onChange={handleCompanyChange}
-                        >
-                          <option value="">{t("auth.selectCompany")}</option>
-                          {companyOptions.map((name) => (
-                            <option key={name} value={name}>
-                              {name}
-                            </option>
-                          ))}
-                        </NativeSelect.Field>
-                        <NativeSelect.Indicator />
-                      </NativeSelect.Root>
-                    </Field.Root>
-                  </Flex>
-
-                  <Field.Root required>
-                    <Field.Label>{t("issuance.savedSignature")}</Field.Label>
-                    {savedSignature !== "" && !isEditingSignature ? (
-                      <Stack gap="3">
-                        <Flex
-                          borderWidth="2px"
-                          borderColor="sage.300"
-                          borderStyle="dashed"
-                          borderRadius="xl"
-                          overflow="hidden"
-                          bg="white"
-                          p="2"
-                          justify="center"
-                        >
-                          <Image
-                            src={savedSignature}
-                            alt={t("issuance.savedSignature")}
-                            maxH="160px"
-                          />
-                        </Flex>
-                        <Flex justify="space-between" align="center">
-                          <Text textStyle="xs" color="fg.muted">
-                            {t("issuance.savedSignature")}
-                          </Text>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="xs"
-                            color="fg.muted"
-                            onClick={handleEditSignature}
-                          >
-                            <RefreshCw size={12} />
-                            {t("auth.editSignature")}
-                          </Button>
-                        </Flex>
-                      </Stack>
-                    ) : (
-                      <SignatureCanvas
-                        signatureData={savedSignature}
-                        onSign={setSavedSignature}
-                      />
-                    )}
-                  </Field.Root>
-                </Stack>
+                <OperatorProfileFormFields
+                  fullName={fullName}
+                  rank={rank}
+                  personalId={personalId}
+                  phone={phone}
+                  company={company}
+                  savedSignature={savedSignature}
+                  isEditingSignature={isEditingSignature}
+                  filteredSoldiers={filteredSoldiers}
+                  companyOptions={companyOptions}
+                  fullNameError={fullNameError}
+                  personalIdError={personalIdError}
+                  personalIdConflict={personalIdConflict}
+                  phoneError={phoneError}
+                  onFullNameChange={handleFullNameChange}
+                  onSoldierSelect={handleSoldierSelect}
+                  onRankChange={handleRankChange}
+                  onPersonalIdChange={handlePersonalIdChange}
+                  onPhoneChange={handlePhoneChange}
+                  onCompanyChange={handleCompanyChange}
+                  onEditSignature={handleEditSignature}
+                  onSignatureChange={setSavedSignature}
+                />
               </Dialog.Body>
 
               <Dialog.Footer flexShrink={0}>
@@ -313,31 +233,6 @@ export const OperatorProfileDialog = ({
       </Portal>
     </Dialog.Root>
   );
-};
-
-const validateFullName = (value: string): string | undefined => {
-  const trimmed = value.trim();
-  if (trimmed === "") return undefined;
-  if (/\d/.test(trimmed)) return t("auth.errors.fullNameHasDigits");
-  if (trimmed.replace(/\s/g, "").length < 3)
-    return t("auth.errors.fullNameTooShort");
-  return undefined;
-};
-
-const validatePersonalId = (value: string): string | undefined => {
-  const trimmed = value.trim();
-  if (trimmed === "") return undefined;
-  if (!/^\d+$/.test(trimmed)) return t("auth.errors.personalIdDigitsOnly");
-  if (trimmed.length < 6 || trimmed.length > 9)
-    return t("auth.errors.personalIdLength");
-  return undefined;
-};
-
-const validatePhone = (value: string): string | undefined => {
-  const trimmed = value.trim();
-  if (trimmed === "") return undefined;
-  if (!/^05\d-?\d{7}$/.test(trimmed)) return t("auth.errors.phoneInvalid");
-  return undefined;
 };
 
 type OperatorProfileDialogProps = {
