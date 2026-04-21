@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Grid, Input, Stack, Text } from "@chakra-ui/react"
-import { Trash2 } from "lucide-react"
+import { ChevronDown, ChevronUp, Trash2 } from "lucide-react"
 import { StatusBadge } from "../../components/StatusBadge"
 import { FilterSelect } from "../../components/FilterSelect"
 import { getItemStatusLabel } from "../../lib/formatters"
@@ -17,10 +17,17 @@ const getRowBackground = (changeType: EditableRow["changeType"]): string | undef
 export const EditableInventoryRow = ({
   row,
   index,
-  isEditing,
+  isExpanded,
+  isReadOnly = false,
+  onToggleExpand,
   onFieldChange,
   onDelete,
 }: EditableInventoryRowProps) => {
+  const handleToggle = () => {
+    if (isReadOnly) return
+    onToggleExpand(row.itemId)
+  }
+
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onFieldChange(row.itemId, "name", event.currentTarget.value)
   }
@@ -60,25 +67,37 @@ export const EditableInventoryRow = ({
     }
   }
 
-  const handleDeleteClick = () => {
+  const handleDeleteClick = (event: React.MouseEvent) => {
+    event.stopPropagation()
     onDelete(row.itemId)
   }
 
-  if (!isEditing) {
+  const stopPropagation = (event: React.MouseEvent | React.KeyboardEvent) => {
+    event.stopPropagation()
+  }
+
+  const rowBackground = getRowBackground(row.changeType)
+
+  if (!isExpanded) {
     return (
       <Grid
-        templateColumns="2fr 1fr 1fr 1fr 1fr"
+        templateColumns="2fr 1fr 1fr 1fr 1fr auto"
         gap="3"
         py="3"
         px="4"
         borderBottomWidth="1px"
         borderColor="border"
         role="row"
-        cursor="pointer"
+        cursor={isReadOnly ? "default" : "pointer"}
+        bg={rowBackground}
+        onClick={handleToggle}
+        alignItems="center"
         css={{
           ...animations.listItem(index),
-          transition: "background 0.15s ease, transform 0.15s ease",
-          "&:hover": { background: "var(--chakra-colors-bg-muted)", transform: "scale(1.005)" },
+          transition: "background 0.15s ease",
+          "&:hover": isReadOnly
+            ? undefined
+            : { background: rowBackground ?? "var(--chakra-colors-bg-muted)" },
         }}
       >
         <Text textStyle="sm" fontWeight="500" role="cell">{row.name}</Text>
@@ -86,6 +105,7 @@ export const EditableInventoryRow = ({
         <Text textStyle="sm" color="fg.muted" role="cell">{getCategoryLabel(row.category)}</Text>
         <Text textStyle="sm" fontWeight="500" role="cell">{row.currentQty} {row.unitOfMeasure}</Text>
         <StatusBadge status={row.status} label={getItemStatusLabel(row.status)} />
+        {isReadOnly ? <span /> : <ChevronDown size={14} color="var(--chakra-colors-fg-muted)" />}
       </Grid>
     )
   }
@@ -98,7 +118,7 @@ export const EditableInventoryRow = ({
       borderBottomWidth="1px"
       borderColor="border"
       role="row"
-      bg={getRowBackground(row.changeType)}
+      bg={rowBackground}
       css={{ transition: "background 0.2s ease" }}
     >
       <Grid
@@ -111,7 +131,9 @@ export const EditableInventoryRow = ({
           borderRadius="md"
           value={row.name}
           onChange={handleNameChange}
+          onClick={stopPropagation}
           placeholder={t("inventory.name")}
+          autoFocus
         />
         <Input
           size="sm"
@@ -121,15 +143,18 @@ export const EditableInventoryRow = ({
           pattern="[0-9]*"
           value={row.itemNumber}
           onChange={handleItemNumberChange}
+          onClick={stopPropagation}
           placeholder={t("inventory.itemNumber")}
         />
-        <FilterSelect
-          label={t("inventory.category")}
-          value={row.category}
-          options={CATEGORY_OPTIONS}
-          onChange={handleCategoryChange}
-        />
-        <Flex gap="1">
+        <Box onClick={stopPropagation}>
+          <FilterSelect
+            label={t("inventory.category")}
+            value={row.category}
+            options={CATEGORY_OPTIONS}
+            onChange={handleCategoryChange}
+          />
+        </Box>
+        <Flex gap="1" onClick={stopPropagation}>
           <Input
             size="sm"
             borderRadius="md"
@@ -150,21 +175,35 @@ export const EditableInventoryRow = ({
           </Box>
         </Flex>
         <StatusBadge status={row.status} label={getItemStatusLabel(row.status)} />
-        <Button
-          size="xs"
-          variant="ghost"
-          color="red.500"
-          minW="8"
-          minH="8"
-          p="0"
-          onClick={handleDeleteClick}
-          aria-label={t("inventory.deleteRow")}
-        >
-          <Trash2 size={14} />
-        </Button>
+        <Flex gap="1">
+          <Button
+            size="xs"
+            variant="ghost"
+            color="red.500"
+            minW="8"
+            minH="8"
+            p="0"
+            onClick={handleDeleteClick}
+            aria-label={t("inventory.deleteRow")}
+          >
+            <Trash2 size={14} />
+          </Button>
+          <Button
+            size="xs"
+            variant="ghost"
+            color="fg.muted"
+            minW="8"
+            minH="8"
+            p="0"
+            onClick={handleToggle}
+            aria-label={t("inventory.collapseRow")}
+          >
+            <ChevronUp size={14} />
+          </Button>
+        </Flex>
       </Grid>
 
-      <Flex gap="3" align="center" pl="1" flexWrap="wrap">
+      <Flex gap="3" align="center" pl="1" flexWrap="wrap" onClick={stopPropagation}>
         <Flex gap="2" align="center">
           <Text textStyle="xs" color="fg.muted" whiteSpace="nowrap">
             {t("inventory.minThreshold")}
@@ -200,7 +239,9 @@ export const EditableInventoryRow = ({
 type EditableInventoryRowProps = {
   row: EditableRow
   index: number
-  isEditing: boolean
+  isExpanded: boolean
+  isReadOnly?: boolean
+  onToggleExpand: (itemId: string) => void
   onFieldChange: (itemId: string, field: EditableField, value: string | number) => void
   onDelete: (itemId: string) => void
 }

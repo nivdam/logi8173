@@ -1,12 +1,12 @@
 import type { InventoryItem, ItemCategory, ItemStatus, Soldier } from "../types"
 import type { SortConfig } from "../components/SortableHeader"
 
-export const filterInventory = (
-  items: InventoryItem[],
+export const filterInventory = <T extends InventoryItem>(
+  items: T[],
   query: string,
   category: ItemCategory | undefined,
   status: ItemStatus | undefined,
-): InventoryItem[] => {
+): T[] => {
   const lowerQuery = query.toLowerCase()
 
   return items.filter((item) => {
@@ -17,10 +17,10 @@ export const filterInventory = (
   })
 }
 
-export const sortInventory = (
-  items: InventoryItem[],
+export const sortInventory = <T extends InventoryItem>(
+  items: T[],
   sort: SortConfig,
-): InventoryItem[] => {
+): T[] => {
   const sorted = [...items].sort((itemA, itemB) => {
     const key = sort.key as keyof InventoryItem
     const valueA = itemA[key]

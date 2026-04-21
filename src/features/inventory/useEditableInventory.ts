@@ -1,5 +1,7 @@
-import { useState, useCallback } from "react"
+import { useCallback, useEffect, useState } from "react"
 import type { InventoryItem } from "../../types"
+
+const NEW_ROW_PREFIX = "new_"
 
 const EMPTY_ROW: EditableRow = {
   itemId: "",
@@ -21,7 +23,11 @@ const createEmptyRow = (): EditableRow => ({
   itemId: NEW_ROW_PREFIX + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
 })
 
-const NEW_ROW_PREFIX = "new_"
+const toUnchangedRow = (item: InventoryItem): EditableRow => ({
+  ...item,
+  changeType: "unchanged",
+  changedFields: new Set<EditableField>(),
+})
 
 const isRowValid = (row: EditableRow): boolean => {
   if (row.name.trim() === "") return false
@@ -31,34 +37,39 @@ const isRowValid = (row: EditableRow): boolean => {
 }
 
 export const useEditableInventory = (serverItems: InventoryItem[]) => {
-  const [isEditing, setIsEditing] = useState(false)
-  const [editableRows, setEditableRows] = useState<EditableRow[]>([])
+  const [editableRows, setEditableRows] = useState<EditableRow[]>(() =>
+    serverItems.map(toUnchangedRow),
+  )
   const [deletedIds, setDeletedIds] = useState<string[]>([])
+  const [expandedRowId, setExpandedRowId] = useState<string | null>(null)
 
-  const startEditing = useCallback(() => {
-    setEditableRows(
-      serverItems.map((item) => ({ ...item, changeType: "unchanged", changedFields: new Set<EditableField>() })),
-    )
-    setDeletedIds([])
-    setIsEditing(true)
-  }, [serverItems])
+  const modifiedRows = editableRows.filter((row) => row.changeType === "modified")
+  const addedRows = editableRows.filter((row) => row.changeType === "added")
+  const changeCount = modifiedRows.length + addedRows.length + deletedIds.length
+  const hasPendingChanges = changeCount > 0
 
-  const cancelEditing = useCallback(() => {
-    setEditableRows([])
-    setDeletedIds([])
-    setIsEditing(false)
-  }, [])
+  // Sync drafts from server when there are no pending changes.
+  // When dirty, ignore incoming server changes to avoid clobbering user edits.
+  useEffect(() => {
+    if (hasPendingChanges) return
+    setEditableRows(serverItems.map(toUnchangedRow))
+  }, [serverItems, hasPendingChanges])
 
   const updateField = useCallback(
     (itemId: string, field: EditableField, value: string | number) => {
       setEditableRows((previous) =>
         previous.map((row) => {
           if (row.itemId !== itemId) return row
-          const nextChangeType =
+          const nextChangeType: ChangeType =
             row.changeType === "added" ? "added" : "modified"
           const nextChangedFields = new Set(row.changedFields)
           nextChangedFields.add(field)
-          return { ...row, [field]: value, changeType: nextChangeType, changedFields: nextChangedFields }
+          return {
+            ...row,
+            [field]: value,
+            changeType: nextChangeType,
+            changedFields: nextChangedFields,
+          }
         }),
       )
     },
@@ -66,13 +77,14 @@ export const useEditableInventory = (serverItems: InventoryItem[]) => {
   )
 
   const addRow = useCallback(() => {
-    setEditableRows((previous) => [createEmptyRow(), ...previous])
+    const newRow = createEmptyRow()
+    setEditableRows((previous) => [newRow, ...previous])
+    setExpandedRowId(newRow.itemId)
   }, [])
 
   const deleteRow = useCallback((itemId: string) => {
-    setEditableRows((previous) =>
-      previous.filter((row) => row.itemId !== itemId),
-    )
+    setEditableRows((previous) => previous.filter((row) => row.itemId !== itemId))
+    setExpandedRowId((current) => (current === itemId ? null : current))
 
     const isNewRow = itemId.startsWith(NEW_ROW_PREFIX)
     if (!isNewRow) {
@@ -80,18 +92,25 @@ export const useEditableInventory = (serverItems: InventoryItem[]) => {
     }
   }, [])
 
-  const modifiedRows = editableRows.filter(
-    (row) => row.changeType === "modified",
-  )
-  const addedRows = editableRows.filter((row) => row.changeType === "added")
-  const changeCount = modifiedRows.length + addedRows.length + deletedIds.length
-  const hasChanges = changeCount > 0
+  const cancelEditing = useCallback(() => {
+    setEditableRows(serverItems.map(toUnchangedRow))
+    setDeletedIds([])
+    setExpandedRowId(null)
+  }, [serverItems])
+
+  const toggleExpanded = useCallback((itemId: string) => {
+    setExpandedRowId((current) => (current === itemId ? null : itemId))
+  }, [])
+
+  const collapseAll = useCallback(() => {
+    setExpandedRowId(null)
+  }, [])
 
   const hasValidationErrors = editableRows.some(
     (row) => row.changeType !== "unchanged" && !isRowValid(row),
   )
 
-  const canSave = hasChanges && !hasValidationErrors
+  const canSave = hasPendingChanges && !hasValidationErrors
 
   const buildPayload = (): BatchUpdatePayload => ({
     modified: modifiedRows.map(buildModifiedDelta),
@@ -100,17 +119,18 @@ export const useEditableInventory = (serverItems: InventoryItem[]) => {
   })
 
   return {
-    isEditing,
     editableRows,
+    expandedRowId,
     changeCount,
-    hasChanges,
+    hasPendingChanges,
     canSave,
     hasValidationErrors,
-    startEditing,
-    cancelEditing,
     updateField,
     addRow,
     deleteRow,
+    cancelEditing,
+    toggleExpanded,
+    collapseAll,
     buildPayload,
   }
 }

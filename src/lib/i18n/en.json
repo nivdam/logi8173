@@ -83,14 +83,14 @@
     "clearFilters": "Clear Filters",
     "allCategories": "All Categories",
     "allStatuses": "All Statuses",
-    "editMode": "Edit Inventory",
-    "cancelEdit": "Cancel Edit",
-    "saveChanges": "Save Changes",
+    "cancelEdit": "Cancel",
+    "saveChanges": "Save",
     "addRow": "Add Item",
     "batchSaveSuccess": "Changes saved successfully",
     "batchSavePartial": "Some changes were not saved",
     "batchSaveError": "Failed to save changes. Try again.",
-    "deleteRow": "Delete row"
+    "deleteRow": "Delete row",
+    "collapseRow": "Close editor"
   },
   "activities": {
     "title": "Activities",

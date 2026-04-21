@@ -1,5 +1,5 @@
 import { Box, Button, Flex, Grid, Input, Text } from "@chakra-ui/react"
-import { Trash2 } from "lucide-react"
+import { ChevronDown, ChevronUp, Trash2 } from "lucide-react"
 import { StatusBadge } from "../../components/StatusBadge"
 import { FilterSelect } from "../../components/FilterSelect"
 import { getItemStatusLabel } from "../../lib/formatters"
@@ -8,19 +8,36 @@ import { animations } from "../../theme/animations"
 import { CATEGORY_OPTIONS, UNIT_OPTIONS, getCategoryLabel } from "./inventory.constants"
 import type { EditableRow, EditableField } from "./useEditableInventory"
 
-const getCardBorderColor = (changeType: EditableRow["changeType"]): string => {
+const getCardBg = (changeType: EditableRow["changeType"]): string => {
+  if (changeType === "modified") return "orange.50"
+  if (changeType === "added") return "green.50"
+  return "bg.card"
+}
+
+const getCardBorderColor = (
+  changeType: EditableRow["changeType"],
+  isExpanded: boolean,
+): string => {
   if (changeType === "modified") return "orange.300"
   if (changeType === "added") return "green.300"
+  if (isExpanded) return "sage.300"
   return "border"
 }
 
 export const EditableInventoryCard = ({
   row,
   index,
-  isEditing,
+  isExpanded,
+  isReadOnly = false,
+  onToggleExpand,
   onFieldChange,
   onDelete,
 }: EditableInventoryCardProps) => {
+  const handleToggle = () => {
+    if (isReadOnly) return
+    onToggleExpand(row.itemId)
+  }
+
   const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onFieldChange(row.itemId, "name", event.currentTarget.value)
   }
@@ -60,27 +77,36 @@ export const EditableInventoryCard = ({
     }
   }
 
-  const handleDeleteClick = () => {
+  const handleDeleteClick = (event: React.MouseEvent) => {
+    event.stopPropagation()
     onDelete(row.itemId)
   }
 
-  if (!isEditing) {
+  const stopPropagation = (event: React.MouseEvent | React.KeyboardEvent) => {
+    event.stopPropagation()
+  }
+
+  if (!isExpanded) {
     return (
       <Box
         p="4"
-        bg="bg.card"
+        bg={getCardBg(row.changeType)}
         borderRadius="xl"
         borderWidth="1px"
-        borderColor="border"
-        cursor="pointer"
+        borderColor={getCardBorderColor(row.changeType, false)}
+        cursor={isReadOnly ? "default" : "pointer"}
+        onClick={handleToggle}
         css={{
-          ...animations.cardHover,
+          ...(isReadOnly ? {} : animations.cardHover),
           ...animations.listItem(index),
         }}
       >
         <Flex justify="space-between" align="start" mb="2">
           <Text textStyle="sm" fontWeight="600">{row.name}</Text>
-          <StatusBadge status={row.status} label={getItemStatusLabel(row.status)} />
+          <Flex gap="2" align="center">
+            <StatusBadge status={row.status} label={getItemStatusLabel(row.status)} />
+            {isReadOnly ? null : <ChevronDown size={14} color="var(--chakra-colors-fg-muted)" />}
+          </Flex>
         </Flex>
         <Flex gap="4" flexWrap="wrap">
           <Flex direction="column">
@@ -109,28 +135,41 @@ export const EditableInventoryCard = ({
   return (
     <Box
       p="4"
-      bg="bg.card"
+      bg={getCardBg(row.changeType)}
       borderRadius="xl"
       borderWidth="2px"
-      borderColor={getCardBorderColor(row.changeType)}
+      borderColor={getCardBorderColor(row.changeType, true)}
       css={{ transition: "border-color 0.2s ease" }}
     >
       <Flex justify="space-between" align="center" mb="3">
         <StatusBadge status={row.status} label={getItemStatusLabel(row.status)} />
-        <Button
-          size="xs"
-          variant="ghost"
-          color="red.500"
-          minW="10"
-          minH="10"
-          onClick={handleDeleteClick}
-          aria-label={t("inventory.deleteRow")}
-        >
-          <Trash2 size={16} />
-        </Button>
+        <Flex gap="1">
+          <Button
+            size="xs"
+            variant="ghost"
+            color="red.500"
+            minW="10"
+            minH="10"
+            onClick={handleDeleteClick}
+            aria-label={t("inventory.deleteRow")}
+          >
+            <Trash2 size={16} />
+          </Button>
+          <Button
+            size="xs"
+            variant="ghost"
+            color="fg.muted"
+            minW="10"
+            minH="10"
+            onClick={handleToggle}
+            aria-label={t("inventory.collapseRow")}
+          >
+            <ChevronUp size={16} />
+          </Button>
+        </Flex>
       </Flex>
 
-      <Flex direction="column" gap="3">
+      <Flex direction="column" gap="3" onClick={stopPropagation}>
         <Box>
           <Text textStyle="xs" color="fg.muted" mb="1">{t("inventory.name")}</Text>
           <Input
@@ -139,6 +178,7 @@ export const EditableInventoryCard = ({
             value={row.name}
             onChange={handleNameChange}
             placeholder={t("inventory.name")}
+            autoFocus
           />
         </Box>
 
@@ -223,7 +263,9 @@ export const EditableInventoryCard = ({
 type EditableInventoryCardProps = {
   row: EditableRow
   index: number
-  isEditing: boolean
+  isExpanded: boolean
+  isReadOnly?: boolean
+  onToggleExpand: (itemId: string) => void
   onFieldChange: (itemId: string, field: EditableField, value: string | number) => void
   onDelete: (itemId: string) => void
 }

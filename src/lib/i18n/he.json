@@ -83,14 +83,14 @@
     "clearFilters": "נקה סינון",
     "allCategories": "כל הקטגוריות",
     "allStatuses": "כל הסטטוסים",
-    "editMode": "עריכת מלאי",
-    "cancelEdit": "ביטול עריכה",
-    "saveChanges": "שמור שינויים",
+    "cancelEdit": "ביטול",
+    "saveChanges": "שמור",
     "addRow": "הוסף פריט",
     "batchSaveSuccess": "השינויים נשמרו בהצלחה",
     "batchSavePartial": "חלק מהשינויים לא נשמרו",
     "batchSaveError": "שמירת השינויים נכשלה. נסה שוב.",
-    "deleteRow": "מחק שורה"
+    "deleteRow": "מחק שורה",
+    "collapseRow": "סגור עריכה"
   },
   "activities": {
     "title": "פעילויות",

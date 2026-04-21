@@ -54,7 +54,7 @@ export const ActivitySnapshotSection = ({
     </Flex>
 
     {sortedItems.length > 0 ? (
-      <InventoryTable items={sortedItems} sort={sort} onSort={onSort} />
+      <InventoryTable items={sortedItems} sort={sort} onSort={onSort} readOnly />
     ) : (
       <EmptyState
         icon={PackageSearch}
