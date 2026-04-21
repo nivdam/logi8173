@@ -26,7 +26,8 @@ export const EditableInventoryRow = ({
   }
 
   const handleItemNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onFieldChange(row.itemId, "itemNumber", event.currentTarget.value)
+    const digitsOnly = event.currentTarget.value.replace(/\D/g, "")
+    onFieldChange(row.itemId, "itemNumber", digitsOnly)
   }
 
   const handleCategoryChange = (value: string | undefined) => {
@@ -110,6 +111,9 @@ export const EditableInventoryRow = ({
         <Input
           size="sm"
           borderRadius="md"
+          type="tel"
+          inputMode="numeric"
+          pattern="[0-9]*"
           value={row.itemNumber}
           onChange={handleItemNumberChange}
           placeholder={t("inventory.itemNumber")}
