@@ -6,22 +6,16 @@ import { getItemStatusLabel } from "../../lib/formatters"
 import { t } from "../../lib/i18n"
 import { animations } from "../../theme/animations"
 import { CATEGORY_OPTIONS, UNIT_OPTIONS, getCategoryLabel } from "./inventory.constants"
+import { useInventoryRowHandlers } from "./useInventoryRowHandlers"
 import type { EditableRow, EditableField } from "./useEditableInventory"
 
-const getCardBg = (changeType: EditableRow["changeType"]): string => {
-  if (changeType === "modified") return "orange.50"
-  if (changeType === "added") return "green.50"
-  return "bg.card"
-}
-
-const getCardBorderColor = (
+const getCardColors = (
   changeType: EditableRow["changeType"],
   isExpanded: boolean,
-): string => {
-  if (changeType === "modified") return "orange.300"
-  if (changeType === "added") return "green.300"
-  if (isExpanded) return "sage.300"
-  return "border"
+): CardColors => {
+  if (changeType === "modified") return { bg: "orange.50", borderColor: "orange.300" }
+  if (changeType === "added") return { bg: "green.50", borderColor: "green.300" }
+  return { bg: "bg.card", borderColor: isExpanded ? "sage.300" : "border" }
 }
 
 export const EditableInventoryCard = ({
@@ -33,67 +27,36 @@ export const EditableInventoryCard = ({
   onFieldChange,
   onDelete,
 }: EditableInventoryCardProps) => {
-  const handleToggle = () => {
-    if (isReadOnly) return
-    onToggleExpand(row.itemId)
-  }
+  const {
+    handleToggle,
+    handleNameChange,
+    handleItemNumberChange,
+    handleCategoryChange,
+    handleQtyChange,
+    handleUnitChange,
+    handleMinThresholdChange,
+    handleNotesChange,
+    handleDeleteClick,
+    stopPropagation,
+  } = useInventoryRowHandlers({
+    itemId: row.itemId,
+    isReadOnly,
+    onFieldChange,
+    onDelete,
+    onToggleExpand,
+  })
 
-  const handleNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onFieldChange(row.itemId, "name", event.currentTarget.value)
-  }
-
-  const handleItemNumberChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const digitsOnly = event.currentTarget.value.replace(/\D/g, "")
-    onFieldChange(row.itemId, "itemNumber", digitsOnly)
-  }
-
-  const handleCategoryChange = (value: string | undefined) => {
-    if (value) {
-      onFieldChange(row.itemId, "category", value)
-    }
-  }
-
-  const handleQtyChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const parsedQuantity = parseInt(event.currentTarget.value, 10)
-    if (!Number.isNaN(parsedQuantity) && parsedQuantity >= 0) {
-      onFieldChange(row.itemId, "currentQty", parsedQuantity)
-    }
-  }
-
-  const handleUnitChange = (value: string | undefined) => {
-    if (value) {
-      onFieldChange(row.itemId, "unitOfMeasure", value)
-    }
-  }
-
-  const handleNotesChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onFieldChange(row.itemId, "notes", event.currentTarget.value)
-  }
-
-  const handleMinThresholdChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const parsed = parseInt(event.currentTarget.value, 10)
-    if (!Number.isNaN(parsed) && parsed >= 0) {
-      onFieldChange(row.itemId, "minThreshold", parsed)
-    }
-  }
-
-  const handleDeleteClick = (event: React.MouseEvent) => {
-    event.stopPropagation()
-    onDelete(row.itemId)
-  }
-
-  const stopPropagation = (event: React.MouseEvent | React.KeyboardEvent) => {
-    event.stopPropagation()
-  }
+  const compactColors = getCardColors(row.changeType, false)
+  const expandedColors = getCardColors(row.changeType, true)
 
   if (!isExpanded) {
     return (
       <Box
         p="4"
-        bg={getCardBg(row.changeType)}
+        bg={compactColors.bg}
         borderRadius="xl"
         borderWidth="1px"
-        borderColor={getCardBorderColor(row.changeType, false)}
+        borderColor={compactColors.borderColor}
         cursor={isReadOnly ? "default" : "pointer"}
         onClick={handleToggle}
         css={{
@@ -135,10 +98,10 @@ export const EditableInventoryCard = ({
   return (
     <Box
       p="4"
-      bg={getCardBg(row.changeType)}
+      bg={expandedColors.bg}
       borderRadius="xl"
       borderWidth="2px"
-      borderColor={getCardBorderColor(row.changeType, true)}
+      borderColor={expandedColors.borderColor}
       css={{ transition: "border-color 0.2s ease" }}
     >
       <Flex justify="space-between" align="center" mb="3">
@@ -268,4 +231,9 @@ type EditableInventoryCardProps = {
   onToggleExpand: (itemId: string) => void
   onFieldChange: (itemId: string, field: EditableField, value: string | number) => void
   onDelete: (itemId: string) => void
+}
+
+type CardColors = {
+  bg: string
+  borderColor: string
 }
