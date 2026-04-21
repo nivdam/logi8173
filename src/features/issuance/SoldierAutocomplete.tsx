@@ -10,7 +10,7 @@ import { AddSoldierDialog } from "./AddSoldierDialog"
 export const SoldierAutocomplete = ({ selectedSoldier, onSelect, onClear }: SoldierAutocompleteProps) => {
   const { data: soldiers = [] } = useSoldiers()
   const { operatorProfile } = useAuth()
-  const selfPersonalId = operatorProfile?.personalId
+  const operatorPersonalId = operatorProfile?.personalId
   const [inputValue, setInputValue] = useState("")
   const [isComboboxOpen, setIsComboboxOpen] = useState(false)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
@@ -30,9 +30,9 @@ export const SoldierAutocomplete = ({ selectedSoldier, onSelect, onClear }: Sold
         items: filtered,
         itemToValue: (soldier) => soldier.personalId,
         itemToString: (soldier) => soldier.fullName,
-        isItemDisabled: (soldier) => soldier.personalId === selfPersonalId,
+        isItemDisabled: (soldier) => soldier.personalId === operatorPersonalId,
       }),
-    [filtered, selfPersonalId],
+    [filtered, operatorPersonalId],
   )
 
   const handleInputChange = (details: { inputValue: string }) => {
@@ -40,10 +40,10 @@ export const SoldierAutocomplete = ({ selectedSoldier, onSelect, onClear }: Sold
   }
 
   const handleSelect = (details: { value: string[] }) => {
-    const selectedValue = details.value[0]
-    if (!selectedValue) return
-    if (selectedValue === selfPersonalId) return
-    const soldier = soldiers.find((s) => s.personalId === selectedValue)
+    const selectedPersonalId = details.value[0]
+    if (!selectedPersonalId) return
+    if (selectedPersonalId === operatorPersonalId) return
+    const soldier = soldiers.find((s) => s.personalId === selectedPersonalId)
     if (soldier) {
       onSelect(soldier)
       setInputValue("")
@@ -142,7 +142,7 @@ export const SoldierAutocomplete = ({ selectedSoldier, onSelect, onClear }: Sold
             <Combobox.Content>
               <Combobox.List>
                 {filtered.map((soldier) => {
-                  const isSelf = soldier.personalId === selfPersonalId
+                  const isCurrentOperator = soldier.personalId === operatorPersonalId
                   return (
                     <Combobox.Item key={soldier.personalId} item={soldier}>
                       <Combobox.ItemText>
@@ -164,7 +164,7 @@ export const SoldierAutocomplete = ({ selectedSoldier, onSelect, onClear }: Sold
                           <Box minW="0">
                             <Text textStyle="sm" fontWeight="500" truncate>
                               {soldier.fullName}
-                              {isSelf && (
+                              {isCurrentOperator && (
                                 <Text as="span" textStyle="xs" color="fg.muted" ms="2">
                                   ({t("issuance.cannotSignSelf")})
                                 </Text>

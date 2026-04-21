@@ -33,8 +33,8 @@ export const OperatorProfileDialog = ({
 }: OperatorProfileDialogProps) => {
   const { data: companies = [] } = useCompanies();
   const companyOptions = companies
-    .filter((companyRecord) => companyRecord.isActive)
-    .map((companyRecord) => companyRecord.name);
+    .filter((company) => company.isActive)
+    .map((company) => company.name);
   const [fullName, setFullName] = useState(defaultFullName);
   const [rank, setRank] = useState(initialProfile?.rank ?? "");
   const [personalId, setPersonalId] = useState(

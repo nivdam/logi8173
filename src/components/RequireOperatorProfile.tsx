@@ -12,7 +12,7 @@ export const RequireOperatorProfile = ({
   children: React.ReactNode
 }) => {
   const { status, operator, operatorProfile } = useAuth()
-  const { save, isSaving } = useSaveOperatorProfile()
+  const { saveProfile, isSaving } = useSaveOperatorProfile()
 
   const isMissingProfile =
     status === "authenticated" &&
@@ -21,7 +21,7 @@ export const RequireOperatorProfile = ({
 
   const handleSaveProfile = async (profile: OperatorProfile) => {
     try {
-      await save(profile)
+      await saveProfile(profile)
     } catch (error) {
       showApiErrorToast({
         actionLabel: t("settings.myProfile.saveError"),

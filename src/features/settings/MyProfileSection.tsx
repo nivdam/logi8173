@@ -21,7 +21,7 @@ import type { OperatorProfile } from "../../lib/auth.types"
 
 export const MyProfileSection = () => {
   const { operator, operatorProfile, clearOperatorProfile } = useAuth()
-  const { save, isSaving } = useSaveOperatorProfile()
+  const { saveProfile, isSaving } = useSaveOperatorProfile()
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const handleOpenDialog = () => {
@@ -34,7 +34,7 @@ export const MyProfileSection = () => {
 
   const handleSaveProfile = async (profile: OperatorProfile) => {
     try {
-      await save(profile)
+      await saveProfile(profile)
       setIsDialogOpen(false)
     } catch (error) {
       showApiErrorToast({
