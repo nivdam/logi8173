@@ -40,6 +40,8 @@ type AuthState = {
   status: "unauthenticated" | "authenticated"
   operator: AuthenticatedOperator | undefined
   operatorProfile: OperatorProfile | undefined
+  tokenExpiresAt: number | undefined
+  isSessionExpiringSoon: boolean
   saveOperatorProfile: (profile: OperatorProfile) => void
   clearOperatorProfile: () => void
   resetSession: () => void
