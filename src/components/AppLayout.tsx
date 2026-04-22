@@ -10,6 +10,7 @@ import { BottomNav } from "./BottomNav";
 import { OnlineOperatorsBadge } from "./OnlineOperatorsBadge";
 import { OperatorProfileDialog } from "./OperatorProfileDialog";
 import { RefreshDataButton } from "./RefreshDataButton";
+import { SessionExpiryBanner } from "./SessionExpiryBanner";
 import { UserAvatar } from "./UserAvatar";
 import { showApiErrorToast } from "../lib/api-error";
 import { useSaveOperatorProfile } from "../features/operator-profile/useSaveOperatorProfile";
@@ -107,6 +108,8 @@ export const AppLayout = () => {
           ) : null}
         </Flex>
       </Flex>
+
+      <SessionExpiryBanner />
 
       <Flex flex="1" minH="0">
         <AppNav />
