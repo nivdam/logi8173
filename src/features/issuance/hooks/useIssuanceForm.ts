@@ -1,4 +1,4 @@
-import { useReducer } from "react"
+import { useEffect, useReducer, useRef } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useAuth } from "../../../lib/use-auth"
 import { useCreateTransaction } from "../../../api"
@@ -23,13 +23,21 @@ const serializeIssuanceState = (formState: IssuanceFormState) => ({
   giverSignature: "",
 })
 
-export const useIssuanceForm = () => {
+export const useIssuanceForm = (activityId: string | undefined) => {
   const { operator, operatorProfile } = useAuth()
   const navigate = useNavigate()
   const [, setSearchParams] = useSearchParams()
   const createTransaction = useCreateTransaction()
 
   const [state, dispatch] = useReducer(issuanceFormReducer, undefined, createInitialState)
+  const previousActivityIdRef = useRef(activityId)
+
+  useEffect(() => {
+    if (previousActivityIdRef.current === activityId) return
+    previousActivityIdRef.current = activityId
+    dispatch({ type: "RESET" })
+    setSearchParams({}, { replace: true })
+  }, [activityId, setSearchParams])
 
   const savedSignature = operatorProfile?.savedSignature || operator?.savedSignatureUrl
   const hasGiverSignature = state.giverSignature !== "" || !!savedSignature
@@ -44,7 +52,7 @@ export const useIssuanceForm = () => {
     state.giverSignature !== ""
 
   const isFormValid =
-    state.activityId !== undefined &&
+    activityId !== undefined &&
     state.receiver !== undefined &&
     hasValidLines &&
     state.receiverSignature !== "" &&
@@ -52,7 +60,8 @@ export const useIssuanceForm = () => {
 
   const totalItemCount = filledLines.reduce((sum, line) => sum + line.qty, 0)
 
-  const draft = useDraftPersistence("draft:issuance", state, isFormDirty, state.showSuccess, serializeIssuanceState)
+  const draftStorageKey = activityId ? `draft:issuance:${activityId}` : "draft:issuance"
+  const draft = useDraftPersistence(draftStorageKey, state, isFormDirty, state.showSuccess, serializeIssuanceState)
 
   const handleRestoreDraft = () => {
     if (!draft.savedDraft) return
@@ -112,13 +121,9 @@ export const useIssuanceForm = () => {
     dispatch({ type: "SET_GIVER_SIGNATURE", payload: base64 })
   }
 
-  const handleSelectActivity = (activityId: string) => {
-    dispatch({ type: "SET_ACTIVITY", payload: activityId })
-  }
-
   const handleSubmit = () => {
     if (createTransaction.isPending) return
-    if (!state.activityId || !state.receiver || !operator) return
+    if (!activityId || !state.receiver || !operator) return
 
     const transactionItems = mapLinesToTransactionItems(state.lines)
     if (transactionItems.length === 0) return
@@ -127,7 +132,7 @@ export const useIssuanceForm = () => {
 
     createTransaction.mutate(
       {
-        activityId: state.activityId,
+        activityId,
         txType: "issue",
         performedAt: state.performedAt,
         giverPersonalId: operatorProfile?.personalId || operator.email,
@@ -183,7 +188,6 @@ export const useIssuanceForm = () => {
     hasDraft: draft.hasDraft,
     handleRestoreDraft,
     handleDiscardDraft,
-    handleSelectActivity,
     handleSelectReceiver,
     handleClearReceiver,
     handleSetPerformedAt,

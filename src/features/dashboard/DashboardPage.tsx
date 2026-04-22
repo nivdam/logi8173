@@ -8,6 +8,7 @@ import { PageHeader } from "../../components/PageHeader"
 import { ApiErrorState } from "../../components/ApiErrorState"
 import { DamageBreakdownWidget } from "./DamageBreakdownWidget"
 import { t } from "../../lib/i18n"
+import { useActiveActivity } from "../../lib/active-activity-context"
 import { useDashboard, useActivities } from "../../api"
 import {
   formatDateTime,
@@ -26,19 +27,20 @@ const formatItemsSummary = (transaction: Transaction): string => {
 
 export const DashboardPage = () => {
   const navigate = useNavigate()
+  const { activeActivityId, isResolving } = useActiveActivity()
   const {
     data: dashboard,
     error: dashboardError,
     isPending: isDashboardPending,
     refetch: refetchDashboard,
-  } = useDashboard()
+  } = useDashboard(activeActivityId, { enabled: !isResolving })
   const {
     data: activities,
     error: activitiesError,
     isPending: isActivitiesPending,
     refetch: refetchActivities,
   } = useActivities()
-  const isLoading = isDashboardPending || isActivitiesPending
+  const isLoading = isResolving || isDashboardPending || isActivitiesPending
 
   const handleRetry = () => {
     void refetchDashboard()

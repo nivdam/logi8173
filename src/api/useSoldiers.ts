@@ -3,19 +3,23 @@ import { api } from "../lib/api"
 import { ADMIN_POLL_MS } from "./polling"
 import type { Soldier } from "../types"
 
-export const useSoldiers = () =>
+export const useSoldiers = (options?: { enabled?: boolean }) =>
   useQuery({
     queryKey: ["soldiers"],
     queryFn: () => api.get<Soldier[]>("soldiers.list"),
+    enabled: options?.enabled ?? true,
     refetchInterval: ADMIN_POLL_MS,
     staleTime: ADMIN_POLL_MS,
   })
 
-export const useActivitySoldiers = (activityId: string | undefined) =>
+export const useActivitySoldiers = (
+  activityId: string | undefined,
+  options?: { enabled?: boolean },
+) =>
   useQuery({
     queryKey: ["activitySoldiers", activityId],
     queryFn: () => api.post<Soldier[]>("activitySoldiers.list", { activityId }),
-    enabled: !!activityId,
+    enabled: !!activityId && (options?.enabled ?? true),
     refetchInterval: ADMIN_POLL_MS,
     staleTime: ADMIN_POLL_MS,
   })
@@ -41,6 +45,7 @@ export const useUpsertActivitySoldier = () => {
       api.post<{ personalId: string; fullName: string }>("activitySoldiers.upsert", soldier),
     onSuccess: (_result, variables) => {
       queryClient.invalidateQueries({ queryKey: ["activitySoldiers", variables.activityId] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
     },
   })
 }

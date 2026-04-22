@@ -104,9 +104,15 @@ export const useDraftPersistence = <T, TSerialized = T>(
   const [draftDismissed, setDraftDismissed] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const keyRef = useRef(storageKey)
-  keyRef.current = storageKey
   const serializerRef = useRef(toSerializable)
   serializerRef.current = toSerializable
+
+  useEffect(() => {
+    if (keyRef.current === storageKey) return
+    keyRef.current = storageKey
+    setSavedDraft(readDraftForOwner<TSerialized>(storageKey, getCurrentOwner()))
+    setDraftDismissed(false)
+  }, [storageKey])
 
   useEffect(() => {
     if (!isDirty || isShowingSuccess) return

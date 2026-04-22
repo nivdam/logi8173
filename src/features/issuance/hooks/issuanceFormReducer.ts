@@ -11,7 +11,6 @@ import type { IssuanceLineItem } from "../issuance.types"
 const createClientTxId = () => crypto.randomUUID()
 
 export const createInitialState = (): IssuanceFormState => ({
-  activityId: undefined,
   clientTxId: createClientTxId(),
   formId: undefined,
   serverTxId: undefined,
@@ -34,19 +33,6 @@ const appendLine = (state: IssuanceFormState, line: IssuanceLineItem): IssuanceF
 
 export const issuanceFormReducer = (state: IssuanceFormState, action: IssuanceFormAction): IssuanceFormState => {
   switch (action.type) {
-    case "SET_ACTIVITY":
-      return {
-        ...state,
-        activityId: action.payload,
-        clientTxId: createClientTxId(),
-        receiver: undefined,
-        lines: [createEmptyLine()],
-        expandedLineIds: [],
-        globalNotes: "",
-        receiverSignature: "",
-        giverSignature: "",
-      }
-
     case "SET_RECEIVER":
       return { ...state, clientTxId: createClientTxId(), receiver: action.payload }
 
@@ -150,7 +136,6 @@ export const issuanceFormReducer = (state: IssuanceFormState, action: IssuanceFo
 }
 
 export type IssuanceFormState = {
-  activityId: string | undefined
   clientTxId: string
   formId: string | undefined
   serverTxId: string | undefined
@@ -165,7 +150,6 @@ export type IssuanceFormState = {
 }
 
 export type IssuanceFormAction =
-  | { type: "SET_ACTIVITY"; payload: string }
   | { type: "SET_RECEIVER"; payload: Soldier | undefined }
   | { type: "SET_PERFORMED_AT"; payload: string }
   | { type: "ADD_LINE_FROM_INVENTORY"; payload: InventoryItem }

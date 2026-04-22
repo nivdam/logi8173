@@ -4,45 +4,83 @@
 
 var DashboardController = {
   summary: function(context) {
+    var body = (context && context.request && context.request.body) || {};
+    var rawActivityId = body.activityId;
+    var requestedActivityId = '';
+    if (rawActivityId !== null && rawActivityId !== undefined && String(rawActivityId).trim() !== '') {
+      requestedActivityId = String(rawActivityId).trim();
+    }
     var masterInventoryId = getConfigProperty_('MASTER_INVENTORY_ID');
     var registryId = getConfigProperty_('ACTIVITIES_REGISTRY_ID');
     var companiesSheetId = getConfigProperty_('COMPANIES_SHEET_ID');
 
-    // Inventory stats
-    var inventoryRows = readAllRows_(masterInventoryId, 'master-inventory');
-    var totalItems = inventoryRows.length;
+    // Resolve the activity used for scoping (explicit request → that one; otherwise latest active)
+    var activities = readAllRows_(registryId, 'activities-registry');
+    var activeActivity = null;
+    if (requestedActivityId) {
+      for (var r = 0; r < activities.length; r++) {
+        if (String(activities[r].activity_id) === requestedActivityId) {
+          activeActivity = activities[r];
+          break;
+        }
+      }
+      if (!activeActivity) {
+        throw createError_('NOT_FOUND', 'Activity not found: ' + requestedActivityId);
+      }
+    } else {
+      for (var b = activities.length - 1; b >= 0; b--) {
+        if (activities[b].status === 'active') {
+          activeActivity = activities[b];
+          break;
+        }
+      }
+    }
+
+    // Inventory stats — activity snapshot with transaction-adjusted stock when scoped,
+    // raw master inventory otherwise.
+    var totalItems = 0;
     var lowStockCount = 0;
     var gapCount = 0;
 
-    for (var i = 0; i < inventoryRows.length; i++) {
-      var qty = Number(inventoryRows[i].initial_qty) || 0;
-      var threshold = Number(inventoryRows[i].min_threshold) || 0;
-
-      if (qty <= 0) {
-        gapCount++;
-      } else if (qty <= threshold) {
-        lowStockCount++;
+    if (requestedActivityId) {
+      var snapshotItems = getActivitySnapshotItems_(requestedActivityId);
+      totalItems = snapshotItems.length;
+      for (var i = 0; i < snapshotItems.length; i++) {
+        var qty = Number(snapshotItems[i].currentQty) || 0;
+        var threshold = Number(snapshotItems[i].minThreshold) || 0;
+        if (qty <= 0) {
+          gapCount++;
+        } else if (qty <= threshold) {
+          lowStockCount++;
+        }
+      }
+    } else {
+      var inventoryRows = readAllRows_(masterInventoryId, 'master-inventory');
+      totalItems = inventoryRows.length;
+      for (var j = 0; j < inventoryRows.length; j++) {
+        var masterQty = Number(inventoryRows[j].initial_qty) || 0;
+        var masterThreshold = Number(inventoryRows[j].min_threshold) || 0;
+        if (masterQty <= 0) {
+          gapCount++;
+        } else if (masterQty <= masterThreshold) {
+          lowStockCount++;
+        }
       }
     }
 
-    // Active activities count
-    var activities = readAllRows_(registryId, 'activities-registry');
+    // Active activities count — 1 when scoped to a specific activity, else global count
     var activeActivities = 0;
-    for (var a = 0; a < activities.length; a++) {
-      if (activities[a].status === 'active') {
-        activeActivities++;
+    if (requestedActivityId) {
+      activeActivities = activeActivity && activeActivity.status === 'active' ? 1 : 0;
+    } else {
+      for (var a = 0; a < activities.length; a++) {
+        if (activities[a].status === 'active') {
+          activeActivities++;
+        }
       }
     }
 
-    // Recent transactions — from the most recent active activity
     var recentTransactions = [];
-    var activeActivity = null;
-    for (var b = activities.length - 1; b >= 0; b--) {
-      if (activities[b].status === 'active') {
-        activeActivity = activities[b];
-        break;
-      }
-    }
 
     if (activeActivity) {
       var txSheetId = getConfigProperty_('ACTIVITY_' + activeActivity.activity_id + '_TRANSACTIONS_ID');
@@ -79,11 +117,17 @@ var DashboardController = {
         companyIssuedCounts[companies[c].name] = 0;
       }
 
-      // Build soldier → company lookup
-      var soldiersSheetId = getConfigProperty_('SOLDIERS_SHEET_ID');
+      // Build soldier → company lookup.
+      // When scoped to a specific activity, read from its activity-soldiers sheet
+      // (separate from the battalion-wide roster); fall back to global soldiers.
       var soldierCompanyMap = {};
+      var scopedSoldiersSheetId = null;
+      if (requestedActivityId) {
+        scopedSoldiersSheetId = getConfigProperty_('ACTIVITY_' + requestedActivityId + '_SOLDIERS_ID');
+      }
+      var soldiersSheetId = scopedSoldiersSheetId || getConfigProperty_('SOLDIERS_SHEET_ID');
       if (soldiersSheetId) {
-        var soldiers = readAllRows_(soldiersSheetId, 'soldiers');
+        var soldiers = readAllRows_(soldiersSheetId, scopedSoldiersSheetId ? 'activity-soldiers' : 'soldiers');
         for (var s = 0; s < soldiers.length; s++) {
           if (soldiers[s].personal_id && soldiers[s].company) {
             soldierCompanyMap[String(soldiers[s].personal_id)] = soldiers[s].company;

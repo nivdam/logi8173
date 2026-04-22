@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Box, Button, Flex, Heading, Image, Menu, Portal, Text } from "@chakra-ui/react";
+import { Box, Button, Flex, Menu, Portal, Text } from "@chakra-ui/react";
 import { Outlet } from "react-router-dom";
 import { useAuth } from "../lib/use-auth";
 import { useHeartbeat } from "../lib/useHeartbeat";
+import { useActiveActivity } from "../lib/active-activity-context";
+import { getActivityBorderColor } from "../lib/activity-color";
 import { t } from "../lib/i18n";
-import logo from "../assets/logo.png";
+import { ActivitySelector } from "./ActivitySelector";
 import { AppNav } from "./AppNav";
 import { BottomNav } from "./BottomNav";
 import { OnlineOperatorsBadge } from "./OnlineOperatorsBadge";
@@ -19,34 +21,37 @@ import type { OperatorProfile } from "../lib/auth.types";
 export const AppLayout = () => {
   useHeartbeat();
   const { operator, operatorProfile, clearOperatorProfile, logout } = useAuth();
+  const { activeActivityId } = useActiveActivity();
   const { saveProfile, isSaving } = useSaveOperatorProfile();
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
-  const accountDisplayName = operatorProfile?.fullName || t("auth.accountNameFallback");
+  const accountDisplayName =
+    operatorProfile?.fullName || t("auth.accountNameFallback");
+  const activityBorderColor = getActivityBorderColor(activeActivityId);
 
   const handleOpenProfileDialog = () => {
-    setIsProfileDialogOpen(true)
-  }
+    setIsProfileDialogOpen(true);
+  };
 
   const handleProfileDialogOpenChange = (details: { open: boolean }) => {
-    setIsProfileDialogOpen(details.open)
-  }
+    setIsProfileDialogOpen(details.open);
+  };
 
   const handleResetProfile = () => {
-    clearOperatorProfile()
-    setIsProfileDialogOpen(false)
-  }
+    clearOperatorProfile();
+    setIsProfileDialogOpen(false);
+  };
 
   const handleSaveProfile = async (profile: OperatorProfile) => {
     try {
-      await saveProfile(profile)
-      setIsProfileDialogOpen(false)
+      await saveProfile(profile);
+      setIsProfileDialogOpen(false);
     } catch (error) {
       showApiErrorToast({
         actionLabel: t("settings.myProfile.saveError"),
         error,
-      })
+      });
     }
-  }
+  };
 
   return (
     <Flex direction="column" h="100dvh" overflow="hidden">
@@ -58,12 +63,11 @@ export const AppLayout = () => {
         py="3"
         borderBottomWidth="1px"
         borderColor="border"
+        borderTopWidth="4px"
         bg="bg.card"
+        css={{ "&": { borderTopColor: activityBorderColor } }}
       >
-        <Image src={logo} alt={t("app.battalion")} h="36px" w="auto" />
-        <Heading size="md" fontWeight="light">
-          {t("app.name")}
-        </Heading>
+        <ActivitySelector />
 
         <Flex ms="auto" align="center" gap="2">
           <OnlineOperatorsBadge />
@@ -77,7 +81,10 @@ export const AppLayout = () => {
                       name={accountDisplayName}
                       avatarUrl={operator.avatarUrl}
                     />
-                    <Text textStyle="sm" display={{ base: "none", md: "block" }}>
+                    <Text
+                      textStyle="sm"
+                      display={{ base: "none", md: "block" }}
+                    >
                       {accountDisplayName}
                     </Text>
                   </Flex>
@@ -95,7 +102,10 @@ export const AppLayout = () => {
                       </Text>
                     </Box>
                     <Menu.Separator />
-                    <Menu.Item value="edit-profile" onClick={handleOpenProfileDialog}>
+                    <Menu.Item
+                      value="edit-profile"
+                      onClick={handleOpenProfileDialog}
+                    >
                       {t("auth.editProfile")}
                     </Menu.Item>
                     <Menu.Item value="logout" onClick={logout}>

@@ -9,6 +9,7 @@ import type {
   Activity,
   ActivityType,
   ActivityDetails,
+  DashboardSummary,
   InventoryItem,
   PublicTransaction,
   Transaction,
@@ -26,6 +27,9 @@ const mockTransactions = [...transactionsMock]
 let mockFormCounter = mockTransactions.length
 const mockOperatorProfileBindings = new Map<string, string>()
 const mockOperatorPersonalIdClaims = new Map<string, string>()
+const mockPinnedActivityClientSeq = new Map<string, number>()
+const mockActivitySoldierIds = new Map<string, Set<string>>()
+const mockActivityInventoryOverrides = new Map<string, Map<string, InventoryItem>>()
 const mockTransactionActivityIds: Record<string, string> = Object.fromEntries(
   mockTransactions.map((transaction) => [transaction.txId, "act1"]),
 )
@@ -49,7 +53,131 @@ const mockOperators: AuthenticatedOperator[] = [
 const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
   "setup.status": () => ({ initialized: true, folderUrl: "https://drive.google.com/mock" }),
   "inventory.list": () => inventoryMock,
+  "activityInventory.list": (body) => {
+    const rawActivityId = body?.activityId
+    const activityId = rawActivityId ? String(rawActivityId).trim() : ""
+    if (!activityId) {
+      throw new Error("activityId is required")
+    }
+    const activity = mockActivities.find((candidate) => candidate.activityId === activityId)
+    if (!activity) {
+      throw new Error("Activity not found: " + activityId)
+    }
+    const snapshotItemIds = activityItemIdsById[activityId] ?? []
+    const overrides = mockActivityInventoryOverrides.get(activityId) ?? new Map<string, InventoryItem>()
+    return snapshotItemIds.map((itemId) => {
+      const override = overrides.get(itemId)
+      if (override) return override
+      const master = inventoryMock.find((candidate) => candidate.itemId === itemId)
+      if (!master) {
+        throw new Error("Item not found in master inventory: " + itemId)
+      }
+      return master
+    })
+  },
+  "activityInventory.batchUpdate": (body) => {
+    const rawActivityId = body?.activityId
+    const activityId = rawActivityId ? String(rawActivityId).trim() : ""
+    if (!activityId) {
+      throw new Error("activityId is required")
+    }
+    const activity = mockActivities.find((candidate) => candidate.activityId === activityId)
+    if (!activity) {
+      throw new Error("Activity not found: " + activityId)
+    }
+    if (activity.status !== "active") {
+      throw new Error("Activity is not active: " + activityId)
+    }
+    const overrides = mockActivityInventoryOverrides.get(activityId) ?? new Map<string, InventoryItem>()
+    const modified = Array.isArray(body?.modified) ? body.modified : []
+    const added = Array.isArray(body?.added) ? body.added : []
+    const deleted = Array.isArray(body?.deleted) ? body.deleted : []
+    const snapshotItemIds = activityItemIdsById[activityId] ?? []
+    const nextItemIds = [...snapshotItemIds]
+    modified.forEach((patch) => {
+      const itemId = String(patch?.itemId || "")
+      if (!itemId) return
+      const base = overrides.get(itemId) ?? inventoryMock.find((candidate) => candidate.itemId === itemId)
+      if (!base) return
+      overrides.set(itemId, { ...base, ...(patch as Partial<InventoryItem>) })
+    })
+    added.forEach((item) => {
+      if (!item?.itemId) return
+      overrides.set(item.itemId, item)
+      if (!nextItemIds.includes(item.itemId)) {
+        nextItemIds.push(item.itemId)
+      }
+    })
+    deleted.forEach((itemId) => {
+      const id = String(itemId)
+      overrides.delete(id)
+      const index = nextItemIds.indexOf(id)
+      if (index >= 0) nextItemIds.splice(index, 1)
+    })
+    mockActivityInventoryOverrides.set(activityId, overrides)
+    activityItemIdsById[activityId] = nextItemIds
+    return {
+      modified: modified.length,
+      added: added.length,
+      deleted: deleted.length,
+    }
+  },
   "soldiers.list": () => soldiersMock,
+  "activitySoldiers.list": (body) => {
+    const rawActivityId = body?.activityId
+    const activityId = rawActivityId ? String(rawActivityId).trim() : ""
+    if (!activityId) {
+      throw new Error("activityId is required")
+    }
+    const activity = mockActivities.find((candidate) => candidate.activityId === activityId)
+    if (!activity) {
+      throw new Error("Activity not found: " + activityId)
+    }
+    const soldierIds = mockActivitySoldierIds.get(activityId)
+    if (!soldierIds) return []
+    return soldiersMock.filter((soldier) => soldierIds.has(soldier.personalId))
+  },
+  "activitySoldiers.upsert": (body) => {
+    const rawActivityId = body?.activityId
+    const activityId = rawActivityId ? String(rawActivityId).trim() : ""
+    if (!activityId) {
+      throw new Error("activityId is required")
+    }
+    const activity = mockActivities.find((candidate) => candidate.activityId === activityId)
+    if (!activity) {
+      throw new Error("Activity not found: " + activityId)
+    }
+    if (activity.status !== "active") {
+      throw new Error("Activity is not active: " + activityId)
+    }
+    const personalId = String(body?.personalId || "").trim()
+    const fullName = String(body?.fullName || "").trim()
+    if (!personalId || !fullName) {
+      throw new Error("personalId and fullName are required")
+    }
+    const existing = soldiersMock.find((soldier) => soldier.personalId === personalId)
+    if (existing) {
+      existing.fullName = fullName
+      existing.rank = String(body?.rank || existing.rank)
+      existing.company = String(body?.company || existing.company)
+      existing.platoon = body?.platoon ? String(body.platoon) : existing.platoon
+      existing.phone = body?.phone ? String(body.phone) : existing.phone
+    } else {
+      soldiersMock.push({
+        personalId,
+        fullName,
+        rank: String(body?.rank || ""),
+        company: String(body?.company || ""),
+        platoon: body?.platoon ? String(body.platoon) : undefined,
+        phone: body?.phone ? String(body.phone) : undefined,
+        createdAt: new Date().toISOString(),
+      })
+    }
+    const existingIds = mockActivitySoldierIds.get(activityId) ?? new Set<string>()
+    existingIds.add(personalId)
+    mockActivitySoldierIds.set(activityId, existingIds)
+    return { personalId, fullName }
+  },
   "companies.list": () => mockCompanies,
   "activities.list": () => mockActivities,
   "activities.get": (body) => {
@@ -114,19 +242,50 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
         : null,
     } satisfies PublicTransaction
   },
-  "dashboard.summary": () => dashboardMock,
+  "dashboard.summary": (body) => {
+    const rawActivityId = body?.activityId
+    const activityId = rawActivityId ? String(rawActivityId).trim() : ""
+    if (!activityId) return dashboardMock
+    const activity = mockActivities.find((candidate) => candidate.activityId === activityId)
+    if (!activity) {
+      throw new Error("Activity not found: " + activityId)
+    }
+    const snapshotItemIds = activityItemIdsById[activityId] ?? []
+    const overrides = mockActivityInventoryOverrides.get(activityId) ?? new Map<string, InventoryItem>()
+    const snapshotItems = snapshotItemIds
+      .map((itemId) => overrides.get(itemId) ?? inventoryMock.find((candidate) => candidate.itemId === itemId))
+      .filter((item): item is InventoryItem => !!item)
+    const lowStockCount = snapshotItems.filter(
+      (item) => item.currentQty > 0 && item.currentQty <= item.minThreshold,
+    ).length
+    const gapCount = snapshotItems.filter((item) => item.currentQty <= 0).length
+    const scopedTransactions = mockTransactions.filter(
+      (transaction) => mockTransactionActivityIds[transaction.txId] === activityId,
+    )
+    return {
+      ...dashboardMock,
+      totalItems: snapshotItems.length,
+      lowStockCount,
+      gapCount,
+      activeActivities: activity.status === "active" ? 1 : 0,
+      recentTransactions: scopedTransactions.slice(0, 5),
+      companyBreakdown: [],
+      damageBreakdown: [],
+    } satisfies DashboardSummary
+  },
   "auth.me": () => ({
     ...mockOperators[0],
   }),
   "operators.list": () => mockOperators,
   "operators.upsert": (body) => {
-    const nextOperator = {
+    const nextOperator: AuthenticatedOperator = {
       email: String(body?.email || "").toLowerCase(),
       fullName: String(body?.fullName || ""),
       role: String(body?.role || "viewer") as OperatorRole,
       googleSub: "",
       avatarUrl: undefined,
       savedSignatureUrl: body?.savedSignatureUrl ? String(body.savedSignatureUrl) : undefined,
+      pinnedActivityId: undefined,
     }
     const existingIndex = mockOperators.findIndex((operator) => operator.email === nextOperator.email)
 
@@ -211,6 +370,48 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
       fullName: nextSoldier.fullName,
       created: true,
     }
+  },
+  "operators.setPinnedActivity": (body) => {
+    const rawActivityId = body?.activityId
+    const isEmptyActivityId =
+      rawActivityId === null ||
+      rawActivityId === undefined ||
+      String(rawActivityId).trim() === ""
+    const pinnedActivityId = isEmptyActivityId ? undefined : String(rawActivityId).trim()
+    if (pinnedActivityId && pinnedActivityId.length > 128) {
+      throw new Error("activityId is too long")
+    }
+    if (pinnedActivityId) {
+      const existingActivity = mockActivities.find(
+        (activity) => activity.activityId === pinnedActivityId,
+      )
+      if (!existingActivity) {
+        throw new Error("Activity not found: " + pinnedActivityId)
+      }
+    }
+    const operator = mockOperators[0]
+    const rawClientSeq = Number(body?.clientSeq)
+    const clientSeq = Number.isFinite(rawClientSeq) && rawClientSeq > 0 ? rawClientSeq : 0
+    if (operator) {
+      const appliedSeq = mockPinnedActivityClientSeq.get(operator.email) ?? 0
+      if (clientSeq > 0 && clientSeq <= appliedSeq) {
+        return {
+          pinnedActivityId: operator.pinnedActivityId,
+          accepted: false,
+          appliedClientSeq: appliedSeq,
+        }
+      }
+      operator.pinnedActivityId = pinnedActivityId
+      if (clientSeq > 0) {
+        mockPinnedActivityClientSeq.set(operator.email, clientSeq)
+      }
+      return {
+        pinnedActivityId,
+        accepted: true,
+        appliedClientSeq: clientSeq > 0 ? clientSeq : appliedSeq,
+      }
+    }
+    return { pinnedActivityId, accepted: true, appliedClientSeq: clientSeq }
   },
   "operators.delete": (body) => {
     const targetEmail = String(body?.email || "").toLowerCase()

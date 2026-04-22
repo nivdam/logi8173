@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { Accordion, Flex, Heading, Text } from "@chakra-ui/react"
+import { Accordion, Flex, Heading } from "@chakra-ui/react";
 import { User, Package, FileSignature } from "lucide-react";
 import { useAuth } from "../../lib/use-auth";
+import { useActiveActivity } from "../../lib/active-activity-context";
+import { useActivityClosedGuard } from "../../lib/use-activity-closed-guard";
+import { useDirtyFormRegistration } from "../../lib/dirty-form-registry";
 import { useActivity } from "../../api";
 import { t } from "../../lib/i18n";
+import { toaster } from "../../lib/toaster";
 import { animations } from "../../theme/animations";
 import { useIssuanceForm } from "./hooks/useIssuanceForm";
 import { DraftRestoreBanner } from "../../components/DraftRestoreBanner";
@@ -14,25 +18,53 @@ import { ItemsSection } from "./ItemsSection";
 import { IssuanceFooter } from "./IssuanceFooter";
 import { IssuanceSuccess } from "./IssuanceSuccess";
 
+const FORM_REGISTRATION_ID = "issuance";
+
 export const IssuanceForm = () => {
   const { operator, operatorProfile } = useAuth();
-  const form = useIssuanceForm();
+  const { activeActivityId, activeActivity, isResolving, setActiveActivity } = useActiveActivity();
+  const form = useIssuanceForm(activeActivityId);
   const [activeSection, setActiveSection] = useState<string[]>(["receiver"]);
 
-  const { data: activityData, isLoading: isLoadingSnapshot, isError: isSnapshotError } = useActivity(form.state.activityId)
-  const snapshotItems = activityData?.snapshotItems ?? []
+  const {
+    data: activityData,
+    isLoading: isLoadingSnapshot,
+    isError: isSnapshotError,
+    refetch: refetchActivity,
+  } = useActivity(activeActivityId);
+  const snapshotItems = activityData?.snapshotItems ?? [];
+
+  useDirtyFormRegistration(FORM_REGISTRATION_ID, form.isFormDirty && !form.state.showSuccess);
+
+  const isActivityClosed = !!activeActivityId && activeActivity?.status !== "active";
+
+  const handleActivityClosedReset = () => {
+    toaster.create({
+      title: t("issuance.activityClosedMidForm"),
+      type: "warning",
+      duration: 6000,
+    });
+    form.handleNewIssuance();
+    setActiveActivity(undefined);
+  };
+
+  useActivityClosedGuard({
+    isActivityClosed,
+    skip: form.state.showSuccess,
+    onReset: handleActivityClosedReset,
+  });
 
   const isActivityReady =
-    form.state.activityId !== undefined &&
+    activeActivityId !== undefined &&
     !isLoadingSnapshot &&
     !isSnapshotError &&
-    snapshotItems.length > 0
+    snapshotItems.length > 0;
 
   if (form.state.showSuccess && form.state.receiver) {
     return (
       <IssuanceSuccess
         formId={form.state.formId}
-        activityId={form.state.activityId || ""}
+        activityId={activeActivityId || ""}
         txId={form.state.serverTxId || ""}
         receiver={form.state.receiver}
         lines={form.state.lines}
@@ -45,6 +77,10 @@ export const IssuanceForm = () => {
 
   const handleSectionChange = (details: { value: string[] }) => {
     setActiveSection(details.value);
+  };
+
+  const handleRetrySnapshot = () => {
+    void refetchActivity();
   };
 
   return (
@@ -61,22 +97,13 @@ export const IssuanceForm = () => {
       )}
 
       <ActivityContextCard
-        selectedActivityId={form.state.activityId}
+        activity={activeActivity}
+        isResolving={isResolving}
         snapshotItemCount={snapshotItems.length}
         isLoadingSnapshot={isLoadingSnapshot}
         isSnapshotError={isSnapshotError}
-        isFormDirty={form.isFormDirty}
-        isSubmitting={form.isSubmitting}
-        onSelect={form.handleSelectActivity}
+        onRetrySnapshot={handleRetrySnapshot}
       />
-
-      {!form.state.activityId && (
-        <Flex align="center" justify="center" py="8">
-          <Text textStyle="sm" color="fg.muted" textAlign="center">
-            {t("issuance.selectActivityPrompt")}
-          </Text>
-        </Flex>
-      )}
 
       {isActivityReady && (
         <Accordion.Root
@@ -93,7 +120,7 @@ export const IssuanceForm = () => {
               overflowVisible
             >
               <IssuanceHeader
-                activityId={form.state.activityId}
+                activityId={activeActivityId}
                 receiver={form.state.receiver}
                 performedAt={form.state.performedAt}
                 onSelectReceiver={form.handleSelectReceiver}

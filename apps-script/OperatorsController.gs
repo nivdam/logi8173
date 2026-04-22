@@ -79,7 +79,9 @@ function assertCanSyncProfilePersonalId_(context, previousPersonalId, personalId
 
 var OperatorsController = {
   me: function(context) {
-    return {
+    var properties = PropertiesService.getScriptProperties();
+    var binding = readOperatorProfileBinding_(properties, context.operator.email);
+    var response = {
       email: context.operator.email,
       fullName: context.operator.fullName,
       role: context.operator.role,
@@ -87,6 +89,87 @@ var OperatorsController = {
       avatarUrl: context.operator.avatarUrl,
       savedSignatureUrl: context.operator.savedSignatureUrl
     };
+    if (binding && binding.pinnedActivityId) {
+      response.pinnedActivityId = String(binding.pinnedActivityId);
+    }
+    return response;
+  },
+
+  setPinnedActivity: function(context) {
+    var body = context.request.body || {};
+    var operatorEmail = String(context.operator.email || '').toLowerCase();
+    if (!operatorEmail) {
+      throw createError_('VALIDATION_ERROR', 'operator email missing');
+    }
+
+    var rawActivityId = body.activityId;
+    var pinnedActivityId = '';
+    if (rawActivityId !== null && rawActivityId !== undefined && String(rawActivityId).trim() !== '') {
+      var trimmedActivityId = String(rawActivityId).trim();
+      if (trimmedActivityId.length > 128) {
+        throw createError_('VALIDATION_ERROR', 'activityId is too long');
+      }
+      var activitiesRegistryId = getConfigProperty_('ACTIVITIES_REGISTRY_ID');
+      var existingActivity = findRow_(activitiesRegistryId, 'activities-registry', 'activity_id', trimmedActivityId);
+      if (!existingActivity) {
+        throw createError_('NOT_FOUND', 'Activity not found: ' + trimmedActivityId);
+      }
+      pinnedActivityId = trimmedActivityId;
+    }
+
+    var rawClientSeq = Number(body.clientSeq);
+    var clientSeq = isFinite(rawClientSeq) && rawClientSeq > 0 ? rawClientSeq : 0;
+
+    var lock = LockService.getScriptLock();
+    if (!lock.tryLock(15000)) {
+      throw createError_('BUSY', 'Another profile update is being processed, please wait');
+    }
+
+    try {
+      var properties = PropertiesService.getScriptProperties();
+      var previousBinding = readOperatorProfileBinding_(properties, operatorEmail) || {};
+      var appliedSeq = Number(previousBinding.pinnedActivityClientSeq) || 0;
+      if (clientSeq > 0 && clientSeq <= appliedSeq) {
+        var staleResponse = { accepted: false, appliedClientSeq: appliedSeq };
+        if (previousBinding.pinnedActivityId) {
+          staleResponse.pinnedActivityId = previousBinding.pinnedActivityId;
+        }
+        return staleResponse;
+      }
+      var nextBinding = {};
+      for (var key in previousBinding) {
+        if (previousBinding.hasOwnProperty(key)) {
+          nextBinding[key] = previousBinding[key];
+        }
+      }
+      if (pinnedActivityId) {
+        nextBinding.pinnedActivityId = pinnedActivityId;
+      } else {
+        delete nextBinding.pinnedActivityId;
+      }
+      if (clientSeq > 0) {
+        nextBinding.pinnedActivityClientSeq = clientSeq;
+      }
+      nextBinding.updatedAt = new Date().toISOString();
+
+      properties.setProperty(
+        buildOperatorProfilePropertyKey_(operatorEmail),
+        JSON.stringify(nextBinding)
+      );
+
+      logGlobalAudit_('operators.setPinnedActivity', context.operator.email, {
+        pinnedActivityId: pinnedActivityId || '',
+        clientSeq: clientSeq
+      });
+
+      var response = { accepted: true, appliedClientSeq: clientSeq > 0 ? clientSeq : appliedSeq };
+      if (pinnedActivityId) {
+        response.pinnedActivityId = pinnedActivityId;
+      }
+      return response;
+    } finally {
+      lock.releaseLock();
+    }
   },
 
   syncMyProfile: function(context) {
@@ -162,7 +245,7 @@ var OperatorsController = {
         fullName = newSoldier.full_name;
       }
 
-      properties.setProperty(buildOperatorProfilePropertyKey_(operatorEmail), JSON.stringify({
+      var mergedBinding = {
         personalId: personalId,
         fullName: String(body.fullName || '').trim(),
         rank: String(body.rank || '').trim(),
@@ -170,7 +253,11 @@ var OperatorsController = {
         platoon: String(body.platoon || '').trim(),
         phone: normalizeSoldierPhone_(body.phone),
         updatedAt: new Date().toISOString()
-      }));
+      };
+      if (previousBinding && previousBinding.pinnedActivityId) {
+        mergedBinding.pinnedActivityId = previousBinding.pinnedActivityId;
+      }
+      properties.setProperty(buildOperatorProfilePropertyKey_(operatorEmail), JSON.stringify(mergedBinding));
       properties.setProperty(claimKey, operatorEmail);
       if (previousPersonalId && previousPersonalId !== personalId) {
         properties.deleteProperty(buildOperatorPersonalIdClaimKey_(previousPersonalId));

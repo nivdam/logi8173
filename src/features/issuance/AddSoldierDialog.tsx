@@ -22,6 +22,7 @@ import {
   useUpsertCompany,
   useUpsertSoldier,
 } from "../../api";
+import { useActiveActivity } from "../../lib/active-activity-context";
 import { toaster } from "../../lib/toaster";
 import { t } from "../../lib/i18n";
 import { RANK_OPTIONS } from "../../lib/rank-options";
@@ -43,8 +44,9 @@ export const AddSoldierDialog = ({
   onOpenChange,
   onCreated,
 }: AddSoldierDialogProps) => {
-  const { data: globalSoldiers = [] } = useSoldiers();
-  const { data: activitySoldiers = [] } = useActivitySoldiers(activityId);
+  const { isResolving } = useActiveActivity();
+  const { data: globalSoldiers = [] } = useSoldiers({ enabled: !isResolving });
+  const { data: activitySoldiers = [] } = useActivitySoldiers(activityId, { enabled: !isResolving });
   const { data: companies = [] } = useCompanies();
   const upsertCompany = useUpsertCompany();
   const upsertGlobalSoldier = useUpsertSoldier();

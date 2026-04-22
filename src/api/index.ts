@@ -1,5 +1,11 @@
 export { useSetupStatus, useInitializeSystem } from "./useSetup"
-export { useInventory, useUpsertInventoryItem, useBatchUpdateInventory } from "./useInventory"
+export {
+  useInventory,
+  useUpsertInventoryItem,
+  useBatchUpdateInventory,
+  useActivityInventory,
+  useBatchUpdateActivityInventory,
+} from "./useInventory"
 export {
   useActivitySoldiers,
   useSoldiers,
@@ -20,6 +26,7 @@ export {
   useCurrentOperator,
   useDeleteOperator,
   useOperators,
+  useSetPinnedActivity,
   useSyncMyProfileSoldier,
   useUpsertOperator,
 } from "./useOperators"
