@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Button, Flex, Grid, Spinner, Stack } from "@chakra-ui/react";
 import { CalendarCheck, Plus } from "lucide-react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { ApiErrorState } from "../components/ApiErrorState";
 import { EmptyState } from "../components/EmptyState";
 import { FilterSelect } from "../components/FilterSelect";
@@ -22,8 +22,10 @@ import type { OpenActivityFormValues } from "../features/activities/activity-typ
 import { showApiErrorToast } from "../lib/api-error";
 import { t } from "../lib/i18n";
 import { toaster } from "../lib/toaster";
+import { useActiveActivity } from "../lib/active-activity-context";
 import { useAuth } from "../lib/use-auth";
-import type { ActivityStatus } from "../types";
+import type { Activity, ActivityStatus } from "../types";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const ActivitiesPage = () => {
   const { activityId } = useParams();
@@ -37,7 +39,10 @@ export const ActivitiesPage = () => {
 
 const ActivitiesListPage = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { operator, operatorProfile } = useAuth();
+  const { setActiveActivity } = useActiveActivity();
+  const queryClient = useQueryClient();
   const {
     data: activities = [],
     error: activitiesError,
@@ -56,7 +61,16 @@ const ActivitiesListPage = () => {
   const [statusFilter, setStatusFilter] = useState<ActivityStatus | undefined>(
     undefined,
   );
-  const [isOpenDialogOpen, setIsOpenDialogOpen] = useState(false);
+  const [isOpenDialogOpen, setIsOpenDialogOpen] = useState(
+    () => searchParams.get("new") === "1",
+  );
+
+  useEffect(() => {
+    if (searchParams.get("new") !== "1") return
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete("new");
+    setSearchParams(nextParams, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const filteredActivities = useMemo(() => {
     const lowerQuery = searchQuery.trim().toLowerCase();
@@ -98,6 +112,10 @@ const ActivitiesListPage = () => {
           description: t("activities.openSuccess"),
           type: "success",
         });
+        queryClient.setQueryData<Activity[]>(["activities"], (previous) =>
+          previous ? [...previous, activity] : [activity],
+        );
+        setActiveActivity(activity.activityId);
         setIsOpenDialogOpen(false);
         navigate(`/activities/${activity.activityId}`);
       },
