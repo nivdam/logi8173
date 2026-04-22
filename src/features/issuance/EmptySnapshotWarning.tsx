@@ -1,10 +1,9 @@
 import { Box, Button, Flex, Text } from "@chakra-ui/react";
-import { AlertTriangle, ArrowLeft } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { t } from "../../lib/i18n";
 
 export const EmptySnapshotWarning = ({
   onAddInventory,
-  onChooseAnother,
 }: EmptySnapshotWarningProps) => (
   <Box
     mt="3"
@@ -24,15 +23,10 @@ export const EmptySnapshotWarning = ({
       <Button size="sm" colorPalette="sage" onClick={onAddInventory}>
         {t("activities.addInventoryAction")}
       </Button>
-      <Button variant="outline" size="sm" onClick={onChooseAnother}>
-        <ArrowLeft size={16} />
-        {t("issuance.chooseAnother")}
-      </Button>
     </Flex>
   </Box>
 );
 
 type EmptySnapshotWarningProps = {
   onAddInventory: () => void;
-  onChooseAnother: () => void;
 };

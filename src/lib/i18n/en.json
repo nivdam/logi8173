@@ -94,8 +94,21 @@
     "batchSaveSuccess": "Changes saved successfully",
     "batchSavePartial": "Some changes were not saved",
     "batchSaveError": "Failed to save changes. Try again.",
+    "activityClosedMidEdit": "The activity was closed by another operator. Returning to Master; pending changes were discarded.",
     "deleteRow": "Delete row",
     "collapseRow": "Close editor"
+  },
+  "activitySelector": {
+    "master": "LOGI8173",
+    "masterCaption": "Default",
+    "sectionActivities": "Activities",
+    "createNew": "New activity",
+    "openMenu": "Open activity selector",
+    "pinError": "Failed to save active activity",
+    "dirtyConfirmTitle": "Unsaved changes in a form",
+    "dirtyConfirmDescription": "Switching activities will reset the current form. Continue?",
+    "dirtyConfirmSwitch": "Switch activity",
+    "dirtyConfirmCancel": "Cancel"
   },
   "activities": {
     "title": "Activities",
@@ -364,6 +377,9 @@
     "receiverSignature": "Receiver Signature"
   },
   "issuance": {
+    "noActiveActivitySelected": "No active activity",
+    "selectFromHeader": "Select an activity from the header to start",
+    "activityClosedMidForm": "The activity was closed by another operator. The form was reset and you're back on Master.",
     "title": "Issue Equipment",
     "step": "Step",
     "stepSoldier": "Select Soldier",
@@ -467,6 +483,7 @@
     "snapshotLoadError": "Failed to load activity inventory"
   },
   "returns": {
+    "activityClosedMidForm": "The activity was closed by another operator. The form was reset and you're back on Master.",
     "formTitle": "Activity Return Form",
     "giverSection": "Returning Soldier",
     "receiverSection": "Receiving Operator",

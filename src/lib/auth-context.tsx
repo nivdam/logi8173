@@ -19,6 +19,7 @@ import {
   SESSION_KEY,
 } from "./auth-helpers"
 import { clearAllDrafts, clearDraftsForOwner } from "./use-draft-persistence"
+import { writeStoredActiveActivityId } from "./active-activity-storage"
 import type { StoredSession } from "./auth-helpers"
 import { AuthContext, AuthLoginContext } from "./auth-store"
 import { toaster } from "./toaster"
@@ -80,6 +81,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     },
     [operator],
   )
+
+  const setPinnedActivityId = useCallback((pinnedActivityId: string | undefined) => {
+    const currentSession = sessionRef.current
+    if (!currentSession) return
+    const nextOperator = { ...currentSession.operator, pinnedActivityId }
+    const nextSession = { ...currentSession, operator: nextOperator }
+    storeSession(nextSession)
+    sessionRef.current = nextSession
+    setOperator(nextOperator)
+  }, [])
 
   const clearOperatorProfile = useCallback(() => {
     if (!operator) return
@@ -168,6 +179,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     } else {
       clearAllDrafts()
     }
+    writeStoredActiveActivityId(undefined)
     resetSession()
     googleLogout()
   }, [resetSession])
@@ -182,6 +194,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         isSessionExpiringSoon,
         saveOperatorProfile,
         clearOperatorProfile,
+        setPinnedActivityId,
         resetSession,
         logout,
       }}

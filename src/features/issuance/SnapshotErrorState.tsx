@@ -2,7 +2,7 @@ import { Box, Button, Flex, Text } from "@chakra-ui/react"
 import { AlertTriangle } from "lucide-react"
 import { t } from "../../lib/i18n"
 
-export const SnapshotErrorState = ({ onRetry, onChooseAnother }: SnapshotErrorStateProps) => (
+export const SnapshotErrorState = ({ onRetry }: SnapshotErrorStateProps) => (
   <Box
     mt="3"
     p="4"
@@ -21,14 +21,10 @@ export const SnapshotErrorState = ({ onRetry, onChooseAnother }: SnapshotErrorSt
       <Button variant="outline" size="sm" onClick={onRetry}>
         {t("common.retry")}
       </Button>
-      <Button variant="ghost" size="sm" onClick={onChooseAnother}>
-        {t("issuance.chooseAnother")}
-      </Button>
     </Flex>
   </Box>
 )
 
 type SnapshotErrorStateProps = {
   onRetry: () => void
-  onChooseAnother: () => void
 }

@@ -9,7 +9,14 @@ import { EmptyState } from "../../components/EmptyState";
 import { t } from "../../lib/i18n";
 import { toaster } from "../../lib/toaster";
 import { filterInventory, sortInventory } from "../../lib/filters";
-import { useInventory, useBatchUpdateInventory } from "../../api";
+import { useActiveActivity } from "../../lib/active-activity-context";
+import { useActivityClosedGuard } from "../../lib/use-activity-closed-guard";
+import {
+  useInventory,
+  useBatchUpdateInventory,
+  useActivityInventory,
+  useBatchUpdateActivityInventory,
+} from "../../api";
 import { InventoryTable } from "./InventoryTable";
 import { useEditableInventory } from "./useEditableInventory";
 import type { SortConfig } from "../../components/SortableHeader";
@@ -31,14 +38,21 @@ const parseStatus = (value: string | undefined): ItemStatus | undefined =>
   STATUS_OPTIONS.find((option) => option.value === value)?.value;
 
 export const InventoryPage = () => {
+  const { activeActivityId, activeActivity, isResolving, setActiveActivity } = useActiveActivity();
+  const masterInventoryQuery = useInventory();
+  const activityInventoryQuery = useActivityInventory(activeActivityId, { enabled: !isResolving });
+  const inventoryQuery = activeActivityId ? activityInventoryQuery : masterInventoryQuery;
   const {
     data: inventoryData,
     error,
-    isPending: isLoading,
+    isPending: isInventoryPending,
     refetch,
-  } = useInventory();
+  } = inventoryQuery;
   const inventoryItems = inventoryData ?? EMPTY_INVENTORY_ITEMS;
-  const batchUpdate = useBatchUpdateInventory();
+  const masterBatchUpdate = useBatchUpdateInventory();
+  const activityBatchUpdate = useBatchUpdateActivityInventory();
+  const isLoading = isResolving || isInventoryPending;
+  const isActivityClosed = !!activeActivityId && activeActivity?.status !== "active";
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState<
     ItemCategory | undefined
@@ -52,6 +66,29 @@ export const InventoryPage = () => {
   });
 
   const editable = useEditableInventory(inventoryItems);
+
+  const handleActivityClosedReset = () => {
+    if (editable.hasPendingChanges) {
+      editable.cancelEditing();
+      toaster.create({
+        title: t("inventory.activityClosedMidEdit"),
+        type: "warning",
+        duration: 6000,
+      });
+    } else {
+      toaster.create({
+        title: t("inventory.activityClosedMidEdit"),
+        type: "info",
+        duration: 4000,
+      });
+    }
+    setActiveActivity(undefined);
+  };
+
+  useActivityClosedGuard({
+    isActivityClosed,
+    onReset: handleActivityClosedReset,
+  });
 
   const filtered = filterInventory(
     editable.editableRows,
@@ -81,36 +118,53 @@ export const InventoryPage = () => {
     setStatusFilter(undefined);
   };
 
+  const handleBatchSaveSuccess = (
+    expectedTotal: number,
+    result: { modified: number; added: number; deleted: number },
+  ) => {
+    const actualTotal = result.modified + result.added + result.deleted;
+    const hasSkipped = actualTotal < expectedTotal;
+    editable.cancelEditing();
+    toaster.create({
+      title: hasSkipped
+        ? t("inventory.batchSavePartial")
+        : t("inventory.batchSaveSuccess"),
+      description: hasSkipped ? `${actualTotal}/${expectedTotal}` : undefined,
+      type: hasSkipped ? "warning" : "success",
+      duration: hasSkipped ? 6000 : 3000,
+    });
+  };
+
+  const handleBatchSaveError = () => {
+    toaster.create({
+      title: t("common.error"),
+      description: t("inventory.batchSaveError"),
+      type: "error",
+      duration: 5000,
+    });
+  };
+
   const handleBatchSave = () => {
     const payload = editable.buildPayload();
     const expectedTotal =
       payload.modified.length + payload.added.length + payload.deleted.length;
-    batchUpdate.mutate(payload, {
-      onSuccess: (result) => {
-        const actualTotal = result.modified + result.added + result.deleted;
-        const hasSkipped = actualTotal < expectedTotal;
-        editable.cancelEditing();
-        toaster.create({
-          title: hasSkipped
-            ? t("inventory.batchSavePartial")
-            : t("inventory.batchSaveSuccess"),
-          description: hasSkipped
-            ? `${actualTotal}/${expectedTotal}`
-            : undefined,
-          type: hasSkipped ? "warning" : "success",
-          duration: hasSkipped ? 6000 : 3000,
-        });
-      },
-      onError: () => {
-        toaster.create({
-          title: t("common.error"),
-          description: t("inventory.batchSaveError"),
-          type: "error",
-          duration: 5000,
-        });
-      },
+    if (activeActivityId) {
+      activityBatchUpdate.mutate(
+        { ...payload, activityId: activeActivityId },
+        {
+          onSuccess: (result) => handleBatchSaveSuccess(expectedTotal, result),
+          onError: handleBatchSaveError,
+        },
+      );
+      return;
+    }
+    masterBatchUpdate.mutate(payload, {
+      onSuccess: (result) => handleBatchSaveSuccess(expectedTotal, result),
+      onError: handleBatchSaveError,
     });
   };
+
+  const isSaving = masterBatchUpdate.isPending || activityBatchUpdate.isPending;
 
   const isEditMode =
     editable.expandedRowId !== null || editable.hasPendingChanges;
@@ -155,8 +209,8 @@ export const InventoryPage = () => {
                   bg="blue.600"
                   color="white"
                   _hover={{ bg: "blue.700" }}
-                  disabled={!editable.canSave}
-                  loading={batchUpdate.isPending}
+                  disabled={!editable.canSave || isActivityClosed}
+                  loading={isSaving}
                   onClick={handleBatchSave}
                 >
                   <Save size={14} />

@@ -3,6 +3,21 @@ import { api } from "../lib/api"
 import { ADMIN_POLL_MS } from "./polling"
 import type { AuthenticatedOperator, OperatorRole } from "../lib/auth.types"
 
+export const useSetPinnedActivity = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ activityId, clientSeq }: SetPinnedActivityInput) =>
+      api.post<{ pinnedActivityId: string | undefined; accepted: boolean; appliedClientSeq: number }>(
+        "operators.setPinnedActivity",
+        { activityId: activityId ?? "", clientSeq },
+      ),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["operators", "me"] })
+    },
+  })
+}
+
 export const useCurrentOperator = () =>
   useQuery({
     queryKey: ["operators", "me"],
@@ -60,6 +75,11 @@ export const useDeleteOperator = () => {
       await queryClient.invalidateQueries({ queryKey: ["operators"] })
     },
   })
+}
+
+type SetPinnedActivityInput = {
+  activityId: string | undefined
+  clientSeq: number
 }
 
 type UpsertOperatorInput = {

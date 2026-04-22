@@ -31,3 +31,9 @@
 ## i18n
 - All user-facing strings hardcoded in Hebrew (no i18n library needed — single language app)
 - Variable names and code in English
+
+## Persistence & Migrations
+- localStorage keys prefixed with `logi8173_` (e.g. `logi8173_session`, `logi8173_active_activity_id`)
+- **Migrations**: when renaming a key or changing a stored shape, read legacy value first, write it to the new key, then remove the legacy key. Never delete a legacy key without carrying over its value
+- Prefer `undefined` over `null` for "absent" in reads — matches `auth-helpers.ts` conventions
+- No SSR guards (`typeof window === "undefined"`) — Vite SPA, not needed

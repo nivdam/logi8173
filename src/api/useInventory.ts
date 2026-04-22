@@ -37,6 +37,33 @@ export const useBatchUpdateInventory = () => {
   })
 }
 
+export const useActivityInventory = (
+  activityId: string | undefined,
+  options?: { enabled?: boolean },
+) =>
+  useQuery({
+    queryKey: ["activityInventory", activityId],
+    queryFn: () =>
+      api.post<InventoryItem[]>("activityInventory.list", { activityId }),
+    enabled: !!activityId && (options?.enabled ?? true),
+    refetchInterval: ACTIVE_POLL_MS,
+    staleTime: ACTIVE_POLL_MS,
+  })
+
+export const useBatchUpdateActivityInventory = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (payload: BatchUpdateActivityInventoryInput) =>
+      api.post<BatchUpdateInventoryResult>("activityInventory.batchUpdate", payload),
+    onSuccess: (_result, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["activityInventory", variables.activityId] })
+      queryClient.invalidateQueries({ queryKey: ["activities", variables.activityId] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+    },
+  })
+}
+
 type UpsertInventoryItemInput = {
   itemId?: string
   itemNumber?: string
@@ -53,6 +80,10 @@ type BatchUpdateInventoryInput = {
   modified: Record<string, string | number | string[]>[]
   added: InventoryItem[]
   deleted: string[]
+}
+
+type BatchUpdateActivityInventoryInput = BatchUpdateInventoryInput & {
+  activityId: string
 }
 
 type BatchUpdateInventoryResult = {

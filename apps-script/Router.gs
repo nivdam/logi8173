@@ -18,11 +18,14 @@ function getRoutes_() {
     'operators.list':     { handler: OperatorsController.list,   roles: ['admin'] },
     'operators.upsert':   { handler: OperatorsController.upsert, roles: ['admin'] },
     'operators.delete':   { handler: OperatorsController.remove, roles: ['admin'] },
+    'operators.setPinnedActivity': { handler: OperatorsController.setPinnedActivity, roles: null },
 
     // Inventory
     'inventory.list':     { handler: InventoryController.list,   roles: null },
     'inventory.upsert':       { handler: InventoryController.upsert,      roles: ['admin', 'warehouse_operator'] },
     'inventory.batchUpdate':  { handler: InventoryController.batchUpdate, roles: ['admin', 'warehouse_operator'] },
+    'activityInventory.list':        { handler: ActivityInventoryController.list,        roles: null },
+    'activityInventory.batchUpdate': { handler: ActivityInventoryController.batchUpdate, roles: ['admin', 'warehouse_operator'] },
 
     // Soldiers
     'soldiers.list':      { handler: SoldiersController.list,    roles: null },

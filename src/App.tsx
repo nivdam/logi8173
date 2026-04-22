@@ -3,6 +3,7 @@ import { AppLayout } from "./components/AppLayout"
 import { RequireAuth } from "./components/RequireAuth"
 import { RequireOperatorProfile } from "./components/RequireOperatorProfile"
 import { RequireSetup } from "./components/RequireSetup"
+import { ActivityProvider } from "./lib/active-activity-context"
 import { DashboardPage } from "./features/dashboard/DashboardPage"
 import { InventoryPage } from "./features/inventory/InventoryPage"
 import { SoldiersPage } from "./features/soldiers/SoldiersPage"
@@ -23,7 +24,9 @@ export const App = () => (
         <RequireAuth>
           <RequireOperatorProfile>
             <RequireSetup>
-              <AppLayout />
+              <ActivityProvider>
+                <AppLayout />
+              </ActivityProvider>
             </RequireSetup>
           </RequireOperatorProfile>
         </RequireAuth>

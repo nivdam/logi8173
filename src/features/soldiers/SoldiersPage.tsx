@@ -8,24 +8,29 @@ import { FilterSelect } from "../../components/FilterSelect"
 import { EmptyState } from "../../components/EmptyState"
 import { t } from "../../lib/i18n"
 import { filterSoldiers, sortSoldiers, getUniquePlatoons } from "../../lib/filters"
-import { useSoldiers, useCompanies } from "../../api"
+import { useActiveActivity } from "../../lib/active-activity-context"
+import { useSoldiers, useActivitySoldiers, useCompanies } from "../../api"
 import { SoldiersTable } from "./SoldiersTable"
 import type { SortConfig } from "../../components/SortableHeader"
 
 export const SoldiersPage = () => {
+  const { activeActivityId, isResolving } = useActiveActivity()
+  const masterSoldiersQuery = useSoldiers({ enabled: !isResolving && !activeActivityId })
+  const activitySoldiersQuery = useActivitySoldiers(activeActivityId, { enabled: !isResolving })
+  const soldiersQuery = activeActivityId ? activitySoldiersQuery : masterSoldiersQuery
   const {
     data: soldiers = [],
     error: soldiersError,
     isPending: isSoldiersPending,
     refetch: refetchSoldiers,
-  } = useSoldiers()
+  } = soldiersQuery
   const {
     data: companies = [],
     error: companiesError,
     isPending: isCompaniesPending,
     refetch: refetchCompanies,
   } = useCompanies()
-  const isLoading = isSoldiersPending || isCompaniesPending
+  const isLoading = isResolving || isSoldiersPending || isCompaniesPending
   const [searchQuery, setSearchQuery] = useState("")
   const [companyFilter, setCompanyFilter] = useState<string | undefined>(undefined)
   const [platoonFilter, setPlatoonFilter] = useState<string | undefined>(undefined)
