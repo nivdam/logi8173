@@ -8,6 +8,7 @@ import { ErrorBanner } from "../components/ErrorBanner"
 import { useErrorBanner } from "../components/use-error-banner"
 import { api } from "../lib/api"
 import { getApiErrorMessage } from "../lib/api-error"
+import { consumePostLoginRedirect } from "../lib/auth-helpers"
 import { t } from "../lib/i18n"
 import logo from "../assets/logo-with-text.png"
 
@@ -41,7 +42,8 @@ export const LoginPage = () => {
         idToken,
         tokenExpiresAt: decoded.exp * 1000,
       })
-      navigate("/", { replace: true })
+      const redirectTo = consumePostLoginRedirect() ?? "/"
+      navigate(redirectTo, { replace: true })
     } catch (loginError) {
       setIsSigningIn(false)
       showError(getApiErrorMessage(loginError, t("auth.loginFailed")))

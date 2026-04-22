@@ -21,13 +21,14 @@ export const canAccessRoute = (
 
 export const SESSION_KEY = "logi8173_session"
 const PROFILE_KEY = "logi8173_operator_profiles"
-const SESSION_REFRESH_LISTENER_WAIT_MS = 15 * 1000
-const SESSION_REFRESH_LISTENER_POLL_MS = 50
+const POST_LOGIN_REDIRECT_KEY = "logi8173_post_login_redirect"
 
 const sessionLostListeners = new Set<() => void>()
-const sessionRefreshListeners = new Set<() => Promise<string | undefined>>()
+const protectedRequestListeners = new Set<(count: number) => void>()
 let sessionLostDispatched = false
 let sessionLostPendingFlush = false
+let sessionLostPendingUntilIdle = false
+let activeProtectedRequestCount = 0
 
 export const onSessionLost = (listener: () => void): (() => void) => {
   sessionLostListeners.add(listener)
@@ -40,30 +41,10 @@ export const onSessionLost = (listener: () => void): (() => void) => {
   }
 }
 
-export const onSessionRefresh = (
-  listener: () => Promise<string | undefined>,
-): (() => void) => {
-  sessionRefreshListeners.add(listener)
-  return () => {
-    sessionRefreshListeners.delete(listener)
-  }
-}
-
-export const refreshSessionToken = async (): Promise<string | undefined> => {
-  if (sessionRefreshListeners.size === 0) {
-    await waitForSessionRefreshListener_()
-  }
-
-  for (const listener of sessionRefreshListeners) {
-    const idToken = await listener()
-    if (idToken) return idToken
-  }
-  return undefined
-}
-
 export const notifySessionLost = (): void => {
   if (sessionLostDispatched) return
   sessionLostDispatched = true
+  sessionLostPendingUntilIdle = false
   clearSession()
   if (sessionLostListeners.size === 0) {
     sessionLostPendingFlush = true
@@ -72,6 +53,48 @@ export const notifySessionLost = (): void => {
   sessionLostListeners.forEach((listener) => {
     listener()
   })
+}
+
+const emitProtectedRequestCount_ = (): void => {
+  protectedRequestListeners.forEach((listener) => {
+    listener(activeProtectedRequestCount)
+  })
+}
+
+export const onProtectedRequestCountChange = (
+  listener: (count: number) => void,
+): (() => void) => {
+  protectedRequestListeners.add(listener)
+  listener(activeProtectedRequestCount)
+  return () => {
+    protectedRequestListeners.delete(listener)
+  }
+}
+
+export const beginProtectedRequest = (): void => {
+  activeProtectedRequestCount += 1
+  emitProtectedRequestCount_()
+}
+
+export const endProtectedRequest = (): void => {
+  activeProtectedRequestCount = Math.max(activeProtectedRequestCount - 1, 0)
+  emitProtectedRequestCount_()
+  if (activeProtectedRequestCount === 0 && sessionLostPendingUntilIdle) {
+    window.setTimeout(() => {
+      if (sessionLostPendingUntilIdle && activeProtectedRequestCount === 0) {
+        notifySessionLost()
+      }
+    }, 0)
+  }
+}
+
+export const notifySessionLostWhenIdle = (): void => {
+  if (sessionLostDispatched) return
+  if (activeProtectedRequestCount === 0) {
+    notifySessionLost()
+    return
+  }
+  sessionLostPendingUntilIdle = true
 }
 
 export const getStoredSession = (): StoredSession | undefined => {
@@ -97,10 +120,12 @@ export const storeSession = (session: StoredSession): void => {
 
 export const markSessionActive = (): void => {
   sessionLostDispatched = false
+  sessionLostPendingUntilIdle = false
 }
 
 export const markSessionDispatched = (): void => {
   sessionLostDispatched = true
+  sessionLostPendingUntilIdle = false
 }
 
 export const clearSession = (): void => {
@@ -177,21 +202,26 @@ export const jwtDecode = <T>(token: string): T => {
   return JSON.parse(json) as T
 }
 
-const waitForSessionRefreshListener_ = (): Promise<void> =>
-  new Promise((resolve) => {
-    const startedAt = Date.now()
-    const check = () => {
-      if (
-        sessionRefreshListeners.size > 0 ||
-        Date.now() - startedAt >= SESSION_REFRESH_LISTENER_WAIT_MS
-      ) {
-        resolve()
-        return
-      }
-      window.setTimeout(check, SESSION_REFRESH_LISTENER_POLL_MS)
-    }
-    check()
-  })
+export const savePostLoginRedirect = (path: string): void => {
+  if (!path || path === "/login") return
+  if (!path.startsWith("/") || path.startsWith("//")) return
+  try {
+    sessionStorage.setItem(POST_LOGIN_REDIRECT_KEY, path)
+  } catch {
+    // ignore
+  }
+}
+
+export const consumePostLoginRedirect = (): string | undefined => {
+  try {
+    const value = sessionStorage.getItem(POST_LOGIN_REDIRECT_KEY)
+    if (!value) return undefined
+    sessionStorage.removeItem(POST_LOGIN_REDIRECT_KEY)
+    return value
+  } catch {
+    return undefined
+  }
+}
 
 const safeLocalStorageWrite = (key: string, value: string): void => {
   try {

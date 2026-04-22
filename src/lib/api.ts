@@ -1,8 +1,9 @@
 import {
+  beginProtectedRequest,
+  endProtectedRequest,
   getGoogleIdTokenExpiresAt,
   getStoredSession,
-  notifySessionLost,
-  refreshSessionToken,
+  notifySessionLostWhenIdle,
 } from "./auth-helpers"
 import { mockApiRequest } from "./mock-api"
 import type { AuthenticatedOperator } from "./auth.types"
@@ -10,17 +11,10 @@ import type { AuthenticatedOperator } from "./auth.types"
 const API_BASE = import.meta.env.VITE_API_BASE || "/api/gas"
 const USE_MOCK = import.meta.env.VITE_API_BASE === "mock"
 const REQUEST_TIMEOUT_MS = 60_000
-const TOKEN_REFRESH_SKEW_MS = 5 * 60 * 1000
 const SESSION_INVALID_CODES = ["TOKEN_EXPIRED", "INVALID_ID_TOKEN"]
 
 const isInvalidSessionError = (error: unknown): boolean =>
   error instanceof ApiError && SESSION_INVALID_CODES.includes(error.code)
-
-const isTokenExpiringSoon = (idToken: string, tokenExpiresAt: number | undefined): boolean => {
-  const expiresAt = tokenExpiresAt ?? getGoogleIdTokenExpiresAt(idToken)
-  if (!expiresAt) return true
-  return expiresAt - Date.now() <= TOKEN_REFRESH_SKEW_MS
-}
 
 const isTokenExpired = (idToken: string, tokenExpiresAt: number | undefined): boolean => {
   const expiresAt = tokenExpiresAt ?? getGoogleIdTokenExpiresAt(idToken)
@@ -28,16 +22,11 @@ const isTokenExpired = (idToken: string, tokenExpiresAt: number | undefined): bo
   return expiresAt <= Date.now()
 }
 
-const getFreshStoredIdToken = async (): Promise<string | undefined> => {
+const getActiveIdToken = (): string | undefined => {
   const session = getStoredSession()
   if (!session?.idToken) return undefined
-  if (!isTokenExpiringSoon(session.idToken, session.tokenExpiresAt)) {
-    return session.idToken
-  }
-
-  const refreshedIdToken = await refreshSessionToken()
-  if (refreshedIdToken) return refreshedIdToken
-  return isTokenExpired(session.idToken, session.tokenExpiresAt) ? undefined : session.idToken
+  if (isTokenExpired(session.idToken, session.tokenExpiresAt)) return undefined
+  return session.idToken
 }
 
 const fetchAndParse = async <T>(
@@ -112,30 +101,28 @@ const appsScriptRequest = async <T>(
     return mockApiRequest<T>(action, body)
   }
 
-  const idToken = explicitIdToken ?? await getFreshStoredIdToken()
+  const idToken = explicitIdToken ?? getActiveIdToken()
   if (!idToken) {
-    notifySessionLost()
+    notifySessionLostWhenIdle()
     throw new ApiError("SESSION_EXPIRED", "Session expired")
+  }
+
+  if (!explicitIdToken) {
+    beginProtectedRequest()
   }
 
   try {
     return await fetchAndParse<T>(action, { ...body, idToken })
   } catch (error) {
     if (!explicitIdToken && isInvalidSessionError(error)) {
-      const refreshedIdToken = await refreshSessionToken()
-      if (refreshedIdToken) {
-        try {
-          return await fetchAndParse<T>(action, { ...body, idToken: refreshedIdToken })
-        } catch (retryError) {
-          if (!isInvalidSessionError(retryError)) {
-            return handleNetworkError<T>(action, body, retryError)
-          }
-        }
-      }
-      notifySessionLost()
+      notifySessionLostWhenIdle()
       throw new ApiError("SESSION_EXPIRED", "Session expired")
     }
     return handleNetworkError<T>(action, body, error)
+  } finally {
+    if (!explicitIdToken) {
+      endProtectedRequest()
+    }
   }
 }
 

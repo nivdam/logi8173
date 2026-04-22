@@ -19,6 +19,8 @@
     "noAccessDescription": "You do not have permission to view this page.",
     "sessionExpiredTitle": "Session expired",
     "sessionExpiredDescription": "Please sign in again to continue.",
+    "sessionExpiryWarning": "Your session will expire in about 2 minutes. Finish the current action and save before continuing.",
+    "loginNow": "Sign in now",
     "loginFailed": "Google sign-in failed. Please try again.",
     "signingIn": "Signing in...",
     "loading": "Loading...",
