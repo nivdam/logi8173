@@ -94,6 +94,7 @@
     "batchSaveSuccess": "השינויים נשמרו בהצלחה",
     "batchSavePartial": "חלק מהשינויים לא נשמרו",
     "batchSaveError": "שמירת השינויים נכשלה. נסה שוב.",
+    "activityClosedMidEdit": "הפעילות נסגרה על ידי מפעיל אחר. חזרנו לימ״ח.",
     "deleteRow": "מחק שורה",
     "collapseRow": "סגור עריכה"
   },
@@ -103,7 +104,11 @@
     "sectionActivities": "פעילויות",
     "createNew": "פעילות חדשה",
     "openMenu": "פתח בורר פעילויות",
-    "pinError": "שמירת הפעילות הפעילה נכשלה"
+    "pinError": "שמירת הפעילות הפעילה נכשלה",
+    "dirtyConfirmTitle": "יש טופס עם שינויים שלא נשמרו",
+    "dirtyConfirmDescription": "החלפת פעילות תאפס את הטופס הנוכחי. להמשיך?",
+    "dirtyConfirmSwitch": "החלף פעילות",
+    "dirtyConfirmCancel": "ביטול"
   },
   "activities": {
     "title": "פעילויות",
@@ -372,6 +377,9 @@
     "receiverSignature": "חתימת מקבל"
   },
   "issuance": {
+    "noActiveActivitySelected": "אין פעילות פעילה",
+    "selectFromHeader": "בחר פעילות מהבורר בראש המסך כדי להתחיל",
+    "activityClosedMidForm": "הפעילות נסגרה על ידי מפעיל אחר. הטופס אופס וחזרנו לימ״ח.",
     "title": "הנפקת ציוד",
     "step": "שלב",
     "stepSoldier": "בחירת חייל",
@@ -475,6 +483,7 @@
     "snapshotLoadError": "טעינת מלאי הפעילות נכשלה"
   },
   "returns": {
+    "activityClosedMidForm": "הפעילות נסגרה על ידי מפעיל אחר. הטופס אופס וחזרנו לימ״ח.",
     "formTitle": "טופס החזרה לפעילות",
     "giverSection": "פרטי המחזיר",
     "receiverSection": "פרטי הקולט למחסן",

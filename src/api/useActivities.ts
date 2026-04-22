@@ -44,6 +44,7 @@ export const useAddItemsToActivity = () => {
     onSuccess: (_result, variables) => {
       queryClient.invalidateQueries({ queryKey: ["activities"] })
       queryClient.invalidateQueries({ queryKey: ["activities", variables.activityId] })
+      queryClient.invalidateQueries({ queryKey: ["activityInventory", variables.activityId] })
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })
     },
   })

@@ -27,6 +27,8 @@ export const useCreateTransaction = () => {
       queryClient.invalidateQueries({ queryKey: ["activities", variables.activityId] })
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })
       queryClient.invalidateQueries({ queryKey: ["inventory"] })
+      queryClient.invalidateQueries({ queryKey: ["activityInventory", variables.activityId] })
+      queryClient.invalidateQueries({ queryKey: ["activitySoldiers", variables.activityId] })
     },
   })
 }

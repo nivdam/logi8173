@@ -13,6 +13,7 @@ import {
 import { X, User } from "lucide-react"
 import { useActivitySoldiers, useSoldiers } from "../../api"
 import { useAuth } from "../../lib/use-auth"
+import { useActiveActivity } from "../../lib/active-activity-context"
 import { t } from "../../lib/i18n"
 import type { Soldier } from "../../types"
 import { AddSoldierDialog } from "./AddSoldierDialog"
@@ -23,12 +24,13 @@ export const SoldierAutocomplete = ({
   onSelect,
   onClear,
 }: SoldierAutocompleteProps) => {
+  const { isResolving } = useActiveActivity()
   const { data: globalSoldiers = [], isLoading: isLoadingGlobalSoldiers } =
-    useSoldiers()
+    useSoldiers({ enabled: !isResolving })
   const {
     data: activitySoldiers = [],
     isLoading: isLoadingActivitySoldiers,
-  } = useActivitySoldiers(activityId)
+  } = useActivitySoldiers(activityId, { enabled: !isResolving })
   const { operatorProfile } = useAuth()
   const operatorPersonalId = operatorProfile?.personalId
   const isLoadingSoldiers = isLoadingGlobalSoldiers || isLoadingActivitySoldiers

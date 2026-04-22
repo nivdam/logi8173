@@ -7,10 +7,10 @@ export const useSetPinnedActivity = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: (activityId: string | undefined) =>
-      api.post<{ pinnedActivityId: string | undefined }>(
+    mutationFn: ({ activityId, clientSeq }: SetPinnedActivityInput) =>
+      api.post<{ pinnedActivityId: string | undefined; accepted: boolean; appliedClientSeq: number }>(
         "operators.setPinnedActivity",
-        { activityId: activityId ?? "" },
+        { activityId: activityId ?? "", clientSeq },
       ),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["operators", "me"] })
@@ -75,6 +75,11 @@ export const useDeleteOperator = () => {
       await queryClient.invalidateQueries({ queryKey: ["operators"] })
     },
   })
+}
+
+type SetPinnedActivityInput = {
+  activityId: string | undefined
+  clientSeq: number
 }
 
 type UpsertOperatorInput = {

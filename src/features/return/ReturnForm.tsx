@@ -1,9 +1,13 @@
 import { useState } from "react"
-import { Accordion, Flex, Heading, Text } from "@chakra-ui/react"
+import { Accordion, Flex, Heading } from "@chakra-ui/react"
 import { RotateCcw, PackageCheck, Package, FileSignature } from "lucide-react"
 import { useActivity } from "../../api"
 import { t } from "../../lib/i18n"
+import { toaster } from "../../lib/toaster"
 import { animations } from "../../theme/animations"
+import { useActiveActivity } from "../../lib/active-activity-context"
+import { useActivityClosedGuard } from "../../lib/use-activity-closed-guard"
+import { useDirtyFormRegistration } from "../../lib/dirty-form-registry"
 import { DraftRestoreBanner } from "../../components/DraftRestoreBanner"
 import { ActivityContextCard } from "../issuance/ActivityContextCard"
 import { IssuanceAccordionSection } from "../issuance/IssuanceAccordionSection"
@@ -14,15 +18,43 @@ import { ReturnFooter } from "./ReturnFooter"
 import { ReturnSuccess } from "./ReturnSuccess"
 import { IssuedItemsChecklist } from "./IssuedItemsChecklist"
 
+const FORM_REGISTRATION_ID = "return"
+
 export const ReturnForm = () => {
-  const form = useReturnForm()
+  const { activeActivityId, activeActivity, isResolving, setActiveActivity } = useActiveActivity()
+  const form = useReturnForm(activeActivityId)
   const [activeSection, setActiveSection] = useState<string[]>(["giver", "issuedItems"])
 
-  const { data: activityData, isLoading: isLoadingSnapshot, isError: isSnapshotError } = useActivity(form.state.activityId)
+  const {
+    data: activityData,
+    isLoading: isLoadingSnapshot,
+    isError: isSnapshotError,
+    refetch: refetchActivity,
+  } = useActivity(activeActivityId)
   const snapshotItems = activityData?.snapshotItems ?? []
 
+  useDirtyFormRegistration(FORM_REGISTRATION_ID, form.isFormDirty && !form.state.showSuccess)
+
+  const isActivityClosed = !!activeActivityId && activeActivity?.status !== "active"
+
+  const handleActivityClosedReset = () => {
+    toaster.create({
+      title: t("returns.activityClosedMidForm"),
+      type: "warning",
+      duration: 6000,
+    })
+    form.handleNewReturn()
+    setActiveActivity(undefined)
+  }
+
+  useActivityClosedGuard({
+    isActivityClosed,
+    skip: form.state.showSuccess,
+    onReset: handleActivityClosedReset,
+  })
+
   const isActivityReady =
-    form.state.activityId !== undefined &&
+    activeActivityId !== undefined &&
     !isLoadingSnapshot &&
     !isSnapshotError &&
     snapshotItems.length > 0
@@ -31,7 +63,7 @@ export const ReturnForm = () => {
     return (
       <ReturnSuccess
         formId={form.state.formId}
-        activityId={form.state.activityId || ""}
+        activityId={activeActivityId || ""}
         txId={form.state.serverTxId || ""}
         giver={form.state.giver}
         lines={form.state.lines}
@@ -51,6 +83,10 @@ export const ReturnForm = () => {
     setActiveSection((current) => current.includes("items") ? current : [...current, "items"])
   }
 
+  const handleRetrySnapshot = () => {
+    void refetchActivity()
+  }
+
   return (
     <Flex direction="column" gap="5" css={animations.fadeInUp}>
       <Heading size="lg" fontWeight="700">
@@ -65,22 +101,13 @@ export const ReturnForm = () => {
       )}
 
       <ActivityContextCard
-        selectedActivityId={form.state.activityId}
+        activity={activeActivity}
+        isResolving={isResolving}
         snapshotItemCount={snapshotItems.length}
         isLoadingSnapshot={isLoadingSnapshot}
         isSnapshotError={isSnapshotError}
-        isFormDirty={form.isFormDirty}
-        isSubmitting={form.isSubmitting}
-        onSelect={form.handleSelectActivity}
+        onRetrySnapshot={handleRetrySnapshot}
       />
-
-      {!form.state.activityId && (
-        <Flex align="center" justify="center" py="8">
-          <Text textStyle="sm" color="fg.muted" textAlign="center">
-            {t("returns.selectActivityPrompt")}
-          </Text>
-        </Flex>
-      )}
 
       {isActivityReady && (
         <Accordion.Root
@@ -97,7 +124,7 @@ export const ReturnForm = () => {
               overflowVisible
             >
               <ReturnHeader
-                activityId={form.state.activityId}
+                activityId={activeActivityId}
                 giver={form.state.giver}
                 performedAt={form.state.performedAt}
                 onSelectGiver={form.handleSelectGiver}

@@ -1,4 +1,4 @@
-import { useMemo, useReducer } from "react"
+import { useEffect, useMemo, useReducer, useRef } from "react"
 import { useNavigate, useSearchParams } from "react-router-dom"
 import { useAuth } from "../../../lib/use-auth"
 import { useCreateTransaction, useTransactions } from "../../../api"
@@ -26,13 +26,21 @@ const serializeReturnState = (formState: ReturnFormState) => ({
   receiverSignature: "",
 })
 
-export const useReturnForm = () => {
+export const useReturnForm = (activityId: string | undefined) => {
   const { operator, operatorProfile } = useAuth()
   const navigate = useNavigate()
   const [, setSearchParams] = useSearchParams()
   const createTransaction = useCreateTransaction()
 
   const [state, dispatch] = useReducer(returnFormReducer, undefined, createInitialState)
+  const previousActivityIdRef = useRef(activityId)
+
+  useEffect(() => {
+    if (previousActivityIdRef.current === activityId) return
+    previousActivityIdRef.current = activityId
+    dispatch({ type: "RESET" })
+    setSearchParams({}, { replace: true })
+  }, [activityId, setSearchParams])
 
   const savedSignature = operatorProfile?.savedSignature || operator?.savedSignatureUrl
   const hasReceiverSignature = state.receiverSignature !== "" || !!savedSignature
@@ -47,7 +55,7 @@ export const useReturnForm = () => {
     state.receiverSignature !== ""
 
   const isFormValid =
-    state.activityId !== undefined &&
+    activityId !== undefined &&
     state.giver !== undefined &&
     hasValidLines &&
     state.giverSignature !== "" &&
@@ -55,7 +63,7 @@ export const useReturnForm = () => {
 
   const totalItemCount = filledLines.reduce((sum, line) => sum + line.qty, 0)
 
-  const transactionsQuery = useTransactions(state.activityId ?? "")
+  const transactionsQuery = useTransactions(activityId ?? "")
   const transactions = transactionsQuery.data ?? []
 
   const soldierPersonalId = state.giver?.personalId
@@ -66,7 +74,8 @@ export const useReturnForm = () => {
 
   const isLoadingIssuedItems = state.giver !== undefined && transactionsQuery.isLoading
 
-  const draft = useDraftPersistence("draft:return", state, isFormDirty, state.showSuccess, serializeReturnState)
+  const draftStorageKey = activityId ? `draft:return:${activityId}` : "draft:return"
+  const draft = useDraftPersistence(draftStorageKey, state, isFormDirty, state.showSuccess, serializeReturnState)
 
   const handleRestoreDraft = () => {
     if (!draft.savedDraft) return
@@ -142,13 +151,9 @@ export const useReturnForm = () => {
     dispatch({ type: "SET_RECEIVER_SIGNATURE", payload: base64 })
   }
 
-  const handleSelectActivity = (activityId: string) => {
-    dispatch({ type: "SET_ACTIVITY", payload: activityId })
-  }
-
   const handleSubmit = () => {
     if (createTransaction.isPending) return
-    if (!state.activityId || !state.giver || !operator) return
+    if (!activityId || !state.giver || !operator) return
 
     const transactionItems = mapLinesToTransactionItems(state.lines)
     if (transactionItems.length === 0) return
@@ -157,7 +162,7 @@ export const useReturnForm = () => {
 
     createTransaction.mutate(
       {
-        activityId: state.activityId,
+        activityId,
         txType: "return",
         performedAt: state.performedAt,
         giverPersonalId: state.giver.personalId,
@@ -216,7 +221,6 @@ export const useReturnForm = () => {
     savedSignature,
     soldierIssuedItems,
     isLoadingIssuedItems,
-    handleSelectActivity,
     handleSelectGiver,
     handleClearGiver,
     handleSetPerformedAt,

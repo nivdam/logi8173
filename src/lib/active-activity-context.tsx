@@ -4,6 +4,7 @@ import { useSetPinnedActivity } from "../api/useOperators"
 import { useAuth } from "./use-auth"
 import { readStoredActiveActivityId, writeStoredActiveActivityId } from "./active-activity-storage"
 import { showApiErrorToast } from "./api-error"
+import { activeProtectedRequestCount, onProtectedRequestCountChange } from "./auth-helpers"
 import { t } from "./i18n"
 import type { Activity } from "../types"
 
@@ -11,6 +12,7 @@ type ActiveActivityContextValue = {
   activeActivityId: string | undefined
   activeActivity: Activity | undefined
   isResolving: boolean
+  isProtectedRequestActive: boolean
   openActivities: Activity[]
   setActiveActivity: (activityId: string | undefined) => void
 }
@@ -24,9 +26,26 @@ export const ActivityProvider = ({ children }: { children: React.ReactNode }) =>
 
   const [activeActivityId, setActiveActivityIdState] = useState<string | undefined>(undefined)
   const [hasResolved, setHasResolved] = useState(false)
+  const [protectedRequestCount, setProtectedRequestCount] = useState(activeProtectedRequestCount())
+  // Pin-write serialization: setActiveActivity enqueues the latest target via
+  // pendingPinActivityIdRef; persistLatestPin drains it sequentially so only one
+  // request is in-flight at a time. pinRequestSeqRef is a monotonic counter
+  // passed to the BE so out-of-order or cross-tab responses can be rejected;
+  // we use Date.now() so the counter survives reloads and is unique across tabs.
+  // lastAppliedPinSeqRef drops stale client-side resolves. lastPersistedPin-
+  // ActivityIdRef is the last confirmed server state — used for error fallback.
   const pendingPinActivityIdRef = useRef<string | undefined>(undefined)
   const lastPersistedPinActivityIdRef = useRef<string | undefined>(operator?.pinnedActivityId)
   const isPersistingPinRef = useRef(false)
+  const pinRequestSeqRef = useRef(0)
+  const lastAppliedPinSeqRef = useRef(0)
+
+  useEffect(() => {
+    const unsubscribe = onProtectedRequestCountChange((count) => {
+      setProtectedRequestCount(count)
+    })
+    return unsubscribe
+  }, [])
 
   const openActivities = useMemo(() => {
     if (!activities) return []
@@ -67,10 +86,11 @@ export const ActivityProvider = ({ children }: { children: React.ReactNode }) =>
     if (!hasResolved) return
     if (!activeActivityId) return
     if (!activitiesLoaded) return
-    if (isOpenActivity(activeActivityId)) return
+    const activityExists = activities?.some((activity) => activity.activityId === activeActivityId) ?? false
+    if (activityExists) return
     setActiveActivityIdState(undefined)
     writeStoredActiveActivityId(undefined)
-  }, [activeActivityId, activitiesLoaded, hasResolved, isOpenActivity])
+  }, [activeActivityId, activities, activitiesLoaded, hasResolved])
 
   const persistLatestPin = useCallback(async () => {
     if (isPersistingPinRef.current) return
@@ -78,11 +98,23 @@ export const ActivityProvider = ({ children }: { children: React.ReactNode }) =>
     try {
       while (true) {
         const targetActivityId = pendingPinActivityIdRef.current
+        const seqAtStart = pinRequestSeqRef.current
         try {
-          await persistPinnedActivity(targetActivityId)
-          lastPersistedPinActivityIdRef.current = targetActivityId
+          const result = await persistPinnedActivity({
+            activityId: targetActivityId,
+            clientSeq: seqAtStart,
+          })
+          const isStaleResolve = seqAtStart < lastAppliedPinSeqRef.current
+          if (isStaleResolve) {
+            if (pendingPinActivityIdRef.current === targetActivityId) return
+            continue
+          }
+          if (result.accepted) {
+            lastAppliedPinSeqRef.current = seqAtStart
+            lastPersistedPinActivityIdRef.current = targetActivityId
+          }
         } catch (error) {
-          const hasNewerRequest = pendingPinActivityIdRef.current !== targetActivityId
+          const hasNewerRequest = pinRequestSeqRef.current !== seqAtStart
           if (!hasNewerRequest) {
             const fallbackActivityId = lastPersistedPinActivityIdRef.current
             setActiveActivityIdState(fallbackActivityId)
@@ -106,12 +138,14 @@ export const ActivityProvider = ({ children }: { children: React.ReactNode }) =>
   const setActiveActivity = useCallback(
     (nextActivityId: string | undefined) => {
       if (!hasResolved) return
+      if (activeProtectedRequestCount() > 0) return
       if (activeActivityId === nextActivityId) return
 
       setActiveActivityIdState(nextActivityId)
       writeStoredActiveActivityId(nextActivityId)
       setPinnedActivityId(nextActivityId)
 
+      pinRequestSeqRef.current = Math.max(pinRequestSeqRef.current + 1, Date.now())
       pendingPinActivityIdRef.current = nextActivityId
       void persistLatestPin()
     },
@@ -120,20 +154,22 @@ export const ActivityProvider = ({ children }: { children: React.ReactNode }) =>
 
   const activeActivity = useMemo(() => {
     if (!activeActivityId) return undefined
-    return openActivities.find((activity) => activity.activityId === activeActivityId)
-  }, [activeActivityId, openActivities])
+    return activities?.find((activity) => activity.activityId === activeActivityId)
+  }, [activeActivityId, activities])
 
   const isResolving = !hasResolved && !activitiesFailed
+  const isProtectedRequestActive = protectedRequestCount > 0
 
   const value = useMemo<ActiveActivityContextValue>(
     () => ({
       activeActivityId,
       activeActivity,
       isResolving,
+      isProtectedRequestActive,
       openActivities,
       setActiveActivity,
     }),
-    [activeActivityId, activeActivity, isResolving, openActivities, setActiveActivity],
+    [activeActivityId, activeActivity, isResolving, isProtectedRequestActive, openActivities, setActiveActivity],
   )
 
   return <ActiveActivityContext.Provider value={value}>{children}</ActiveActivityContext.Provider>

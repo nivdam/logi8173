@@ -117,6 +117,9 @@ var OperatorsController = {
       pinnedActivityId = trimmedActivityId;
     }
 
+    var rawClientSeq = Number(body.clientSeq);
+    var clientSeq = isFinite(rawClientSeq) && rawClientSeq > 0 ? rawClientSeq : 0;
+
     var lock = LockService.getScriptLock();
     if (!lock.tryLock(15000)) {
       throw createError_('BUSY', 'Another profile update is being processed, please wait');
@@ -125,6 +128,14 @@ var OperatorsController = {
     try {
       var properties = PropertiesService.getScriptProperties();
       var previousBinding = readOperatorProfileBinding_(properties, operatorEmail) || {};
+      var appliedSeq = Number(previousBinding.pinnedActivityClientSeq) || 0;
+      if (clientSeq > 0 && clientSeq <= appliedSeq) {
+        var staleResponse = { accepted: false, appliedClientSeq: appliedSeq };
+        if (previousBinding.pinnedActivityId) {
+          staleResponse.pinnedActivityId = previousBinding.pinnedActivityId;
+        }
+        return staleResponse;
+      }
       var nextBinding = {};
       for (var key in previousBinding) {
         if (previousBinding.hasOwnProperty(key)) {
@@ -136,6 +147,9 @@ var OperatorsController = {
       } else {
         delete nextBinding.pinnedActivityId;
       }
+      if (clientSeq > 0) {
+        nextBinding.pinnedActivityClientSeq = clientSeq;
+      }
       nextBinding.updatedAt = new Date().toISOString();
 
       properties.setProperty(
@@ -144,10 +158,11 @@ var OperatorsController = {
       );
 
       logGlobalAudit_('operators.setPinnedActivity', context.operator.email, {
-        pinnedActivityId: pinnedActivityId || ''
+        pinnedActivityId: pinnedActivityId || '',
+        clientSeq: clientSeq
       });
 
-      var response = {};
+      var response = { accepted: true, appliedClientSeq: clientSeq > 0 ? clientSeq : appliedSeq };
       if (pinnedActivityId) {
         response.pinnedActivityId = pinnedActivityId;
       }

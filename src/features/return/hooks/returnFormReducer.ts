@@ -11,7 +11,6 @@ import type { SoldierIssuedItem } from "../return.types"
 const createClientTxId = () => crypto.randomUUID()
 
 export const createInitialState = (): ReturnFormState => ({
-  activityId: undefined,
   clientTxId: createClientTxId(),
   formId: undefined,
   serverTxId: undefined,
@@ -35,19 +34,6 @@ const appendLine = (state: ReturnFormState, line: IssuanceLineItem): ReturnFormS
 
 export const returnFormReducer = (state: ReturnFormState, action: ReturnFormAction): ReturnFormState => {
   switch (action.type) {
-    case "SET_ACTIVITY":
-      return {
-        ...state,
-        activityId: action.payload,
-        clientTxId: createClientTxId(),
-        giver: undefined,
-        lines: [],
-        expandedLineIds: [],
-        selectedIssuedItemIds: new Set<string>(),
-        globalNotes: "",
-        giverSignature: "",
-        receiverSignature: "",
-      }
 
     case "SET_GIVER":
       return {
@@ -237,7 +223,6 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
 }
 
 export type ReturnFormState = {
-  activityId: string | undefined
   clientTxId: string
   formId: string | undefined
   serverTxId: string | undefined
@@ -257,7 +242,6 @@ type ReturnFormDraft = Omit<ReturnFormState, "selectedIssuedItemIds"> & {
 }
 
 export type ReturnFormAction =
-  | { type: "SET_ACTIVITY"; payload: string }
   | { type: "SET_GIVER"; payload: Soldier | undefined }
   | { type: "SET_PERFORMED_AT"; payload: string }
   | { type: "ADD_EMPTY_LINE" }

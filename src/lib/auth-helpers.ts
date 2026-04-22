@@ -28,7 +28,7 @@ const protectedRequestListeners = new Set<(count: number) => void>()
 let sessionLostDispatched = false
 let sessionLostPendingFlush = false
 let sessionLostPendingUntilIdle = false
-let activeProtectedRequestCount = 0
+let activeProtectedRequestCount_ = 0
 
 export const onSessionLost = (listener: () => void): (() => void) => {
   sessionLostListeners.add(listener)
@@ -57,31 +57,33 @@ export const notifySessionLost = (): void => {
 
 const emitProtectedRequestCount_ = (): void => {
   protectedRequestListeners.forEach((listener) => {
-    listener(activeProtectedRequestCount)
+    listener(activeProtectedRequestCount_)
   })
 }
+
+export const activeProtectedRequestCount = (): number => activeProtectedRequestCount_
 
 export const onProtectedRequestCountChange = (
   listener: (count: number) => void,
 ): (() => void) => {
   protectedRequestListeners.add(listener)
-  listener(activeProtectedRequestCount)
+  listener(activeProtectedRequestCount_)
   return () => {
     protectedRequestListeners.delete(listener)
   }
 }
 
 export const beginProtectedRequest = (): void => {
-  activeProtectedRequestCount += 1
+  activeProtectedRequestCount_ += 1
   emitProtectedRequestCount_()
 }
 
 export const endProtectedRequest = (): void => {
-  activeProtectedRequestCount = Math.max(activeProtectedRequestCount - 1, 0)
+  activeProtectedRequestCount_ = Math.max(activeProtectedRequestCount_ - 1, 0)
   emitProtectedRequestCount_()
-  if (activeProtectedRequestCount === 0 && sessionLostPendingUntilIdle) {
+  if (activeProtectedRequestCount_ === 0 && sessionLostPendingUntilIdle) {
     window.setTimeout(() => {
-      if (sessionLostPendingUntilIdle && activeProtectedRequestCount === 0) {
+      if (sessionLostPendingUntilIdle && activeProtectedRequestCount_ === 0) {
         notifySessionLost()
       }
     }, 0)
@@ -90,7 +92,7 @@ export const endProtectedRequest = (): void => {
 
 export const notifySessionLostWhenIdle = (): void => {
   if (sessionLostDispatched) return
-  if (activeProtectedRequestCount === 0) {
+  if (activeProtectedRequestCount_ === 0) {
     notifySessionLost()
     return
   }
