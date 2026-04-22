@@ -97,6 +97,14 @@
     "deleteRow": "מחק שורה",
     "collapseRow": "סגור עריכה"
   },
+  "activitySelector": {
+    "master": "ימ\"ח",
+    "masterCaption": "ברירת מחדל",
+    "sectionActivities": "פעילויות",
+    "createNew": "פעילות חדשה",
+    "openMenu": "פתח בורר פעילויות",
+    "pinError": "שמירת הפעילות הפעילה נכשלה"
+  },
   "activities": {
     "title": "פעילויות",
     "description": "פתיחת פעילות, בחירת פריטים רלוונטיים מהמלאי הראשי וניהול מלאי ייעודי לכל פעילות.",

@@ -3,6 +3,21 @@ import { api } from "../lib/api"
 import { ADMIN_POLL_MS } from "./polling"
 import type { AuthenticatedOperator, OperatorRole } from "../lib/auth.types"
 
+export const useSetPinnedActivity = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (activityId: string | undefined) =>
+      api.post<{ pinnedActivityId: string | undefined }>(
+        "operators.setPinnedActivity",
+        { activityId: activityId ?? "" },
+      ),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["operators", "me"] })
+    },
+  })
+}
+
 export const useCurrentOperator = () =>
   useQuery({
     queryKey: ["operators", "me"],

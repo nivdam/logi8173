@@ -97,6 +97,14 @@
     "deleteRow": "Delete row",
     "collapseRow": "Close editor"
   },
+  "activitySelector": {
+    "master": "LOGI8173",
+    "masterCaption": "Default",
+    "sectionActivities": "Activities",
+    "createNew": "New activity",
+    "openMenu": "Open activity selector",
+    "pinError": "Failed to save active activity"
+  },
   "activities": {
     "title": "Activities",
     "description": "Open activities, select only the relevant master inventory items, and manage each activity with its own scoped snapshot.",

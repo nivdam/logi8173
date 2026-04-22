@@ -20,6 +20,7 @@ export {
   useCurrentOperator,
   useDeleteOperator,
   useOperators,
+  useSetPinnedActivity,
   useSyncMyProfileSoldier,
   useUpsertOperator,
 } from "./useOperators"

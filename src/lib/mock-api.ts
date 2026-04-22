@@ -43,6 +43,7 @@ const mockOperators: AuthenticatedOperator[] = [
     googleSub: "mock_sub",
     avatarUrl: undefined,
     savedSignatureUrl: undefined,
+    pinnedActivityId: undefined,
   },
 ]
 
@@ -120,13 +121,14 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
   }),
   "operators.list": () => mockOperators,
   "operators.upsert": (body) => {
-    const nextOperator = {
+    const nextOperator: AuthenticatedOperator = {
       email: String(body?.email || "").toLowerCase(),
       fullName: String(body?.fullName || ""),
       role: String(body?.role || "viewer") as OperatorRole,
       googleSub: "",
       avatarUrl: undefined,
       savedSignatureUrl: body?.savedSignatureUrl ? String(body.savedSignatureUrl) : undefined,
+      pinnedActivityId: undefined,
     }
     const existingIndex = mockOperators.findIndex((operator) => operator.email === nextOperator.email)
 
@@ -211,6 +213,30 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
       fullName: nextSoldier.fullName,
       created: true,
     }
+  },
+  "operators.setPinnedActivity": (body) => {
+    const rawActivityId = body?.activityId
+    const isEmptyActivityId =
+      rawActivityId === null ||
+      rawActivityId === undefined ||
+      String(rawActivityId).trim() === ""
+    const pinnedActivityId = isEmptyActivityId ? undefined : String(rawActivityId).trim()
+    if (pinnedActivityId && pinnedActivityId.length > 128) {
+      throw new Error("activityId is too long")
+    }
+    if (pinnedActivityId) {
+      const existingActivity = mockActivities.find(
+        (activity) => activity.activityId === pinnedActivityId,
+      )
+      if (!existingActivity) {
+        throw new Error("Activity not found: " + pinnedActivityId)
+      }
+    }
+    const operator = mockOperators[0]
+    if (operator) {
+      operator.pinnedActivityId = pinnedActivityId
+    }
+    return { pinnedActivityId }
   },
   "operators.delete": (body) => {
     const targetEmail = String(body?.email || "").toLowerCase()

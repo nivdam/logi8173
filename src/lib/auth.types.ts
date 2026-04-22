@@ -34,6 +34,7 @@ type AuthenticatedOperator = {
   avatarUrl: string | undefined
   googleSub: string
   savedSignatureUrl: string | undefined
+  pinnedActivityId: string | undefined
 }
 
 type AuthState = {
@@ -44,6 +45,7 @@ type AuthState = {
   isSessionExpiringSoon: boolean
   saveOperatorProfile: (profile: OperatorProfile) => void
   clearOperatorProfile: () => void
+  setPinnedActivityId: (pinnedActivityId: string | undefined) => void
   resetSession: () => void
   logout: () => void
 }
