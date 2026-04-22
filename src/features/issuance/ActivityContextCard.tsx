@@ -10,6 +10,10 @@ import {
 import { ClipboardList } from "lucide-react";
 import { useActivities, useAddItemsToActivity, useInventory } from "../../api";
 import { EmptyState } from "../../components/EmptyState";
+import {
+  readStoredActiveActivityId,
+  writeStoredActiveActivityId,
+} from "../../lib/active-activity-storage";
 import { t } from "../../lib/i18n";
 import { toaster } from "../../lib/toaster";
 import { ActivityInventoryDialog } from "../activities/ActivityInventoryDialog";
@@ -20,8 +24,6 @@ import { EmptySnapshotWarning } from "./EmptySnapshotWarning";
 import { SelectedActivityDisplay } from "./SelectedActivityDisplay";
 import { SnapshotErrorState } from "./SnapshotErrorState";
 import { SwitchActivityDialog } from "./SwitchActivityDialog";
-
-const LAST_ACTIVITY_STORAGE_KEY = "logi8173_last_activity_id";
 
 export const ActivityContextCard = ({
   selectedActivityId,
@@ -62,7 +64,7 @@ export const ActivityContextCard = ({
 
   useEffect(() => {
     if (!selectedActivityId) return;
-    localStorage.setItem(LAST_ACTIVITY_STORAGE_KEY, selectedActivityId);
+    writeStoredActiveActivityId(selectedActivityId);
   }, [selectedActivityId]);
 
   useEffect(() => {
@@ -70,7 +72,7 @@ export const ActivityContextCard = ({
     if (activeActivities.length === 0) return;
     if (isSubmitting || isFormDirty || pendingActivityId !== undefined) return;
 
-    const lastActivityId = localStorage.getItem(LAST_ACTIVITY_STORAGE_KEY);
+    const lastActivityId = readStoredActiveActivityId();
     if (!lastActivityId) return;
 
     const rememberedActivity = activeActivities.find(

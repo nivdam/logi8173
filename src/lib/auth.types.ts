@@ -34,7 +34,7 @@ type AuthenticatedOperator = {
   avatarUrl: string | undefined
   googleSub: string
   savedSignatureUrl: string | undefined
-  pinnedActivityId: string | undefined
+  pinnedActivityId?: string
 }
 
 type AuthState = {

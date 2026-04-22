@@ -43,7 +43,6 @@ const mockOperators: AuthenticatedOperator[] = [
     googleSub: "mock_sub",
     avatarUrl: undefined,
     savedSignatureUrl: undefined,
-    pinnedActivityId: undefined,
   },
 ]
 

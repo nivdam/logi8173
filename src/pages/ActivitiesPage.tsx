@@ -67,6 +67,7 @@ const ActivitiesListPage = () => {
 
   useEffect(() => {
     if (searchParams.get("new") !== "1") return
+    setIsOpenDialogOpen(true);
     const nextParams = new URLSearchParams(searchParams);
     nextParams.delete("new");
     setSearchParams(nextParams, { replace: true });
