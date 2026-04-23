@@ -29,7 +29,7 @@ export const useUpsertSoldier = () => {
 
   return useMutation({
     mutationFn: (soldier: UpsertSoldierInput) =>
-      api.post<{ personalId: string; fullName: string }>("soldiers.upsert", soldier),
+      api.protectedPost<{ personalId: string; fullName: string }>("soldiers.upsert", soldier),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["soldiers"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })
@@ -42,7 +42,7 @@ export const useUpsertActivitySoldier = () => {
 
   return useMutation({
     mutationFn: (soldier: ActivitySoldierInput) =>
-      api.post<{ personalId: string; fullName: string }>("activitySoldiers.upsert", soldier),
+      api.protectedPost<{ personalId: string; fullName: string }>("activitySoldiers.upsert", soldier),
     onSuccess: (_result, variables) => {
       queryClient.invalidateQueries({ queryKey: ["activitySoldiers", variables.activityId] })
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })
@@ -55,7 +55,7 @@ export const useImportSoldiersFromMaster = () => {
 
   return useMutation({
     mutationFn: (input: ImportSoldiersFromMasterInput) =>
-      api.post<ImportSoldiersFromMasterResult>("activitySoldiers.importFromMaster", input),
+      api.protectedPost<ImportSoldiersFromMasterResult>("activitySoldiers.importFromMaster", input),
     onSuccess: (_result, variables) => {
       queryClient.invalidateQueries({ queryKey: ["activitySoldiers", variables.activityId] })
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })

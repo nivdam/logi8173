@@ -38,7 +38,7 @@ export const useUpsertOperator = () => {
 
   return useMutation({
     mutationFn: (input: UpsertOperatorInput) =>
-      api.post<{ email: string; fullName: string; role: string }>(
+      api.protectedPost<{ email: string; fullName: string; role: string }>(
         "operators.upsert",
         input,
       ),
@@ -53,7 +53,7 @@ export const useSyncMyProfileSoldier = () => {
 
   return useMutation({
     mutationFn: (input: SyncMyProfileSoldierInput) =>
-      api.post<{ personalId: string; fullName: string; created: boolean }>(
+      api.protectedPost<{ personalId: string; fullName: string; created: boolean }>(
         "operators.syncMyProfile",
         input,
       ),
@@ -70,7 +70,7 @@ export const useDeleteOperator = () => {
 
   return useMutation({
     mutationFn: (email: string) =>
-      api.post<{ email: string }>("operators.delete", { email }),
+      api.protectedPost<{ email: string }>("operators.delete", { email }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["operators"] })
     },

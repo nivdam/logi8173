@@ -96,6 +96,7 @@ const appsScriptRequest = async <T>(
   action: string,
   body: Record<string, unknown> = {},
   explicitIdToken?: string,
+  options?: { protectedRequest?: boolean },
 ): Promise<T> => {
   if (USE_MOCK) {
     return mockApiRequest<T>(action, body)
@@ -107,7 +108,9 @@ const appsScriptRequest = async <T>(
     throw new ApiError("SESSION_EXPIRED", "Session expired")
   }
 
-  if (!explicitIdToken) {
+  const shouldProtect = !explicitIdToken && options?.protectedRequest === true
+
+  if (shouldProtect) {
     beginProtectedRequest()
   }
 
@@ -120,7 +123,7 @@ const appsScriptRequest = async <T>(
     }
     return handleNetworkError<T>(action, body, error)
   } finally {
-    if (!explicitIdToken) {
+    if (shouldProtect) {
       endProtectedRequest()
     }
   }
@@ -146,6 +149,8 @@ export const api = {
     appsScriptRequest<T>(action, params ?? {}),
   post: <T>(action: string, body?: Record<string, unknown>) =>
     appsScriptRequest<T>(action, body ?? {}),
+  protectedPost: <T>(action: string, body?: Record<string, unknown>) =>
+    appsScriptRequest<T>(action, body ?? {}, undefined, { protectedRequest: true }),
   publicPost: publicRequest,
   authenticateWithGoogleToken: (idToken: string) =>
     appsScriptRequest<AuthenticatedOperator>("auth.me", {}, idToken),
