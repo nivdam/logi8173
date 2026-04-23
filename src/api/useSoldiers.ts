@@ -50,6 +50,19 @@ export const useUpsertActivitySoldier = () => {
   })
 }
 
+export const useImportSoldiersFromMaster = () => {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (input: ImportSoldiersFromMasterInput) =>
+      api.post<ImportSoldiersFromMasterResult>("activitySoldiers.importFromMaster", input),
+    onSuccess: (_result, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["activitySoldiers", variables.activityId] })
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] })
+    },
+  })
+}
+
 type UpsertSoldierInput = {
   personalId: string
   fullName: string
@@ -61,4 +74,16 @@ type UpsertSoldierInput = {
 
 type ActivitySoldierInput = UpsertSoldierInput & {
   activityId: string
+}
+
+type ImportSoldiersFromMasterInput = {
+  activityId: string
+  personalIds: string[]
+}
+
+type ImportSoldiersFromMasterResult = {
+  activityId: string
+  imported: number
+  skipped: number
+  requested: number
 }

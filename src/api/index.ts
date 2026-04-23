@@ -8,6 +8,7 @@ export {
 } from "./useInventory"
 export {
   useActivitySoldiers,
+  useImportSoldiersFromMaster,
   useSoldiers,
   useUpsertActivitySoldier,
   useUpsertSoldier,

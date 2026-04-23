@@ -200,5 +200,120 @@ var SoldiersController = {
     validateSoldierBody_(body);
     var sheetId = getActivitySoldiersSheetId_(body.activityId, true);
     return upsertActivitySoldierInSheet_(sheetId, body, context);
+  },
+
+  importFromMaster: function(context) {
+    var body = context.request.body || {};
+    var activityId = String(body.activityId || '').trim();
+    if (!activityId) {
+      throw createError_('VALIDATION_ERROR', 'activityId is required');
+    }
+
+    var rawPersonalIds = Array.isArray(body.personalIds) ? body.personalIds : [];
+    var personalIds = [];
+    var seen = {};
+    for (var i = 0; i < rawPersonalIds.length; i++) {
+      var personalId = String(rawPersonalIds[i] || '').trim();
+      if (!personalId) continue;
+      if (seen[personalId]) continue;
+      seen[personalId] = true;
+      personalIds.push(personalId);
+    }
+    if (personalIds.length === 0) {
+      throw createError_('VALIDATION_ERROR', 'personalIds must contain at least one id');
+    }
+
+    var registryId = getConfigProperty_('ACTIVITIES_REGISTRY_ID');
+    var initialActivityRow = findRow_(registryId, 'activities-registry', 'activity_id', activityId);
+    if (!initialActivityRow) {
+      throw createError_('NOT_FOUND', 'Activity not found: ' + activityId);
+    }
+    if (initialActivityRow.row.status !== 'active') {
+      throw createError_('VALIDATION_ERROR', 'Activity is not active: ' + activityId);
+    }
+
+    var masterSheetId = getConfigProperty_('SOLDIERS_SHEET_ID');
+    var masterRows = readAllRows_(masterSheetId, 'soldiers');
+    var masterByPersonalId = {};
+    for (var m = 0; m < masterRows.length; m++) {
+      var masterPersonalId = String(masterRows[m].personal_id || '');
+      if (masterPersonalId) {
+        masterByPersonalId[masterPersonalId] = masterRows[m];
+      }
+    }
+
+    var missing = [];
+    for (var p = 0; p < personalIds.length; p++) {
+      if (!masterByPersonalId[personalIds[p]]) {
+        missing.push(personalIds[p]);
+      }
+    }
+    if (missing.length > 0) {
+      throw createError_('NOT_FOUND', 'Soldiers not found in master: ' + missing.join(', '));
+    }
+
+    var activitySheetId = getActivitySoldiersSheetId_(activityId, true);
+    ensureSheetHeaders_(activitySheetId, 'activity-soldiers', SHEET_HEADERS['activity-soldiers']);
+
+    var lock = LockService.getScriptLock();
+    if (!lock.tryLock(15000)) {
+      throw createError_('BUSY', 'Another import is being processed, please wait');
+    }
+
+    try {
+      var activityRow = findRow_(registryId, 'activities-registry', 'activity_id', activityId);
+      if (!activityRow) {
+        throw createError_('NOT_FOUND', 'Activity not found: ' + activityId);
+      }
+      if (activityRow.row.status !== 'active') {
+        throw createError_('VALIDATION_ERROR', 'Activity is not active: ' + activityId);
+      }
+
+      var existingRows = readAllRows_(activitySheetId, 'activity-soldiers');
+      var existingByPersonalId = {};
+      for (var e = 0; e < existingRows.length; e++) {
+        existingByPersonalId[String(existingRows[e].personal_id || '')] = true;
+      }
+
+      var now = new Date().toISOString();
+      var importedCount = 0;
+      var skippedCount = 0;
+      for (var k = 0; k < personalIds.length; k++) {
+        var targetPersonalId = personalIds[k];
+        if (existingByPersonalId[targetPersonalId]) {
+          skippedCount++;
+          continue;
+        }
+        var masterRow = masterByPersonalId[targetPersonalId];
+        var soldierRecord = {
+          personal_id: targetPersonalId,
+          full_name: String(masterRow.full_name || '').trim(),
+          rank: String(masterRow.rank || '').trim(),
+          company: String(masterRow.company || '').trim(),
+          platoon: String(masterRow.platoon || '').trim(),
+          phone: normalizeSoldierPhone_(masterRow.phone),
+          created_at: now,
+          updated_at: now
+        };
+        appendRow_(activitySheetId, 'activity-soldiers', soldierRecord);
+        importedCount++;
+      }
+
+      logGlobalAudit_('activitySoldiers.importFromMaster', context.operator.email, {
+        activityId: activityId,
+        requested: personalIds.length,
+        imported: importedCount,
+        skipped: skippedCount
+      });
+
+      return {
+        activityId: activityId,
+        imported: importedCount,
+        skipped: skippedCount,
+        requested: personalIds.length
+      };
+    } finally {
+      lock.releaseLock();
+    }
   }
 };
