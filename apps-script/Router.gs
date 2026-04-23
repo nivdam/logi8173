@@ -30,8 +30,9 @@ function getRoutes_() {
     // Soldiers
     'soldiers.list':      { handler: SoldiersController.list,    roles: null },
     'soldiers.upsert':    { handler: SoldiersController.upsert,  roles: ['admin', 'warehouse_operator'] },
-    'activitySoldiers.list':   { handler: SoldiersController.listActivity,   roles: null },
-    'activitySoldiers.upsert': { handler: SoldiersController.upsertActivity, roles: ['admin', 'warehouse_operator'] },
+    'activitySoldiers.list':             { handler: SoldiersController.listActivity,       roles: null },
+    'activitySoldiers.upsert':           { handler: SoldiersController.upsertActivity,     roles: ['admin', 'warehouse_operator'] },
+    'activitySoldiers.importFromMaster': { handler: SoldiersController.importFromMaster,   roles: ['admin', 'warehouse_operator'] },
 
     // Imports
     'imports.fetchSheetText': { handler: ImportController.fetchSheetText, roles: ['admin'] },

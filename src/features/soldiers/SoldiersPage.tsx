@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
-import { Flex, Spinner, Text, VStack } from "@chakra-ui/react"
-import { UserSearch } from "lucide-react"
+import { Button, Flex, Spinner, Text, VStack } from "@chakra-ui/react"
+import { Download, UserSearch, Users } from "lucide-react"
 import { PageHeader } from "../../components/PageHeader"
 import { ApiErrorState } from "../../components/ApiErrorState"
 import { SearchInput } from "../../components/SearchInput"
@@ -9,12 +9,16 @@ import { EmptyState } from "../../components/EmptyState"
 import { t } from "../../lib/i18n"
 import { filterSoldiers, sortSoldiers, getUniquePlatoons } from "../../lib/filters"
 import { useActiveActivity } from "../../lib/active-activity-context"
+import { canWrite } from "../../lib/auth-helpers"
+import { useAuth } from "../../lib/use-auth"
 import { useSoldiers, useActivitySoldiers, useCompanies } from "../../api"
 import { SoldiersTable } from "./SoldiersTable"
+import { ImportFromMasterDialog } from "./ImportFromMasterDialog"
 import type { SortConfig } from "../../components/SortableHeader"
 
 export const SoldiersPage = () => {
-  const { activeActivityId, isResolving } = useActiveActivity()
+  const { operator } = useAuth()
+  const { activeActivityId, activeActivity, isResolving } = useActiveActivity()
   const masterSoldiersQuery = useSoldiers({ enabled: !isResolving && !activeActivityId })
   const activitySoldiersQuery = useActivitySoldiers(activeActivityId, { enabled: !isResolving })
   const soldiersQuery = activeActivityId ? activitySoldiersQuery : masterSoldiersQuery
@@ -35,6 +39,16 @@ export const SoldiersPage = () => {
   const [companyFilter, setCompanyFilter] = useState<string | undefined>(undefined)
   const [platoonFilter, setPlatoonFilter] = useState<string | undefined>(undefined)
   const [sort, setSort] = useState<SortConfig>({ key: "fullName", direction: "asc" })
+  const [isImportOpen, setIsImportOpen] = useState(false)
+
+  const isActivityMode = !!activeActivityId
+  const isActivityOpen = activeActivity?.status === "active"
+  const canImportFromMaster = !!operator && canWrite(operator.role) && isActivityMode && isActivityOpen
+
+  const existingPersonalIds = useMemo(
+    () => new Set(soldiers.map((soldier) => soldier.personalId)),
+    [soldiers],
+  )
 
   const companyOptions = useMemo(
     () =>
@@ -81,9 +95,33 @@ export const SoldiersPage = () => {
     setPlatoonFilter(undefined)
   }
 
+  const handleOpenImport = () => {
+    setIsImportOpen(true)
+  }
+
+  const handleImportOpenChange = (open: boolean) => {
+    setIsImportOpen(open)
+  }
+
+  const isEmptyActivityState =
+    isActivityMode && !hasActiveFilters && soldiers.length === 0
+
   return (
     <VStack align="stretch" gap={{ base: "5", md: "7" }}>
-      <PageHeader title={t("soldiers.title")} description={t("soldiers.description")} />
+      <Flex justify="space-between" align="start" flexWrap="wrap" gap="3">
+        <PageHeader title={t("soldiers.title")} description={t("soldiers.description")} />
+        {canImportFromMaster && soldiers.length > 0 ? (
+          <Button
+            size="sm"
+            variant="outline"
+            borderRadius="lg"
+            onClick={handleOpenImport}
+          >
+            <Download size={14} />
+            {t("soldiers.importAction")}
+          </Button>
+        ) : null}
+      </Flex>
 
       <Flex gap="3" flexWrap="wrap" align="center">
         <SearchInput placeholder={t("soldiers.searchPlaceholder")} onSearch={setSearchQuery} />
@@ -126,6 +164,14 @@ export const SoldiersPage = () => {
         />
       ) : sortedSoldiers.length > 0 ? (
         <SoldiersTable soldiers={sortedSoldiers} sort={sort} onSort={setSort} />
+      ) : isEmptyActivityState ? (
+        <EmptyState
+          icon={Users}
+          title={t("soldiers.activityEmptyTitle")}
+          description={t("soldiers.activityEmptyDescription")}
+          actionLabel={canImportFromMaster ? t("soldiers.importAction") : undefined}
+          onAction={canImportFromMaster ? handleOpenImport : undefined}
+        />
       ) : (
         <EmptyState
           icon={UserSearch}
@@ -135,6 +181,15 @@ export const SoldiersPage = () => {
           onAction={clearAll}
         />
       )}
+
+      {activeActivityId ? (
+        <ImportFromMasterDialog
+          open={isImportOpen}
+          activityId={activeActivityId}
+          existingPersonalIds={existingPersonalIds}
+          onOpenChange={handleImportOpenChange}
+        />
+      ) : null}
     </VStack>
   )
 }

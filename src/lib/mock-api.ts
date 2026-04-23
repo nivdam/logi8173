@@ -137,6 +137,56 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
     if (!soldierIds) return []
     return soldiersMock.filter((soldier) => soldierIds.has(soldier.personalId))
   },
+  "activitySoldiers.importFromMaster": (body) => {
+    const rawActivityId = body?.activityId
+    const activityId = rawActivityId ? String(rawActivityId).trim() : ""
+    if (!activityId) {
+      throw new Error("activityId is required")
+    }
+    const activity = mockActivities.find((candidate) => candidate.activityId === activityId)
+    if (!activity) {
+      throw new Error("Activity not found: " + activityId)
+    }
+    if (activity.status !== "active") {
+      throw new Error("Activity is not active: " + activityId)
+    }
+    const rawPersonalIds = Array.isArray(body?.personalIds) ? body.personalIds : []
+    const personalIds: string[] = []
+    const seen = new Set<string>()
+    rawPersonalIds.forEach((value) => {
+      const personalId = String(value || "").trim()
+      if (!personalId || seen.has(personalId)) return
+      seen.add(personalId)
+      personalIds.push(personalId)
+    })
+    if (personalIds.length === 0) {
+      throw new Error("personalIds must contain at least one id")
+    }
+    const missing = personalIds.filter(
+      (personalId) => !soldiersMock.some((soldier) => soldier.personalId === personalId),
+    )
+    if (missing.length > 0) {
+      throw new Error("Soldiers not found in master: " + missing.join(", "))
+    }
+    const existingIds = mockActivitySoldierIds.get(activityId) ?? new Set<string>()
+    let importedCount = 0
+    let skippedCount = 0
+    personalIds.forEach((personalId) => {
+      if (existingIds.has(personalId)) {
+        skippedCount++
+        return
+      }
+      existingIds.add(personalId)
+      importedCount++
+    })
+    mockActivitySoldierIds.set(activityId, existingIds)
+    return {
+      activityId,
+      imported: importedCount,
+      skipped: skippedCount,
+      requested: personalIds.length,
+    }
+  },
   "activitySoldiers.upsert": (body) => {
     const rawActivityId = body?.activityId
     const activityId = rawActivityId ? String(rawActivityId).trim() : ""
