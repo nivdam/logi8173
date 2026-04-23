@@ -44,7 +44,7 @@ function uploadSignature_(base64Data, fileName) {
     throw createError_('VALIDATION_ERROR', 'Invalid signature data');
   }
 
-  // base64Data comes as "data:image/png;base64,XXXXX"
+  // base64Data comes as "data:image/<type>;base64,XXXXX"
   var parts = base64Data.split(',');
   if (parts.length !== 2) {
     throw createError_('VALIDATION_ERROR', 'Invalid base64 data URI format');
@@ -56,7 +56,7 @@ function uploadSignature_(base64Data, fileName) {
   }
 
   var contentType = mimeMatch[1];
-  var allowedTypes = ['image/png', 'image/jpeg', 'image/webp'];
+  var allowedTypes = ['image/png', 'image/jpeg', 'image/webp', 'image/svg+xml'];
   if (allowedTypes.indexOf(contentType) === -1) {
     throw createError_('VALIDATION_ERROR', 'Unsupported image type: ' + contentType);
   }
