@@ -40,8 +40,8 @@ export const IssuanceAccordionSection = ({
           w="7"
           h="7"
           borderRadius="full"
-          bg="sage.100"
-          color="sage.700"
+          bg="forest.100"
+          color="forest.700"
         >
           <Icon size={14} />
         </Flex>

@@ -4,7 +4,6 @@ import {
   createListCollection,
   Field,
   Flex,
-  Image,
   Input,
   NativeSelect,
   Portal,
@@ -13,6 +12,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { RefreshCw } from "lucide-react";
+import { SignatureImage } from "../../components/SignatureImage";
 import { useMemo } from "react";
 import { t } from "../../lib/i18n";
 import { RANK_OPTIONS } from "../../lib/rank-options";
@@ -104,7 +104,7 @@ export const OperatorProfileFormFields = ({
                 <Combobox.Empty>
                   {isLoadingSoldiers ? (
                     <Flex justify="center" p="3">
-                      <Spinner size="sm" color="sage.400" />
+                      <Spinner size="sm" color="forest.400" />
                     </Flex>
                   ) : (
                     <Text textStyle="sm" color="fg.muted" p="3">
@@ -194,15 +194,15 @@ export const OperatorProfileFormFields = ({
           <Stack gap="3">
             <Flex
               borderWidth="2px"
-              borderColor="sage.300"
+              borderColor="forest.300"
               borderStyle="dashed"
               borderRadius="xl"
               overflow="hidden"
-              bg="white"
+              bg="bg.card"
               p="2"
               justify="center"
             >
-              <Image
+              <SignatureImage
                 src={savedSignature}
                 alt={t("issuance.savedSignature")}
                 maxH="160px"

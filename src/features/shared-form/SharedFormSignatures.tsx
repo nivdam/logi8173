@@ -1,6 +1,7 @@
-import { Box, Flex, Image, Text, VStack } from "@chakra-ui/react"
+import { Box, Flex, Text, VStack } from "@chakra-ui/react"
 import { PenLine } from "lucide-react"
 import { t } from "../../lib/i18n"
+import { SignatureImage } from "../../components/SignatureImage"
 
 export const SharedFormSignatures = ({ signatureBase64 }: Props) => {
   if (!signatureBase64) return null
@@ -19,18 +20,17 @@ export const SharedFormSignatures = ({ signatureBase64 }: Props) => {
       </Flex>
       <VStack gap="3" align="stretch">
         <Box
-          bg="white"
+          bg="bg.card"
           borderRadius="lg"
           borderWidth="1px"
           borderColor="border"
           p="3"
           textAlign="center"
         >
-          <Image
+          <SignatureImage
             src={signatureBase64}
             alt={t("sharedForm.signature")}
             maxH="120px"
-            mx="auto"
           />
         </Box>
       </VStack>

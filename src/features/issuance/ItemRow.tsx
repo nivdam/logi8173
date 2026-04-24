@@ -46,9 +46,9 @@ export const ItemRow = ({
           minW="6"
           h="6"
           borderRadius="full"
-          borderColor="sage.300"
-          color="sage.600"
-          _hover={{ bg: "sage.50", borderColor: "sage.500" }}
+          borderColor="forest.300"
+          color="forest.600"
+          _hover={{ bg: "forest.50", borderColor: "forest.500" }}
         >
           <CopyPlus size={12} />
         </Button>

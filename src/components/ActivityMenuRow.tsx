@@ -23,7 +23,7 @@ export const ActivityMenuRow = ({
       </Flex>
     </Flex>
     {isSelected ? (
-      <Box color="sage.500" display="inline-flex" flexShrink="0">
+      <Box color="forest.500" display="inline-flex" flexShrink="0">
         <CheckCircle2 size={18} fill="currentColor" stroke="white" strokeWidth={2.5} />
       </Box>
     ) : null}

@@ -24,8 +24,9 @@ export const RefreshDataButton = () => {
         <IconButton
           aria-label={t("common.refreshData")}
           variant="ghost"
-          size="sm"
+          size="md"
           borderRadius="full"
+          color="fg"
           onClick={handleRefresh}
           disabled={isRefreshing}
           css={{
@@ -39,9 +40,9 @@ export const RefreshDataButton = () => {
           }}
         >
           {isRefreshing ? (
-            <Spinner size="xs" color="sage.400" />
+            <Spinner size="sm" color="interactive" />
           ) : (
-            <RotateCw size={16} />
+            <RotateCw size={18} />
           )}
         </IconButton>
       </Tooltip.Trigger>

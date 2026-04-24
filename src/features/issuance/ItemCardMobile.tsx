@@ -48,7 +48,7 @@ export const ItemCardMobile = ({
           )}
         </Flex>
         <Flex align="center" gap="2" flexShrink={0}>
-          <Badge colorPalette="sage" size="sm" variant="solid">
+          <Badge colorPalette="gray" size="sm" variant="solid">
             x{line.qty}
           </Badge>
           <Accordion.ItemIndicator>

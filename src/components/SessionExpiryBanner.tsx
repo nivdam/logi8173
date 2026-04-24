@@ -1,4 +1,5 @@
-import { Button, Flex, Text } from "@chakra-ui/react"
+import { Button, Flex, Icon, Text } from "@chakra-ui/react"
+import { AlertTriangle } from "lucide-react"
 import { useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "../lib/use-auth"
 import { savePostLoginRedirect } from "../lib/auth-helpers"
@@ -23,21 +24,26 @@ export const SessionExpiryBanner = () => {
       gap="3"
       px={{ base: "4", md: "6" }}
       py="3"
-      bg="yellow.100"
-      color="yellow.900"
-      borderBottomWidth="1px"
-      borderColor="yellow.300"
+      bg="bg.muted"
+      color="fg"
+      borderBottomWidth="2px"
+      borderColor="warning"
       role="status"
       aria-live="polite"
     >
-      <Text textStyle="sm" fontWeight="500">
-        {t("auth.sessionExpiryWarning")}
-      </Text>
+      <Flex align="center" gap="2" minW="0">
+        <Icon color="warning" flexShrink={0}>
+          <AlertTriangle size={18} />
+        </Icon>
+        <Text textStyle="sm" fontWeight="500">
+          {t("auth.sessionExpiryWarning")}
+        </Text>
+      </Flex>
       <Button
         size="md"
         minH="44px"
         variant="solid"
-        colorPalette="yellow"
+        colorPalette="primary"
         onClick={handleLoginNow}
         flexShrink="0"
       >

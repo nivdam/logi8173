@@ -89,19 +89,19 @@ const ImportStatusBadge = ({ status }: { status: ImportRowStatus }) => {
 }
 
 const getStatusStyle = (status: ImportRowStatus): { label: string; bg: string; color: string } => {
-  if (status === "will_create") return { label: "חדש", bg: "sage.50", color: "sage.700" }
+  if (status === "will_create") return { label: "חדש", bg: "forest.50", color: "forest.700" }
   if (status === "will_update") return { label: "עדכון", bg: "sky.50", color: "sky.700" }
   if (status === "invalid") return { label: "שגיאה", bg: "rose.50", color: "red.600" }
   if (status === "duplicate_in_file") return { label: "כפול", bg: "sunburst.400/10", color: "sunburst.400" }
   if (status === "importing") return { label: "מייבא...", bg: "sky.50", color: "sky.600" }
-  if (status === "imported") return { label: "הושלם", bg: "sage.50", color: "sage.700" }
+  if (status === "imported") return { label: "הושלם", bg: "forest.50", color: "forest.700" }
   return { label: "נכשל", bg: "rose.50", color: "red.600" }
 }
 
 const getRowBackground = (status: ImportRowStatus): string => {
   if (status === "invalid" || status === "failed") return "rose.50/30"
   if (status === "duplicate_in_file") return "sunburst.400/5"
-  if (status === "imported") return "sage.50/30"
+  if (status === "imported") return "forest.50/30"
   return "transparent"
 }
 

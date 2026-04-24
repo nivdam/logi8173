@@ -59,7 +59,7 @@ export const PhoneActions = ({ phone }: Props) => {
               gap="1.5"
               onClick={handleCall}
             >
-              <Phone size={14} color="var(--chakra-colors-sage-600)" />
+              <Phone size={14} color="var(--chakra-colors-forest-600)" />
               <Text textStyle="xs">{t("soldiers.call")}</Text>
             </Button>
             <Button

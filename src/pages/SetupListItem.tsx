@@ -10,10 +10,10 @@ export const SetupListItem = ({ icon: Icon, text, index }: Props) => (
         w="8"
         h="8"
         borderRadius="lg"
-        bg="sage.100"
+        bg="forest.100"
         flexShrink={0}
       >
-        <Icon size={16} color="var(--chakra-colors-sage-600)" />
+        <Icon size={16} color="var(--chakra-colors-forest-600)" />
       </Flex>
       <Text textStyle="sm">{text}</Text>
     </Flex>

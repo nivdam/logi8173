@@ -23,7 +23,7 @@ export const ActivityCard = ({
     opacity={isClosed ? 0.65 : 1}
     onClick={onOpen}
     transition="border-color 0.15s ease, transform 0.15s ease, opacity 0.15s ease"
-    _hover={{ borderColor: "sage.300", transform: "translateY(-1px)" }}
+    _hover={{ borderColor: "forest.300", transform: "translateY(-1px)" }}
   >
     <Flex justify="space-between" align={{ base: "start", md: "center" }} direction={{ base: "column", md: "row" }} gap="4">
       <Stack gap="1">

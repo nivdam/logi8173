@@ -10,7 +10,7 @@ export const SharedFormLoading = () => (
     bg="bg"
     gap="4"
   >
-    <Spinner size="lg" color="sage.500" />
+    <Spinner size="lg" color="forest.500" />
     <Text color="fg.muted" textStyle="sm">{t("sharedForm.loading")}</Text>
   </Flex>
 )

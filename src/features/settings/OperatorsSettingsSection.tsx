@@ -179,7 +179,7 @@ export const OperatorsSettingsSection = ({
                       <Text fontWeight="600" textStyle="sm" lineClamp={1}>
                         {operator.fullName || operator.email}
                       </Text>
-                      <Badge colorPalette="sage" variant="subtle" flexShrink={0}>
+                      <Badge colorPalette="gray" variant="subtle" flexShrink={0}>
                         {t(`roles.${operator.role}`)}
                       </Badge>
                       {isCurrentOperator(operator) ? (

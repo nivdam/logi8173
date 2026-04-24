@@ -46,7 +46,7 @@ export const SharedFormItems = ({ items }: Props) => (
                 {item.name}
               </Text>
             </Flex>
-            <Text textStyle="sm" fontWeight="600" color="sage.600">
+            <Text textStyle="sm" fontWeight="600" color="forest.600">
               x{item.qty} {item.unitOfMeasure || ""}
             </Text>
           </Flex>

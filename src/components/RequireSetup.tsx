@@ -19,7 +19,7 @@ export const RequireSetup = ({ children }: Props) => {
     return (
       <Flex align="center" justify="center" minH="100dvh" bg="bg">
         <VStack gap="4">
-          <Spinner size="lg" color="sage.400" />
+          <Spinner size="lg" color="forest.400" />
           <Text color="fg.muted" textStyle="sm">
             {t("setup.checking")}
           </Text>
@@ -42,7 +42,7 @@ export const RequireSetup = ({ children }: Props) => {
         description={t("setup.genericErrorDescription")}
         technicalMessage={technicalMessage}
       >
-        <Button colorPalette="sage" variant="solid" w="100%" size="lg" onClick={handleRetry}>
+        <Button colorPalette="primary" variant="solid" w="100%" size="lg" onClick={handleRetry}>
           {t("setup.backendErrorRetryAction")}
         </Button>
       </AuthErrorCard>

@@ -221,7 +221,7 @@ export const OperatorProfileDialog = ({
                 )}
                 <Button
                   type="submit"
-                  colorPalette="sage"
+                  colorPalette="primary"
                   loading={isSaving}
                   disabled={!isValid}
                 >

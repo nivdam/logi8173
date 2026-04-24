@@ -20,7 +20,7 @@ export const UserAvatar = ({ name, avatarUrl, email, size = "32px" }: Props) => 
       justify="center"
       boxSize={size}
       borderRadius="full"
-      bg="sage.600"
+      bg="interactive"
       color="white"
       fontWeight="600"
       textStyle="sm"

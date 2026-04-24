@@ -50,7 +50,7 @@ export const DashboardPage = () => {
   if (isLoading) {
     return (
       <Flex justify="center" align="center" py="24">
-        <Spinner size="lg" color="sage.400" />
+        <Spinner size="lg" color="forest.400" />
       </Flex>
     )
   }
@@ -81,7 +81,7 @@ export const DashboardPage = () => {
           <RotateCcw size={16} />
           {t("dashboard.newReturn")}
         </Button>
-        <Button size="sm" borderRadius="lg" bg="sage.600" color="white" _hover={{ bg: "sage.700" }} css={animations.cardHover} onClick={() => navigate("/issue")}>
+        <Button size="sm" borderRadius="lg" bg="interactive" color="white" _hover={{ bg: "interactive.hover" }} css={animations.cardHover} onClick={() => navigate("/issue")}>
           <Plus size={16} />
           {t("dashboard.newIssuance")}
         </Button>
@@ -94,8 +94,8 @@ export const DashboardPage = () => {
         label={t("dashboard.totalItems")}
         value={dashboard.totalItems}
         icon={Package}
-        color="sage.600"
-        iconBg="sage.50"
+        color="forest.600"
+        iconBg="forest.50"
         link={t("dashboard.viewInventory")}
         index={0}
       />
@@ -143,7 +143,7 @@ export const DashboardPage = () => {
           <Flex align="center" gap="2">
             <Heading size="md" fontWeight="600">{t("dashboard.recentTransactions")}</Heading>
           </Flex>
-          <Flex align="center" gap="1" color="sage.500" cursor="pointer" _hover={{ color: "sage.700" }} css={{ transition: "color 0.15s ease" }}>
+          <Flex align="center" gap="1" color="forest.500" cursor="pointer" _hover={{ color: "forest.700" }} css={{ transition: "color 0.15s ease" }}>
             <Text textStyle="sm">{t("common.viewAll")}</Text>
             <ChevronLeft size={16} />
           </Flex>
@@ -175,8 +175,8 @@ export const DashboardPage = () => {
                 w="10"
                 h="10"
                 borderRadius="full"
-                bg={transaction.txType === "issue" ? "sage.100" : "sky.100"}
-                color={transaction.txType === "issue" ? "sage.700" : "sky.700"}
+                bg={transaction.txType === "issue" ? "forest.100" : "sky.100"}
+                color={transaction.txType === "issue" ? "forest.700" : "sky.700"}
                 fontWeight="600"
                 textStyle="sm"
                 flexShrink={0}
@@ -200,13 +200,13 @@ export const DashboardPage = () => {
                 px="2.5"
                 py="1"
                 borderRadius="full"
-                bg={transaction.txType === "issue" ? "sage.50" : transaction.txType === "return" ? "sky.50" : "gray.100"}
+                bg={transaction.txType === "issue" ? "forest.50" : transaction.txType === "return" ? "sky.50" : "gray.100"}
                 flexShrink={0}
               >
                 <Text
                   textStyle="xs"
                   fontWeight="500"
-                  color={transaction.txType === "issue" ? "sage.700" : transaction.txType === "return" ? "sky.700" : "gray.600"}
+                  color={transaction.txType === "issue" ? "forest.700" : transaction.txType === "return" ? "sky.700" : "gray.600"}
                 >
                   {getTransactionTypeLabel(transaction.txType)}
                 </Text>
@@ -236,7 +236,7 @@ export const DashboardPage = () => {
               <CalendarCheck size={18} />
               <Heading size="md" fontWeight="600">{t("nav.activities")}</Heading>
             </Flex>
-            <Flex align="center" gap="1" color="sage.500" cursor="pointer" _hover={{ color: "sage.700" }} css={{ transition: "color 0.15s ease" }}>
+            <Flex align="center" gap="1" color="forest.500" cursor="pointer" _hover={{ color: "forest.700" }} css={{ transition: "color 0.15s ease" }}>
               <Text textStyle="sm">{t("common.viewAll")}</Text>
               <ChevronLeft size={16} />
             </Flex>
@@ -305,7 +305,7 @@ export const DashboardPage = () => {
                   <Box h="2" bg="bg.muted" borderRadius="full" overflow="hidden">
                     <Box
                       h="full"
-                      bg={["sage.400", "sky.400", "sunburst.400", "rose.300", "sage.600"][index % 5]}
+                      bg={["forest.400", "sky.400", "sunburst.400", "rose.300", "forest.600"][index % 5]}
                       borderRadius="full"
                       css={{
                         width: `${(company.issuedCount / maxIssuedCount) * 100}%`,
