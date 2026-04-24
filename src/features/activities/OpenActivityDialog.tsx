@@ -15,6 +15,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { PackageSearch } from "lucide-react";
+import { ApiErrorState } from "../../components/ApiErrorState";
 import { EmptyState } from "../../components/EmptyState";
 import { FilterSelect } from "../../components/FilterSelect";
 import { SearchInput } from "../../components/SearchInput";
@@ -30,6 +31,8 @@ export const OpenActivityDialog = ({
   open,
   inventoryItems,
   isInventoryLoading,
+  inventoryError,
+  onRetryInventory,
   isSubmitting,
   onOpenChange,
   onSubmit,
@@ -184,6 +187,14 @@ export const OpenActivityDialog = ({
                             color="forest.400"
                           />
                         </Box>
+                      ) : inventoryError ? (
+                        <ApiErrorState
+                          error={inventoryError}
+                          title={t("activities.loadErrorTitle")}
+                          fallbackMessage={t("activities.loadErrorDescription")}
+                          actionLabel={t("common.retry")}
+                          onAction={onRetryInventory}
+                        />
                       ) : filteredInventory.length > 0 ? (
                         <Stack gap="2">
                           {filteredInventory.map((item) => (
@@ -239,6 +250,8 @@ type Props = {
   open: boolean;
   inventoryItems: InventoryItem[];
   isInventoryLoading: boolean;
+  inventoryError: unknown;
+  onRetryInventory: () => void;
   isSubmitting: boolean;
   onOpenChange: (details: { open: boolean }) => void;
   onSubmit: (values: OpenActivityFormValues) => void;

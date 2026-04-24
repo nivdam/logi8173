@@ -22,6 +22,7 @@ export const createInitialState = (): IssuanceFormState => ({
   receiverSignature: "",
   giverSignature: "",
   showSuccess: false,
+  hasSubmittedAndFailed: false,
 })
 
 const appendLine = (state: IssuanceFormState, line: IssuanceLineItem): IssuanceFormState => ({
@@ -30,7 +31,16 @@ const appendLine = (state: IssuanceFormState, line: IssuanceLineItem): IssuanceF
   expandedLineIds: [...state.expandedLineIds, line.lineId],
 })
 
-export const issuanceFormReducer = (state: IssuanceFormState, action: IssuanceFormAction): IssuanceFormState => {
+// Actions that modify transaction content — if a previous submit failed,
+// the next content edit regenerates clientTxId so the server treats it as a new attempt.
+const isContentAction = (type: IssuanceFormAction["type"]): boolean =>
+  type !== "SET_EXPANDED_LINE_IDS" &&
+  type !== "SHOW_SUCCESS" &&
+  type !== "RESTORE_DRAFT" &&
+  type !== "RESET" &&
+  type !== "MARK_SUBMIT_FAILED"
+
+const applyAction = (state: IssuanceFormState, action: IssuanceFormAction): IssuanceFormState => {
   switch (action.type) {
     case "SET_RECEIVER":
       return { ...state, receiver: action.payload }
@@ -116,17 +126,30 @@ export const issuanceFormReducer = (state: IssuanceFormState, action: IssuanceFo
     case "SHOW_SUCCESS":
       return { ...state, showSuccess: true, formId: action.payload.formId, serverTxId: action.payload.txId }
 
+    case "MARK_SUBMIT_FAILED":
+      return { ...state, hasSubmittedAndFailed: true }
+
     case "RESTORE_DRAFT":
       return {
         ...action.payload,
         showSuccess: false,
         formId: undefined,
         serverTxId: undefined,
+        hasSubmittedAndFailed: false,
       }
 
     case "RESET":
       return createInitialState()
   }
+}
+
+export const issuanceFormReducer = (state: IssuanceFormState, action: IssuanceFormAction): IssuanceFormState => {
+  const nextState = applyAction(state, action)
+  if (nextState === state) return state
+  if (state.hasSubmittedAndFailed && isContentAction(action.type)) {
+    return { ...nextState, clientTxId: createClientTxId(), hasSubmittedAndFailed: false }
+  }
+  return nextState
 }
 
 export type IssuanceFormState = {
@@ -141,6 +164,7 @@ export type IssuanceFormState = {
   receiverSignature: string
   giverSignature: string
   showSuccess: boolean
+  hasSubmittedAndFailed: boolean
 }
 
 export type IssuanceFormAction =
@@ -158,5 +182,6 @@ export type IssuanceFormAction =
   | { type: "SET_RECEIVER_SIGNATURE"; payload: string }
   | { type: "SET_GIVER_SIGNATURE"; payload: string }
   | { type: "SHOW_SUCCESS"; payload: { formId: string; txId: string } }
+  | { type: "MARK_SUBMIT_FAILED" }
   | { type: "RESTORE_DRAFT"; payload: IssuanceFormState }
   | { type: "RESET" }

@@ -189,6 +189,7 @@ export const useReturnForm = (activityId: string | undefined) => {
           dispatch({ type: "SHOW_SUCCESS", payload: { formId: result.formNumber || result.txId, txId: result.txId } })
         },
         onError: (error) => {
+          dispatch({ type: "MARK_SUBMIT_FAILED" })
           showApiErrorToast({
             actionLabel: t("returns.submitReturn"),
             error,

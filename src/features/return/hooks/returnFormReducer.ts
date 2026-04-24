@@ -23,6 +23,7 @@ export const createInitialState = (): ReturnFormState => ({
   giverSignature: "",
   receiverSignature: "",
   showSuccess: false,
+  hasSubmittedAndFailed: false,
 })
 
 const appendLine = (state: ReturnFormState, line: IssuanceLineItem): ReturnFormState => ({
@@ -31,7 +32,16 @@ const appendLine = (state: ReturnFormState, line: IssuanceLineItem): ReturnFormS
   expandedLineIds: [...state.expandedLineIds, line.lineId],
 })
 
-export const returnFormReducer = (state: ReturnFormState, action: ReturnFormAction): ReturnFormState => {
+// Actions that modify transaction content — if a previous submit failed,
+// the next content edit regenerates clientTxId so the server treats it as a new attempt.
+const isContentAction = (type: ReturnFormAction["type"]): boolean =>
+  type !== "SET_EXPANDED_LINE_IDS" &&
+  type !== "SHOW_SUCCESS" &&
+  type !== "RESTORE_DRAFT" &&
+  type !== "RESET" &&
+  type !== "MARK_SUBMIT_FAILED"
+
+const applyAction = (state: ReturnFormState, action: ReturnFormAction): ReturnFormState => {
   switch (action.type) {
 
     case "SET_GIVER":
@@ -192,6 +202,9 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
     case "SHOW_SUCCESS":
       return { ...state, showSuccess: true, formId: action.payload.formId, serverTxId: action.payload.txId }
 
+    case "MARK_SUBMIT_FAILED":
+      return { ...state, hasSubmittedAndFailed: true }
+
     case "RESTORE_DRAFT": {
       const rawIds = action.payload.selectedIssuedItemIds
       const restoredSelectedIds = rawIds instanceof Set
@@ -203,12 +216,22 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
         formId: undefined,
         serverTxId: undefined,
         selectedIssuedItemIds: restoredSelectedIds,
+        hasSubmittedAndFailed: false,
       }
     }
 
     case "RESET":
       return createInitialState()
   }
+}
+
+export const returnFormReducer = (state: ReturnFormState, action: ReturnFormAction): ReturnFormState => {
+  const nextState = applyAction(state, action)
+  if (nextState === state) return state
+  if (state.hasSubmittedAndFailed && isContentAction(action.type)) {
+    return { ...nextState, clientTxId: createClientTxId(), hasSubmittedAndFailed: false }
+  }
+  return nextState
 }
 
 export type ReturnFormState = {
@@ -224,6 +247,7 @@ export type ReturnFormState = {
   giverSignature: string
   receiverSignature: string
   showSuccess: boolean
+  hasSubmittedAndFailed: boolean
 }
 
 type ReturnFormDraft = Omit<ReturnFormState, "selectedIssuedItemIds"> & {
@@ -246,5 +270,6 @@ export type ReturnFormAction =
   | { type: "POPULATE_ALL_ISSUED"; payload: { items: SoldierIssuedItem[] } }
   | { type: "CLEAR_ALL_ISSUED" }
   | { type: "SHOW_SUCCESS"; payload: { formId: string; txId: string } }
+  | { type: "MARK_SUBMIT_FAILED" }
   | { type: "RESTORE_DRAFT"; payload: ReturnFormDraft }
   | { type: "RESET" }

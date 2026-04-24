@@ -21,7 +21,12 @@ export const ActivityContextCard = ({
   onRetrySnapshot,
 }: Props) => {
   const [isAddInventoryOpen, setIsAddInventoryOpen] = useState(false);
-  const { data: inventoryItems = [], isLoading: isInventoryLoading } = useInventory({ enabled: isAddInventoryOpen });
+  const {
+    data: inventoryItems = [],
+    isLoading: isInventoryLoading,
+    error: inventoryError,
+    refetch: refetchInventory,
+  } = useInventory({ enabled: isAddInventoryOpen });
   const addItemsToActivity = useAddItemsToActivity();
 
   if (isResolving) {
@@ -55,6 +60,10 @@ export const ActivityContextCard = ({
 
   const handleAddInventoryOpenChange = (details: { open: boolean }) => {
     setIsAddInventoryOpen(details.open);
+  };
+
+  const handleRetryInventory = () => {
+    void refetchInventory();
   };
 
   const handleAddInventory = (itemIds: string[]) => {
@@ -103,6 +112,8 @@ export const ActivityContextCard = ({
         open={isAddInventoryOpen}
         inventoryItems={inventoryItems}
         isInventoryLoading={isInventoryLoading}
+        inventoryError={inventoryError}
+        onRetryInventory={handleRetryInventory}
         isSubmitting={addItemsToActivity.isPending}
         onOpenChange={handleAddInventoryOpenChange}
         onSubmit={handleAddInventory}

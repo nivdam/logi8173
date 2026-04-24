@@ -58,7 +58,9 @@ const ActivitiesListPage = () => {
   } = useActivities();
   const {
     data: inventoryItems = [],
+    error: inventoryError,
     isPending: isInventoryPending,
+    refetch: refetchInventory,
   } = useInventory({ enabled: isOpenDialogOpen });
   const openActivity = useOpenActivity();
 
@@ -129,6 +131,10 @@ const ActivitiesListPage = () => {
 
   const handleRetry = () => {
     void refetchActivities();
+  };
+
+  const handleRetryInventory = () => {
+    void refetchInventory();
   };
 
   if (activitiesError) {
@@ -226,6 +232,8 @@ const ActivitiesListPage = () => {
         open={isOpenDialogOpen}
         inventoryItems={inventoryItems}
         isInventoryLoading={isInventoryPending}
+        inventoryError={inventoryError}
+        onRetryInventory={handleRetryInventory}
         isSubmitting={openActivity.isPending}
         onOpenChange={handleDialogOpenChange}
         onSubmit={handleOpenActivity}
