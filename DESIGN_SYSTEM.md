@@ -18,20 +18,22 @@ Living document. Every UI component must conform to these rules. Updated as the 
 
 Source of truth: `src/theme/foundation/colors.ts`
 
-### Primary — Sage (muted green-teal, from battalion logo)
+### Primary — Forest (deep mountain green, drawn from the battalion logo)
 
 | Scale | Hex | Usage |
 |-------|-----|-------|
-| `sage.50` | #f0f5f4 | Selection highlight |
-| `sage.100` | #d9e5e2 | Active nav background, selected states |
-| `sage.200` | #b3cbc5 | |
-| `sage.300` | #8db1a8 | |
-| `sage.400` | #7C9A92 | **Main brand color** |
-| `sage.500` | #6a857e | |
-| `sage.600` | #586e68 | |
-| `sage.700` | #465752 | Active nav text, emphasis |
-| `sage.800` | #34403d | |
-| `sage.900` | #222a28 | |
+| `forest.50` | #eaf2ed | Lightest tint |
+| `forest.100` | #d4e5d8 | Active nav background (light), subtle fills |
+| `forest.200` | #a8c9b0 | |
+| `forest.300` | #6fa079 | Primary border, focus ring |
+| `forest.400` | #4f8659 | **Primary surface in dark mode** |
+| `forest.500` | #3c6e45 | **Primary surface in light mode / main brand** |
+| `forest.600` | #2F6B45 | Pulled directly from the logo |
+| `forest.700` | #224d32 | Active nav text, emphasis (light) |
+| `forest.800` | #173724 | Active nav background (dark) |
+| `forest.900` | #0e2217 | Darkest shade |
+
+Use the semantic `primary` palette (`colorPalette="primary"`) instead of hardcoded forest shades whenever possible — `primary` automatically swaps to a red scale in combat mode.
 
 ### Danger — Rose (soft red)
 
@@ -60,19 +62,51 @@ Main: `sky.300` (#A0C4FF). Full scale in `colors.ts`.
 | Warning | `yellow.600` | #FDA828 | Low stock, pending |
 | Error | `red.600` | #F92457 | Shortages, errors (distinct from rose) |
 
-### Semantic Tokens
+### Semantic Tokens (three modes: Light / Dark / Combat)
 
-| Token | Light | Dark | Usage |
-|-------|-------|------|-------|
-| `bg` | `gray.50` | `gray.900` | Page background |
-| `bg.card` | `white` | `gray.800` | Cards, header, sidebar |
-| `bg.muted` | `gray.100` | `gray.700` | Hover backgrounds, subtle fills |
-| `fg` | `gray.900` | `white` | Primary text |
-| `fg.muted` | `gray.500` | `gray.400` | Secondary text, descriptions |
-| `border` | `gray.200` | `gray.700` | Dividers, card borders |
-| `success` | `green.600` | `green.600` | |
-| `warning` | `yellow.600` | `yellow.600` | |
-| `error` | `red.600` | `red.600` | |
+| Token | Light | Dark | Combat |
+|-------|-------|------|--------|
+| `bg` | `#F8F9FB` | `#0f1113` | `#0a0000` |
+| `bg.card` | `white` | `#181b1f` | `#140404` |
+| `bg.muted` | `gray.100` | `#23272c` | `#1c0707` |
+| `fg` | `gray.900` | `#eef1f3` | `#ff3838` |
+| `fg.muted` | `gray.500` | `#98a0ab` | `#a62020` |
+| `fg.onPrimary` | `white` | `#0a0d0f` | `#0a0000` |
+| `border` | `gray.200` | `#2a2f35` | `#3a0a0a` |
+| `border.focus` | `forest.400` | `forest.300` | `#7a1414` |
+| `primary` | `forest.500` | `forest.400` | `#ff2a2a` |
+| `interactive` | `forest.500` | `forest.400` | `#ff2a2a` |
+| `interactive.hover` | `forest.600` | `forest.300` | `#ff5c5c` |
+| `surface.selected` | `forest.100` | `forest.800` | `#2a0707` |
+| `success` | `green.600` | `green.600` | `#ff6666` |
+| `warning` | `yellow.600` | `yellow.600` | `#ff8c8c` |
+| `error` | `red.600` | `red.600` | `#ff2020` |
+
+**Chakra conditions mapping** (see `src/theme/index.ts`):
+
+```ts
+conditions: {
+  light:  '[data-theme="light"] &',
+  dark:   '[data-theme="dark"] &, [data-theme="combat"] &',  // combat inherits dark
+  combat: '[data-theme="combat"] &',                         // layered overrides
+}
+```
+
+Combat only defines overrides on top of dark — every token without an explicit `_combat` value falls through to the dark value automatically.
+
+### Semantic `primary` Color Palette
+
+`colorPalette="primary"` on Chakra components (Button, Badge, etc.) resolves to forest shades in light/dark and to a red scale in combat. Prefer this over `colorPalette="forest"` so combat mode works correctly.
+
+| Shade | Light / Dark | Combat |
+|-------|-------|--------|
+| 100 | `forest.100` | `#ff8080` |
+| 300 | `forest.300` | `#ff3838` |
+| 500 | `forest.500` | `#ff2020` |
+| 700 | `forest.700` | `#7a1414` |
+| 900 | `forest.900` | `#3a0a0a` |
+
+`primary.contrast` flips between `#ffffff` (light), `#0a0d0f` (dark — forest.400 is bright enough that white text misses WCAG), and `#0a0000` (combat). Chakra picks this automatically for solid button variants.
 
 ### Forbidden
 
@@ -165,10 +199,12 @@ All spacing uses Chakra's scale tokens (multiples of 4px):
 
 | Variant | Usage | Props |
 |---------|-------|-------|
-| Primary | Main actions (שמור, הנפק, התחבר) | `colorPalette="brand"` variant `"solid"` |
+| Primary | Main actions (שמור, הנפק, התחבר) | `colorPalette="primary"` variant `"solid"` |
 | Secondary | Secondary actions (ביטול, חזרה) | `variant="outline"` |
 | Danger | Destructive actions (מחק, סגור פעילות) | `colorPalette="red"` variant `"solid"` |
 | Ghost | Subtle actions (סינון, עוד) | `variant="ghost"` |
+
+Prefer `bg="interactive"` + `color="fg.onPrimary"` + `_hover={{ bg: "interactive.hover" }}` over hardcoded `forest.*` shades — both tokens adapt to combat mode automatically.
 
 ### Cards
 
@@ -281,13 +317,25 @@ All spacing uses Chakra's scale tokens (multiples of 4px):
 
 ---
 
-## Dark Mode
+## Color Modes
 
-- Follows system preference (no manual toggle in V1)
-- Every color must have both light and dark variants
-- Test both modes when adding new components
-- Background: `#F8F9FB` (light) / `gray.900` (dark)
-- Surface: `white` (light) / `gray.800` (dark)
+Three user-selectable modes controlled by a toggle in the header:
+
+| Mode | Intent | Primary | Background |
+|------|--------|---------|------------|
+| **Light** | Day / office use | Forest green | Near-white |
+| **Dark** | Evening / battery saver | Forest green (brighter) | Near-black, neutral |
+| **Combat** | Night field use, preserves night vision | Red | Pure black |
+
+### Rules
+
+- Choice is persisted to `localStorage` under `logi8173_color_mode`. Default is Light.
+- `useColorMode()` is a shared store — every consumer sees the same mode and re-renders on change.
+- An inline script in `index.html` writes `<html data-theme="…">` before React hydrates (no flash on reload).
+- Every new semantic token must define light + dark values. Combat overrides are optional — they inherit dark through the shared `_dark` condition.
+- In combat, status colors (`success`, `warning`, `error`, `rose`, `sky`) all collapse to red shades. Never rely on color alone to communicate meaning — always pair with an icon or explicit label.
+- Activity border color (header top border) keeps its OKLCh-generated per-activity color in every mode — this is the one exception, preserved so operators can still tell activities apart visually.
+- Signature canvas (`SignatureCanvas`) and saved signature rendering (`SignatureImage`) adapt pen/background colors to the current mode. Saved SVGs are sanitized (`<path>`-only whitelist) and re-stroked with `currentColor` so the same stored signature reads correctly in any mode.
 
 ---
 
@@ -298,8 +346,9 @@ All spacing uses Chakra's scale tokens (multiples of 4px):
 - `role="table"` / `role="row"` / `role="cell"` on grid-based tables
 - Keyboard navigation support (Tab, Enter, Space)
 - Color contrast: WCAG AA minimum (4.5:1 for body text, 3:1 for large text/icons/focus rings)
-- `brand.solid` is accent only — never use as body text color (contrast risk)
-- Validated pairings: white-on-brand, brand-on-white, muted-on-surface, red-on-white
+- `primary` is accent only — never use as body text color (contrast risk)
+- Validated pairings in each mode: contrast ≥ 13:1 on `bg.card` + `fg` in dark, ≥ 4.8:1 on `bg.card` + `fg` in combat (both pass WCAG AA)
+- In combat, status colors all shift to red — pair every status signal with an icon or text so meaning isn't color-only
 
 ---
 
@@ -367,14 +416,14 @@ Source: `src/components/`
 ## Navigation
 
 ### Desktop (≥md)
-- Sidebar: 200px wide, light background (`bg.card`)
-- Active: `sage.100` background, `sage.700` text, orange indicator bar (sunburst.400) on inline-start
+- Sidebar: 200px wide, `bg.card` background (adapts per mode)
+- Active: `surface.selected` background, `interactive` text, orange indicator bar (`sunburst.400`) on inline-start
 - CSS transitions on all states
 
 ### Mobile (<md)
-- Floating bottom nav bar: `sage.800` background, `borderRadius="2xl"`, side margins
-- Active: `sage.600` pill with white icon + label, orange top indicator
-- Inactive: muted sage icons, no label
+- Floating bottom nav bar: `forest.800` background (`#173724`), `borderRadius="2xl"`, side margins
+- Active: `forest.600` pill with white icon + label, orange top indicator
+- Inactive: `fg.muted` icons, no label
 - Label appears with CSS `max-width` + `opacity` transition (no DOM add/remove)
 
 ---
@@ -388,3 +437,4 @@ Source: `src/components/`
 | 2026-04-04 | Replaced color palette: brand.* → sage/rose/sky. Added semantic tokens (bg, bg.card, bg.muted, fg, border). Source of truth: `src/theme/` |
 | 2026-04-04 | Switched font from Inter to Heebo (Hebrew-optimized). Added interactive/focus/disabled tokens. xs restricted from critical text (Gemini review) |
 | 2026-04-05 | Phase 2: Bento Box dashboard, micro-animations system, shared components library, table/card responsive pattern, navigation design (desktop sidebar + mobile floating bar) |
+| 2026-04-24 | Phase 3 (Epic #86 stage 1): replaced sage with Forest palette, added three color modes (Light / Dark / Combat), new semantic `primary` palette with `_combat` overrides, ThemeToggle in header, FOUC-prevention inline script, SignatureImage/SignatureCanvas adapt to mode |

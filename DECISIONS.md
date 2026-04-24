@@ -45,3 +45,23 @@ Every async dependency in a form must have explicit UI states: loading, error, e
 ## No URL-Driven Activity Selection
 
 The issuance route stays `/issue` without activity ID in the URL. Activity selection is form state, not routing state. This keeps the routing simple and avoids stale URL bookmarks pointing to closed activities.
+
+## Three Color Modes — Light / Dark / Combat
+
+We ship three themes instead of only light/dark. Combat is a red-on-black night-vision mode specifically for operators on night activities — an always-white screen ruins dark adaptation in the field.
+
+Implementation:
+- A semantic `primary` palette resolves to forest green in light/dark and a red scale in combat. Components use `colorPalette="primary"` so Chakra handles the swap automatically.
+- Chakra custom conditions group combat under `_dark`: every unspecified combat token inherits the dark value, and only targeted overrides (bg, fg, primary, status colors) are declared under `_combat`. This keeps the semantic token table small.
+- `useColorMode()` is a module-level singleton using `useSyncExternalStore` — every component reads the same state, so toggling in the header re-renders the signature canvas, status badges, and anything else that reads the mode.
+- The stored mode is applied via an inline script in `index.html` before React hydrates to prevent a flash of the default theme on reload.
+
+**Not in scope yet:** auto-combat on signature screens (#83), print CSS to force light, palette picker, density tweaks. Tracked in Epic #86.
+
+## Signature Rendering Adapts to the Active Theme
+
+Saved signatures are stored as base-64 SVG on Drive. Before this change they baked a near-black stroke into the SVG, which disappeared against a dark/combat background.
+
+`SignatureImage` now parses every saved SVG through a `<path>`-only whitelist, strips scripts and event handlers, rewrites the stroke to `currentColor`, and renders inline — so the same stored signature reads correctly in every mode. The live `SignatureCanvas` picks pen/background colors from the current mode, and clears the parent form state when the mode changes so a visually-empty canvas can't submit as signed.
+
+**Applied in:** Profile dialog, issuance footer, return footer, shared form — all use `SignatureImage` for previews.
