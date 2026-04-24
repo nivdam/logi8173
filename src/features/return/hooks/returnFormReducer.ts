@@ -192,9 +192,6 @@ export const returnFormReducer = (state: ReturnFormState, action: ReturnFormActi
     case "SHOW_SUCCESS":
       return { ...state, showSuccess: true, formId: action.payload.formId, serverTxId: action.payload.txId }
 
-    case "REGENERATE_CLIENT_TX_ID":
-      return { ...state, clientTxId: createClientTxId() }
-
     case "RESTORE_DRAFT": {
       const rawIds = action.payload.selectedIssuedItemIds
       const restoredSelectedIds = rawIds instanceof Set
@@ -249,6 +246,5 @@ export type ReturnFormAction =
   | { type: "POPULATE_ALL_ISSUED"; payload: { items: SoldierIssuedItem[] } }
   | { type: "CLEAR_ALL_ISSUED" }
   | { type: "SHOW_SUCCESS"; payload: { formId: string; txId: string } }
-  | { type: "REGENERATE_CLIENT_TX_ID" }
   | { type: "RESTORE_DRAFT"; payload: ReturnFormDraft }
   | { type: "RESET" }

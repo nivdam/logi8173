@@ -131,9 +131,10 @@ Use this when a production deploy regresses critical flows (issuance, return, lo
 4. Operator A returns the same equipment
 5. Operator B refocuses → sees the return
 6. Confirm one issuance + one return in the activity transactions sheet — no duplicates
-7. Log out operator A, log in operator B on the same device → no flash of operator A's data
+7. **Retry-after-error test** (covers `clientTxId` idempotency): with DevTools Network tab open, throttle to Offline mid-submit → wait for the error toast → throttle back to Online → tap submit again. Verify exactly **one** row in the transactions sheet (not two) and the UI shows success (possibly with a "duplicate" info toast — that is the expected idempotency path).
+8. Log out operator A, log in operator B on the same device → no flash of operator A's data
 
-If any of the 7 steps fails → roll back immediately, then investigate.
+If any of the 8 steps fails → roll back immediately, then investigate.
 
 ## Recovery
 

@@ -116,9 +116,6 @@ export const issuanceFormReducer = (state: IssuanceFormState, action: IssuanceFo
     case "SHOW_SUCCESS":
       return { ...state, showSuccess: true, formId: action.payload.formId, serverTxId: action.payload.txId }
 
-    case "REGENERATE_CLIENT_TX_ID":
-      return { ...state, clientTxId: createClientTxId() }
-
     case "RESTORE_DRAFT":
       return {
         ...action.payload,
@@ -161,6 +158,5 @@ export type IssuanceFormAction =
   | { type: "SET_RECEIVER_SIGNATURE"; payload: string }
   | { type: "SET_GIVER_SIGNATURE"; payload: string }
   | { type: "SHOW_SUCCESS"; payload: { formId: string; txId: string } }
-  | { type: "REGENERATE_CLIENT_TX_ID" }
   | { type: "RESTORE_DRAFT"; payload: IssuanceFormState }
   | { type: "RESET" }

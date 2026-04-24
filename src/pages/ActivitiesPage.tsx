@@ -58,9 +58,7 @@ const ActivitiesListPage = () => {
   } = useActivities();
   const {
     data: inventoryItems = [],
-    error: inventoryError,
     isPending: isInventoryPending,
-    refetch: refetchInventory,
   } = useInventory({ enabled: isOpenDialogOpen });
   const openActivity = useOpenActivity();
 
@@ -131,13 +129,12 @@ const ActivitiesListPage = () => {
 
   const handleRetry = () => {
     void refetchActivities();
-    void refetchInventory();
   };
 
-  if (activitiesError || inventoryError) {
+  if (activitiesError) {
     return (
       <ApiErrorState
-        error={activitiesError || inventoryError}
+        error={activitiesError}
         title={t("activities.loadErrorTitle")}
         fallbackMessage={t("activities.loadErrorDescription")}
         actionLabel={t("common.retry")}
