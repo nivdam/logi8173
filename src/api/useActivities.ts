@@ -26,7 +26,7 @@ export const useOpenActivity = () => {
   return useMutation({
     mutationFn: (input: OpenActivityInput) =>
       api
-        .post<Activity | Activity[]>("activities.open", input)
+        .protectedPost<Activity | Activity[]>("activities.open", input)
         .then(normalizeSingleActivityResponse),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["activities"] })
@@ -40,7 +40,7 @@ export const useAddItemsToActivity = () => {
 
   return useMutation({
     mutationFn: (input: AddItemsToActivityInput) =>
-      api.post<ActivityDetails>("activities.addItems", input),
+      api.protectedPost<ActivityDetails>("activities.addItems", input),
     onSuccess: (_result, variables) => {
       queryClient.invalidateQueries({ queryKey: ["activities"] })
       queryClient.invalidateQueries({ queryKey: ["activities", variables.activityId] })
@@ -55,7 +55,7 @@ export const useCloseActivity = () => {
 
   return useMutation({
     mutationFn: (input: CloseActivityInput) =>
-      api.post<{ activityId: string; status: string; closedAt: string }>(
+      api.protectedPost<{ activityId: string; status: string; closedAt: string }>(
         "activities.close",
         input,
       ),
@@ -72,7 +72,7 @@ export const useReopenActivity = () => {
 
   return useMutation({
     mutationFn: (input: ReopenActivityInput) =>
-      api.post<{ activityId: string; status: string; reopenedAt: string }>(
+      api.protectedPost<{ activityId: string; status: string; reopenedAt: string }>(
         "activities.reopen",
         input,
       ),
