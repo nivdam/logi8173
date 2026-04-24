@@ -30,7 +30,7 @@ export const ReturnForm = () => {
     isLoading: isLoadingSnapshot,
     isError: isSnapshotError,
     refetch: refetchActivity,
-  } = useActivity(activeActivityId)
+  } = useActivity(activeActivityId, { poll: true })
   const snapshotItems = activityData?.snapshotItems ?? []
 
   useDirtyFormRegistration(FORM_REGISTRATION_ID, form.isFormDirty && !form.state.showSuccess)

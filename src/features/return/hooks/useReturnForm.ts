@@ -63,7 +63,7 @@ export const useReturnForm = (activityId: string | undefined) => {
 
   const totalItemCount = filledLines.reduce((sum, line) => sum + line.qty, 0)
 
-  const transactionsQuery = useTransactions(activityId ?? "")
+  const transactionsQuery = useTransactions(activityId ?? "", { poll: true })
   const transactions = transactionsQuery.data ?? []
 
   const soldierPersonalId = state.giver?.personalId
@@ -189,6 +189,7 @@ export const useReturnForm = (activityId: string | undefined) => {
           dispatch({ type: "SHOW_SUCCESS", payload: { formId: result.formNumber || result.txId, txId: result.txId } })
         },
         onError: (error) => {
+          dispatch({ type: "REGENERATE_CLIENT_TX_ID" })
           showApiErrorToast({
             actionLabel: t("returns.submitReturn"),
             error,

@@ -1,14 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "../lib/api"
-import { ADMIN_POLL_MS } from "./polling"
+import { REFERENCE_STALE_MS } from "./polling"
 import type { Company } from "../types"
 
-export const useCompanies = () =>
+export const useCompanies = (options?: { enabled?: boolean }) =>
   useQuery({
     queryKey: ["companies"],
     queryFn: () => api.get<Company[]>("companies.list"),
-    refetchInterval: ADMIN_POLL_MS,
-    staleTime: ADMIN_POLL_MS,
+    enabled: options?.enabled ?? true,
+    staleTime: REFERENCE_STALE_MS,
+    refetchOnWindowFocus: false,
   })
 
 export const useUpsertCompany = () => {

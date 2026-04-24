@@ -20,9 +20,9 @@ export const ActivityContextCard = ({
   isSnapshotError,
   onRetrySnapshot,
 }: Props) => {
-  const { data: inventoryItems = [], isLoading: isInventoryLoading } = useInventory();
-  const addItemsToActivity = useAddItemsToActivity();
   const [isAddInventoryOpen, setIsAddInventoryOpen] = useState(false);
+  const { data: inventoryItems = [], isLoading: isInventoryLoading } = useInventory({ enabled: isAddInventoryOpen });
+  const addItemsToActivity = useAddItemsToActivity();
 
   if (isResolving) {
     return (

@@ -26,7 +26,6 @@ export const createInitialState = (): IssuanceFormState => ({
 
 const appendLine = (state: IssuanceFormState, line: IssuanceLineItem): IssuanceFormState => ({
   ...state,
-  clientTxId: createClientTxId(),
   lines: [...state.lines, line],
   expandedLineIds: [...state.expandedLineIds, line.lineId],
 })
@@ -34,7 +33,7 @@ const appendLine = (state: IssuanceFormState, line: IssuanceLineItem): IssuanceF
 export const issuanceFormReducer = (state: IssuanceFormState, action: IssuanceFormAction): IssuanceFormState => {
   switch (action.type) {
     case "SET_RECEIVER":
-      return { ...state, clientTxId: createClientTxId(), receiver: action.payload }
+      return { ...state, receiver: action.payload }
 
     case "ADD_LINE_FROM_INVENTORY":
       return appendLine(state, createLineFromInventoryItem(action.payload))
@@ -48,7 +47,6 @@ export const issuanceFormReducer = (state: IssuanceFormState, action: IssuanceFo
     case "UPDATE_LINE_FIELD":
       return {
         ...state,
-        clientTxId: createClientTxId(),
         lines: state.lines.map((line) =>
           line.lineId === action.payload.lineId
             ? { ...line, [action.payload.field]: action.payload.value }
@@ -60,7 +58,6 @@ export const issuanceFormReducer = (state: IssuanceFormState, action: IssuanceFo
       const { lineId, item } = action.payload
       return {
         ...state,
-        clientTxId: createClientTxId(),
         lines: state.lines.map((line) =>
           line.lineId === lineId
             ? {
@@ -87,7 +84,6 @@ export const issuanceFormReducer = (state: IssuanceFormState, action: IssuanceFo
       const after = state.lines.slice(sourceIndex + 1)
       return {
         ...state,
-        clientTxId: createClientTxId(),
         lines: [...before, duplicated, ...after],
         expandedLineIds: [...state.expandedLineIds, duplicated.lineId],
       }
@@ -97,7 +93,6 @@ export const issuanceFormReducer = (state: IssuanceFormState, action: IssuanceFo
       const remaining = state.lines.filter((line) => line.lineId !== action.payload)
       return {
         ...state,
-        clientTxId: createClientTxId(),
         lines: remaining.length === 0 ? [createEmptyLine()] : remaining,
         expandedLineIds: state.expandedLineIds.filter((id) => id !== action.payload),
       }
@@ -107,24 +102,26 @@ export const issuanceFormReducer = (state: IssuanceFormState, action: IssuanceFo
       return { ...state, expandedLineIds: action.payload }
 
     case "SET_PERFORMED_AT":
-      return { ...state, clientTxId: createClientTxId(), performedAt: action.payload }
+      return { ...state, performedAt: action.payload }
 
     case "SET_GLOBAL_NOTES":
-      return { ...state, clientTxId: createClientTxId(), globalNotes: action.payload }
+      return { ...state, globalNotes: action.payload }
 
     case "SET_RECEIVER_SIGNATURE":
-      return { ...state, clientTxId: createClientTxId(), receiverSignature: action.payload }
+      return { ...state, receiverSignature: action.payload }
 
     case "SET_GIVER_SIGNATURE":
-      return { ...state, clientTxId: createClientTxId(), giverSignature: action.payload }
+      return { ...state, giverSignature: action.payload }
 
     case "SHOW_SUCCESS":
       return { ...state, showSuccess: true, formId: action.payload.formId, serverTxId: action.payload.txId }
 
+    case "REGENERATE_CLIENT_TX_ID":
+      return { ...state, clientTxId: createClientTxId() }
+
     case "RESTORE_DRAFT":
       return {
         ...action.payload,
-        clientTxId: createClientTxId(),
         showSuccess: false,
         formId: undefined,
         serverTxId: undefined,
@@ -164,5 +161,6 @@ export type IssuanceFormAction =
   | { type: "SET_RECEIVER_SIGNATURE"; payload: string }
   | { type: "SET_GIVER_SIGNATURE"; payload: string }
   | { type: "SHOW_SUCCESS"; payload: { formId: string; txId: string } }
+  | { type: "REGENERATE_CLIENT_TX_ID" }
   | { type: "RESTORE_DRAFT"; payload: IssuanceFormState }
   | { type: "RESET" }

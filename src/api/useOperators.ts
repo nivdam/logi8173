@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "../lib/api"
-import { ADMIN_POLL_MS } from "./polling"
+import { REFERENCE_STALE_MS } from "./polling"
 import type { AuthenticatedOperator, OperatorRole } from "../lib/auth.types"
 
 export const useSetPinnedActivity = () => {
@@ -29,8 +29,8 @@ export const useOperators = () =>
   useQuery({
     queryKey: ["operators"],
     queryFn: () => api.get<AuthenticatedOperator[]>("operators.list"),
-    refetchInterval: ADMIN_POLL_MS,
-    staleTime: ADMIN_POLL_MS,
+    staleTime: REFERENCE_STALE_MS,
+    refetchOnWindowFocus: false,
   })
 
 export const useUpsertOperator = () => {

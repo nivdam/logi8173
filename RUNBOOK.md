@@ -99,6 +99,42 @@ If using a custom domain instead of `*.vercel.app`:
 4. Wait for DNS propagation (can take up to 48 hours, usually minutes)
 5. Verify HTTPS works on the custom domain before testing login
 
+## Rollback
+
+Use this when a production deploy regresses critical flows (issuance, return, login, dashboard).
+
+### Trigger — roll back if, within 30 minutes of a deploy:
+
+- 2–3 independent operator reports of stale data, duplicate transactions, or inability to issue/return
+- Dashboard or inventory page fails to load for any operator
+- Auth flow breaks (login succeeds but `auth.me` fails, or operator is bounced)
+- Any data-integrity doubt (e.g., transaction written with wrong `operator_id`)
+
+### Frontend rollback (Vercel)
+
+1. Before deploying, record the current production deployment ID from Vercel dashboard (Deployments → copy the hash)
+2. To roll back: `vercel rollback <previous-deployment-url>` from the project root, or click **Promote to Production** on the previous deployment in the Vercel UI
+3. Verify: open the app in incognito, confirm version hash changed, run the 10-minute smoke test below
+
+### Apps Script rollback
+
+1. Before deploying a new Apps Script version, **create a new deployment** — never overwrite an existing one
+2. Keep the previous deployment's URL stored in a safe place (e.g., a pinned message in the ops Slack / notes app)
+3. To roll back: update the Vercel env var `APPS_SCRIPT_URL` to the previous deployment URL and redeploy the frontend (or use Vercel's instant env var update + redeploy)
+4. The old Apps Script deployment stays live until explicitly archived — this is the rollback target
+
+### 10-minute smoke test after every deploy
+
+1. Two operators (or two browsers) open the same active activity
+2. Operator A issues equipment to a test soldier
+3. Operator B refocuses their tab → sees the new transaction
+4. Operator A returns the same equipment
+5. Operator B refocuses → sees the return
+6. Confirm one issuance + one return in the activity transactions sheet — no duplicates
+7. Log out operator A, log in operator B on the same device → no flash of operator A's data
+
+If any of the 7 steps fails → roll back immediately, then investigate.
+
 ## Recovery
 
 ### Operator Access Broken

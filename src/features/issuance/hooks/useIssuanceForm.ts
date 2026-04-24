@@ -159,6 +159,7 @@ export const useIssuanceForm = (activityId: string | undefined) => {
           dispatch({ type: "SHOW_SUCCESS", payload: { formId: result.formNumber || result.txId, txId: result.txId } })
         },
         onError: (error) => {
+          dispatch({ type: "REGENERATE_CLIENT_TX_ID" })
           showApiErrorToast({
             actionLabel: t("issuance.submitIssuance"),
             error,

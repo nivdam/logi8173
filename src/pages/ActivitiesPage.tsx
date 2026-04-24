@@ -43,6 +43,13 @@ const ActivitiesListPage = () => {
   const { operator, operatorProfile } = useAuth();
   const { setActiveActivity } = useActiveActivity();
   const queryClient = useQueryClient();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<ActivityStatus | undefined>(
+    undefined,
+  );
+  const [isOpenDialogOpen, setIsOpenDialogOpen] = useState(
+    () => searchParams.get("new") === "1",
+  );
   const {
     data: activities = [],
     error: activitiesError,
@@ -54,16 +61,8 @@ const ActivitiesListPage = () => {
     error: inventoryError,
     isPending: isInventoryPending,
     refetch: refetchInventory,
-  } = useInventory();
+  } = useInventory({ enabled: isOpenDialogOpen });
   const openActivity = useOpenActivity();
-
-  const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<ActivityStatus | undefined>(
-    undefined,
-  );
-  const [isOpenDialogOpen, setIsOpenDialogOpen] = useState(
-    () => searchParams.get("new") === "1",
-  );
 
   useEffect(() => {
     if (searchParams.get("new") !== "1") return
