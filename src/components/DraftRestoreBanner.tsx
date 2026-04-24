@@ -1,5 +1,6 @@
 import { Button, Flex, Text } from "@chakra-ui/react"
 import { RotateCcw, Trash2 } from "lucide-react"
+import { t } from "../lib/i18n"
 
 export const DraftRestoreBanner = ({ onRestore, onDiscard }: DraftRestoreBannerProps) => (
   <Flex
@@ -7,23 +8,23 @@ export const DraftRestoreBanner = ({ onRestore, onDiscard }: DraftRestoreBannerP
     justify="space-between"
     gap="3"
     p="3"
-    bg="blue.subtle"
+    bg="bg.muted"
     borderWidth="1px"
-    borderColor="blue.muted"
+    borderColor="border"
     borderRadius="lg"
   >
     <Text textStyle="sm" fontWeight="500" color="fg">
-      נמצאה טיוטה שמורה
+      {t("draft.title")}
     </Text>
     <Flex gap="2" flexShrink={0}>
       <Button
         size="xs"
         variant="solid"
-        colorPalette="blue"
+        colorPalette="primary"
         onClick={onRestore}
       >
         <RotateCcw />
-        שחזר טיוטה
+        {t("draft.restore")}
       </Button>
       <Button
         size="xs"
@@ -31,7 +32,7 @@ export const DraftRestoreBanner = ({ onRestore, onDiscard }: DraftRestoreBannerP
         onClick={onDiscard}
       >
         <Trash2 />
-        התחל מחדש
+        {t("draft.discard")}
       </Button>
     </Flex>
   </Flex>

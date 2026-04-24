@@ -29,7 +29,7 @@ export const BottomNav = () => (
   >
     <Flex
       as="nav"
-      bg="sage.800"
+      bg="forest.800"
       borderRadius="2xl"
       justify="space-around"
       alignItems="center"
@@ -65,7 +65,7 @@ export const BottomNav = () => (
                 py="2"
                 css={{
                   background: isActive
-                    ? "var(--chakra-colors-sage-600)"
+                    ? "var(--chakra-colors-forest-600)"
                     : "transparent",
                   paddingInline: isActive ? "14px" : "0",
                   transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -81,7 +81,7 @@ export const BottomNav = () => (
                   <item.icon
                     size={isActive ? 18 : 20}
                     strokeWidth={isActive ? 2 : 1.5}
-                    color={isActive ? "white" : "#8db1a8"}
+                    color={isActive ? "white" : "var(--chakra-colors-fg-muted)"}
                   />
                 </Box>
                 {/* Label — always rendered, animated via width + opacity */}

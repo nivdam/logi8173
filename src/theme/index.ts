@@ -4,9 +4,17 @@ import { textStyles } from "./foundation/text-styles";
 import { shadows } from "./foundation/shadows";
 
 const config = defineConfig({
+  // Custom conditions drive Light / Dark / Combat modes via [data-theme="..."]
+  // on <html>. _dark also matches combat so dark tokens provide the base, and
+  // _combat layers targeted overrides only where needed.
+  conditions: {
+    light: '[data-theme="light"] &',
+    dark: '[data-theme="dark"] &, [data-theme="combat"] &',
+    combat: '[data-theme="combat"] &',
+  },
   globalCss: {
     html: {
-      colorPalette: "sage",
+      colorPalette: "forest",
       scrollBehavior: "smooth",
     },
     body: {
@@ -16,8 +24,8 @@ const config = defineConfig({
       lineHeight: "1.6",
     },
     "*::selection": {
-      bg: "sage.100",
-      color: "sage.900",
+      bg: "forest.100",
+      color: "forest.900",
     },
   },
   theme: {

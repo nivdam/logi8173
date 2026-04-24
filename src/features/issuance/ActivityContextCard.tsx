@@ -28,7 +28,7 @@ export const ActivityContextCard = ({
     return (
       <ContextCardShell>
         <Flex align="center" justify="center" py="6">
-          <Spinner size="md" color="sage.400" />
+          <Spinner size="md" color="forest.400" />
         </Flex>
       </ContextCardShell>
     );

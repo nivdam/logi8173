@@ -1,21 +1,51 @@
 import { defineTokens, defineSemanticTokens } from "@chakra-ui/react"
 
+// Combat shades for the `primary` semantic palette. Each entry mirrors the
+// corresponding forest.{shade} but swaps to a red scale in combat mode so
+// `colorPalette="primary"` stays readable under red night-vision.
+const PRIMARY_COMBAT_SHADES = {
+  50: "#ffb0b0",
+  100: "#ff8080",
+  200: "#ff5c5c",
+  300: "#ff3838",
+  400: "#ff2a2a",
+  500: "#ff2020",
+  600: "#c01010",
+  700: "#7a1414",
+  800: "#5c1010",
+  900: "#3a0a0a",
+} as const
+
+const primaryPaletteShades = () =>
+  Object.fromEntries(
+    Object.entries(PRIMARY_COMBAT_SHADES).map(([shade, combatValue]) => [
+      shade,
+      {
+        value: {
+          _light: `{colors.forest.${shade}}`,
+          _dark: `{colors.forest.${shade}}`,
+          _combat: combatValue,
+        },
+      },
+    ]),
+  )
+
 export const colors = defineTokens.colors({
-  sage: {
-    50: { value: "#f0f5f4" },
-    100: { value: "#d9e5e2" },
-    200: { value: "#b3cbc5" },
-    300: { value: "#8db1a8" },
-    400: { value: "#7C9A92" },
-    500: { value: "#6a857e" },
-    600: { value: "#586e68" },
-    700: { value: "#465752" },
-    800: { value: "#34403d" },
-    900: { value: "#222a28" },
-    solid: { value: "#586e68" },
+  forest: {
+    50: { value: "#eaf2ed" },
+    100: { value: "#d4e5d8" },
+    200: { value: "#a8c9b0" },
+    300: { value: "#6fa079" },
+    400: { value: "#4f8659" },
+    500: { value: "#3c6e45" },
+    600: { value: "#2F6B45" },
+    700: { value: "#224d32" },
+    800: { value: "#173724" },
+    900: { value: "#0e2217" },
+    solid: { value: "#2F6B45" },
     contrast: { value: "#ffffff" },
-    fg: { value: "#465752" },
-    focusRing: { value: "#7C9A92" },
+    fg: { value: "#224d32" },
+    focusRing: { value: "#4f8659" },
   },
   rose: {
     50: { value: "#fef5f5" },
@@ -69,38 +99,163 @@ export const colors = defineTokens.colors({
   },
 })
 
+// Combat mode (red night-vision) overrides dark values. Tokens without an
+// explicit _combat fall through to the _dark value via the conditions mapping
+// in src/theme/index.ts, where the `dark` condition matches both
+// [data-theme="dark"] and [data-theme="combat"].
 export const semanticColors = defineSemanticTokens.colors({
+  // Dark values use neutral near-blacks (from the combat/dark design system)
+  // rather than the gray scale, which is tuned for light-mode surfaces and
+  // reads as cool-slate in dark contexts.
   bg: {
-    DEFAULT: { value: { _light: "{colors.gray.50}", _dark: "{colors.gray.900}" } },
-    card: { value: { _light: "white", _dark: "{colors.gray.800}" } },
-    muted: { value: { _light: "{colors.gray.100}", _dark: "{colors.gray.700}" } },
+    DEFAULT: {
+      value: {
+        _light: "{colors.gray.50}",
+        _dark: "#0f1113",
+        _combat: "#0a0000",
+      },
+    },
+    card: {
+      value: {
+        _light: "white",
+        _dark: "#181b1f",
+        _combat: "#140404",
+      },
+    },
+    muted: {
+      value: {
+        _light: "{colors.gray.100}",
+        _dark: "#23272c",
+        _combat: "#1c0707",
+      },
+    },
     auth: {
       value: {
         _light: "linear-gradient(180deg, #f8faf8 0%, #eef2ef 100%)",
-        _dark: "{colors.gray.900}",
+        _dark: "#0f1113",
+        _combat: "#0a0000",
       },
     },
   },
   fg: {
-    DEFAULT: { value: { _light: "{colors.gray.900}", _dark: "white" } },
-    muted: { value: { _light: "{colors.gray.500}", _dark: "{colors.gray.400}" } },
-    onPrimary: { value: "white" },
+    DEFAULT: {
+      value: {
+        _light: "{colors.gray.900}",
+        _dark: "#eef1f3",
+        _combat: "#ff3838",
+      },
+    },
+    muted: {
+      value: {
+        _light: "{colors.gray.500}",
+        _dark: "#98a0ab",
+        _combat: "#a62020",
+      },
+    },
+    onPrimary: { value: { _light: "white", _dark: "#0a0d0f", _combat: "#0a0000" } },
   },
   border: {
-    DEFAULT: { value: { _light: "{colors.gray.200}", _dark: "{colors.gray.700}" } },
-    focus: { value: { _light: "{colors.sage.400}", _dark: "{colors.sage.300}" } },
-    error: { value: "{colors.red.600}" },
+    DEFAULT: {
+      value: {
+        _light: "{colors.gray.200}",
+        _dark: "#2a2f35",
+        _combat: "#3a0a0a",
+      },
+    },
+    focus: {
+      value: {
+        _light: "{colors.forest.400}",
+        _dark: "{colors.forest.300}",
+        _combat: "#7a1414",
+      },
+    },
+    error: { value: { _light: "{colors.red.600}", _dark: "{colors.red.600}", _combat: "#ff2020" } },
   },
-  success: { value: "{colors.green.600}" },
-  warning: { value: "{colors.yellow.600}" },
-  error: { value: "{colors.red.600}" },
+  primary: {
+    DEFAULT: {
+      value: {
+        _light: "{colors.forest.500}",
+        _dark: "{colors.forest.400}",
+        _combat: "#ff2a2a",
+      },
+    },
+    // `solid` and `contrast` drive Chakra's solid button variant when used with
+    // colorPalette="primary". contrast flips to near-black in dark because the
+    // dark primary (forest.400) is light enough that white text has poor
+    // contrast; combat flips to near-black on the red.
+    solid: {
+      value: {
+        _light: "{colors.forest.500}",
+        _dark: "{colors.forest.400}",
+        _combat: "#ff2a2a",
+      },
+    },
+    contrast: {
+      value: {
+        _light: "#ffffff",
+        _dark: "#0a0d0f",
+        _combat: "#0a0000",
+      },
+    },
+    fg: {
+      value: {
+        _light: "{colors.forest.700}",
+        _dark: "{colors.forest.200}",
+        _combat: "#ffb0b0",
+      },
+    },
+    focusRing: {
+      value: {
+        _light: "{colors.forest.400}",
+        _dark: "{colors.forest.400}",
+        _combat: "#ff5c5c",
+      },
+    },
+    // Full palette shades so Chakra's `colorPalette="primary"` resolves correctly
+    // in all modes. Light/dark fall through to the forest palette; combat swaps
+    // to a red scale for night-vision safety.
+    ...primaryPaletteShades(),
+  },
+  success: { value: { _light: "{colors.green.600}", _dark: "{colors.green.600}", _combat: "#ff6666" } },
+  warning: { value: { _light: "{colors.yellow.600}", _dark: "{colors.yellow.600}", _combat: "#ff8c8c" } },
+  error: { value: { _light: "{colors.red.600}", _dark: "{colors.red.600}", _combat: "#ff2020" } },
   interactive: {
-    DEFAULT: { value: { _light: "{colors.sage.600}", _dark: "{colors.sage.400}" } },
-    hover: { value: { _light: "{colors.sage.700}", _dark: "{colors.sage.300}" } },
-    disabled: { value: { _light: "{colors.gray.300}", _dark: "{colors.gray.600}" } },
+    DEFAULT: {
+      value: {
+        _light: "{colors.forest.500}",
+        _dark: "{colors.forest.400}",
+        _combat: "#ff2a2a",
+      },
+    },
+    hover: {
+      value: {
+        _light: "{colors.forest.600}",
+        _dark: "{colors.forest.300}",
+        _combat: "#ff5c5c",
+      },
+    },
+    disabled: {
+      value: {
+        _light: "{colors.gray.300}",
+        _dark: "{colors.gray.600}",
+        _combat: "#5e1515",
+      },
+    },
   },
   surface: {
-    selected: { value: { _light: "{colors.sage.100}", _dark: "{colors.sage.900}" } },
-    disabled: { value: { _light: "{colors.gray.100}", _dark: "{colors.gray.800}" } },
+    selected: {
+      value: {
+        _light: "{colors.forest.100}",
+        _dark: "{colors.forest.800}",
+        _combat: "#2a0707",
+      },
+    },
+    disabled: {
+      value: {
+        _light: "{colors.gray.100}",
+        _dark: "{colors.gray.800}",
+        _combat: "#1c0707",
+      },
+    },
   },
 })

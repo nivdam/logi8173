@@ -16,8 +16,8 @@ export const SelectedActivityDisplay = ({
       w="10"
       h="10"
       borderRadius="full"
-      bg="sage.100"
-      color="sage.700"
+      bg="forest.100"
+      color="forest.700"
       flexShrink={0}
     >
       <ClipboardList size={20} />
@@ -27,13 +27,13 @@ export const SelectedActivityDisplay = ({
         <Text textStyle="sm" fontWeight="600">
           {activity.name}
         </Text>
-        <Badge colorPalette="sage" size="sm">
+        <Badge colorPalette="gray" size="sm">
           {getActivityTypeLabel(activity.activityType)}
         </Badge>
       </Flex>
       {isLoadingSnapshot ? (
         <Flex align="center" gap="2">
-          <Spinner size="xs" color="sage.400" />
+          <Spinner size="xs" color="forest.400" />
           <Text textStyle="xs" color="fg.muted">
             {t("issuance.loadingSnapshot")}
           </Text>

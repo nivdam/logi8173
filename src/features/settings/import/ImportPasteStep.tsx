@@ -102,10 +102,10 @@ export const ImportPasteStep = ({ entity, onParse, onImportFromUrl }: ImportPast
         <Box
           borderWidth="1px"
           borderStyle="dashed"
-          borderColor={isDraggingFile ? "sage.500" : "border"}
+          borderColor={isDraggingFile ? "forest.500" : "border"}
           borderRadius="xl"
           p="4"
-          bg={isDraggingFile ? "sage.50" : "bg.subtle"}
+          bg={isDraggingFile ? "forest.50" : "bg.subtle"}
           transition="all 0.2s"
           onDragEnter={(event) => {
             event.preventDefault()
@@ -164,9 +164,9 @@ export const ImportPasteStep = ({ entity, onParse, onImportFromUrl }: ImportPast
         </Text>
         <Button
           size="sm"
-          bg="sage.600"
+          bg="interactive"
           color="white"
-          _hover={{ bg: "sage.700" }}
+          _hover={{ bg: "interactive.hover" }}
           disabled={!rawText.trim()}
           onClick={handleParseClick}
         >

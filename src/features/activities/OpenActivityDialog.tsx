@@ -156,7 +156,7 @@ export const OpenActivityDialog = ({
                     </Stack>
                     <Badge
                       alignSelf="flex-start"
-                      colorPalette="sage"
+                      colorPalette="primary"
                       variant="subtle"
                     >
                       {t("activities.selectedItemsCount")} {selectedCount}
@@ -181,7 +181,7 @@ export const OpenActivityDialog = ({
                             display="block"
                             mx="auto"
                             size="md"
-                            color="sage.400"
+                            color="forest.400"
                           />
                         </Box>
                       ) : filteredInventory.length > 0 ? (
@@ -220,7 +220,7 @@ export const OpenActivityDialog = ({
                 </Dialog.ActionTrigger>
                 <Button
                   type="submit"
-                  colorPalette="sage"
+                  colorPalette="primary"
                   loading={isSubmitting}
                   disabled={!isValid}
                 >

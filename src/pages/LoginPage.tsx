@@ -74,7 +74,7 @@ export const LoginPage = () => {
 
           {isSigningIn ? (
             <VStack gap="3" role="status" aria-live="polite">
-              <Spinner size="lg" color="sage.400" />
+              <Spinner size="lg" color="forest.400" />
               <Text textStyle="sm" color="fg.muted">
                 {t("auth.signingIn")}
               </Text>

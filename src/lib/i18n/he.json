@@ -580,5 +580,18 @@
     "warehouse_operator": "רס\"פ / מנפיק מחסן",
     "commander": "מפקד",
     "viewer": "צופה"
+  },
+  "theme": {
+    "toggleAriaLabel": "החלף מצב תצוגה",
+    "modes": {
+      "light": "בהיר",
+      "dark": "כהה",
+      "combat": "לחימה"
+    }
+  },
+  "draft": {
+    "title": "נמצאה טיוטה שמורה",
+    "restore": "שחזר טיוטה",
+    "discard": "התחל מחדש"
   }
 }

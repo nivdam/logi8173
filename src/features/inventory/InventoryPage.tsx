@@ -193,9 +193,9 @@ export const InventoryPage = () => {
             <Button
               size="md"
               borderRadius="lg"
-              bg="sage.600"
+              bg="interactive"
               color="white"
-              _hover={{ bg: "sage.700" }}
+              _hover={{ bg: "interactive.hover" }}
               onClick={editable.addRow}
             >
               <Plus size={14} />
@@ -254,7 +254,7 @@ export const InventoryPage = () => {
         {hasActiveFilters ? (
           <Text
             textStyle="xs"
-            color="sage.600"
+            color="forest.600"
             cursor="pointer"
             _hover={{ textDecoration: "underline" }}
             onClick={clearAll}
@@ -266,7 +266,7 @@ export const InventoryPage = () => {
 
       {isLoading ? (
         <Flex justify="center" py="16">
-          <Spinner size="lg" color="sage.400" />
+          <Spinner size="lg" color="forest.400" />
         </Flex>
       ) : error ? (
         <ApiErrorState

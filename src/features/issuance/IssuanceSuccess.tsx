@@ -97,7 +97,7 @@ export const IssuanceSuccess = ({ formId, activityId, txId, receiver, lines, ite
                     </Text>
                   )}
                 </Flex>
-                <Text textStyle="sm" fontWeight="600" color="sage.600">
+                <Text textStyle="sm" fontWeight="600" color="forest.600">
                   x{line.qty} {line.unitOfMeasure}
                 </Text>
               </Flex>
@@ -111,10 +111,10 @@ export const IssuanceSuccess = ({ formId, activityId, txId, receiver, lines, ite
         <Button
           flex="2"
           size="lg"
-          bg="sage.600"
+          bg="interactive"
           color="white"
           borderRadius="xl"
-          _hover={{ bg: "sage.700" }}
+          _hover={{ bg: "interactive.hover" }}
           onClick={onNewIssuance}
         >
           <Plus size={18} />

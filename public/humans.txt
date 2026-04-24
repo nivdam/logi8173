@@ -1,0 +1,23 @@
+/* TEAM */
+Project: Logi8173
+Created by: ניב דמינוביץ
+Maintained by: Logi8173 team
+UI Designer: Niv Damianovich
+
+/* PRODUCT */
+Logi8173 is a battalion logistics system for inventory, issuance, returns,
+and traceable operational records.
+
+/* STACK */
+Frontend: React
+Proxy/API: Vercel
+Backend: Google Apps Script
+Data: Google Sheets, Google Drive
+
+/* CONTACT */
+Organization: גדח"ן 8173
+
+/* META */
+Location: Israel
+Last updated: 2026-04-24
+Language: Hebrew / English

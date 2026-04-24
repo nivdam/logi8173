@@ -1,4 +1,4 @@
-import { Box, Flex, Text } from "@chakra-ui/react"
+import { Box, Circle, Flex, Float, IconButton, Text } from "@chakra-ui/react"
 import {
   PopoverRoot,
   PopoverTrigger,
@@ -7,7 +7,7 @@ import {
   PopoverArrow,
   PopoverBody,
 } from "@chakra-ui/react"
-import { Circle } from "lucide-react"
+import { Circle as CircleIcon, Users } from "lucide-react"
 import { useOnlineOperators } from "../api"
 import { t } from "../lib/i18n"
 import type { OnlineOperator } from "../types"
@@ -15,7 +15,7 @@ import type { OnlineOperator } from "../types"
 const OnlineOperatorRow = ({ operator }: OnlineOperatorRowProps) => (
   <Flex align="center" gap="2" py="1">
     <Box color="green.500" flexShrink={0}>
-      <Circle size={8} fill="currentColor" />
+      <CircleIcon size={8} fill="currentColor" />
     </Box>
     <Text textStyle="sm" truncate>
       {operator.fullName}
@@ -34,27 +34,29 @@ export const OnlineOperatorsBadge = () => {
   return (
     <PopoverRoot positioning={{ placement: "bottom-end" }}>
       <PopoverTrigger asChild>
-        <Flex
-          align="center"
-          gap="1.5"
-          px="2.5"
-          py="1.5"
-          minH="11"
-          minW="11"
-          borderRadius="full"
-          cursor="pointer"
-          bg="green.50"
-          _hover={{ bg: "green.100" }}
-          role="button"
+        <IconButton
           aria-label={`${count} ${t("presence.onlineCount")}`}
+          variant="ghost"
+          size="md"
+          borderRadius="full"
+          color="fg"
+          position="relative"
         >
-          <Box color="green.500">
-            <Circle size={8} fill="currentColor" />
-          </Box>
-          <Text textStyle="xs" fontWeight="600" color="green.700">
-            {count}
-          </Text>
-        </Flex>
+          <Users size={18} />
+          <Float placement="top-end" offsetX="1" offsetY="1">
+            <Circle
+              size="4"
+              bg="success"
+              color="fg.onPrimary"
+              fontSize="9px"
+              fontWeight="700"
+              borderWidth="2px"
+              borderColor="bg.card"
+            >
+              {count}
+            </Circle>
+          </Float>
+        </IconButton>
       </PopoverTrigger>
       <PopoverPositioner>
         <PopoverContent minW="180px" maxW="260px">

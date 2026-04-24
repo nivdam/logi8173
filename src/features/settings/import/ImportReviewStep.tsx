@@ -65,7 +65,7 @@ export const ImportReviewStep = <T extends Record<string, unknown>>({
       >
         <Flex gap="4" flexWrap="wrap">
           {willCreateCount > 0 && (
-            <ImportSummaryBadge count={willCreateCount} label={t("settings.import.willCreate")} color="sage.700" bg="sage.50" />
+            <ImportSummaryBadge count={willCreateCount} label={t("settings.import.willCreate")} color="forest.700" bg="forest.50" />
           )}
           {willUpdateCount > 0 && (
             <ImportSummaryBadge count={willUpdateCount} label={t("settings.import.willUpdate")} color="sky.700" bg="sky.50" />
@@ -90,7 +90,7 @@ export const ImportReviewStep = <T extends Record<string, unknown>>({
         <Flex
           p="3"
           borderRadius="lg"
-          bg={result.failedCount > 0 ? "sunburst.400/10" : "sage.50"}
+          bg={result.failedCount > 0 ? "sunburst.400/10" : "forest.50"}
           gap="3"
           align="center"
           flexWrap="wrap"
@@ -123,9 +123,9 @@ export const ImportReviewStep = <T extends Record<string, unknown>>({
         {!result && (
           <Button
             size="sm"
-            bg="sage.600"
+            bg="interactive"
             color="white"
-            _hover={{ bg: "sage.700" }}
+            _hover={{ bg: "interactive.hover" }}
             disabled={isImportDisabled}
             onClick={handleImport}
           >

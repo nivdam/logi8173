@@ -122,7 +122,7 @@ export const IssuanceHeader = ({
           closeOnSelect
           locale="he-IL"
           timeZone={getLocalTimeZone()}
-          colorPalette="sage"
+          colorPalette="primary"
           positioning={{ placement: "bottom-start" }}
         >
           <DatePicker.Label>
@@ -146,14 +146,14 @@ export const IssuanceHeader = ({
                 borderRadius="xl"
                 css={{
                   "& [data-selected]": {
-                    bg: "var(--chakra-colors-sage-600)",
+                    bg: "var(--chakra-colors-forest-600)",
                     color: "white",
                     borderRadius: "var(--chakra-radii-md)",
                     fontWeight: "700",
                   },
                   "& [data-today]": {
                     borderWidth: "2px",
-                    borderColor: "var(--chakra-colors-sage-400)",
+                    borderColor: "var(--chakra-colors-forest-400)",
                     borderRadius: "var(--chakra-radii-md)",
                   },
                   "& [data-outside-range]": {

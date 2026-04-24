@@ -104,7 +104,7 @@ export const ActivitySelector = () => {
             <Flex align="center" gap="2" minW="0">
               <Image src={logo} alt={t("app.battalion")} h="32px" w="auto" />
               <Flex direction="column" align="flex-start" lineHeight="1.1" minW="0">
-                <Text textStyle="sm" fontWeight="600" truncate maxW="100%">
+                <Text textStyle="sm" fontWeight="600" color="fg" truncate maxW="100%">
                   {triggerLabel}
                 </Text>
                 {triggerCaption ? (
@@ -183,7 +183,7 @@ export const ActivitySelector = () => {
                 <Button variant="ghost" onClick={handleCancelSwitch}>
                   {t("activitySelector.dirtyConfirmCancel")}
                 </Button>
-                <Button colorPalette="sage" onClick={handleConfirmSwitch}>
+                <Button colorPalette="primary" onClick={handleConfirmSwitch}>
                   {t("activitySelector.dirtyConfirmSwitch")}
                 </Button>
               </Dialog.Footer>

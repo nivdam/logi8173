@@ -24,7 +24,7 @@ export const ItemsSection = ({
           {t("issuance.itemsSection")}
         </Heading>
         {lines.length > 0 && (
-          <Badge colorPalette="sage" size="sm">
+          <Badge colorPalette="gray" size="sm">
             {lines.length} {t("issuance.reviewItems")}
           </Badge>
         )}
@@ -101,8 +101,8 @@ export const ItemsSection = ({
           size="sm"
           borderRadius="lg"
           onClick={onAddEmptyLine}
-          color="sage.600"
-          borderColor="sage.300"
+          color="forest.600"
+          borderColor="forest.300"
         >
           <Plus size={16} />
           {t("issuance.addRow")}

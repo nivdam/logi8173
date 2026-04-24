@@ -27,7 +27,7 @@ export const SettingsSectionCard = ({
           {description}
         </Text>
       </Box>
-      <Button ms="auto" size="sm" onClick={onAction} colorPalette="sage" aria-label={actionLabel}>
+      <Button ms="auto" size="sm" onClick={onAction} colorPalette="primary" aria-label={actionLabel}>
         <Plus size={16} />
         <Box as="span" display={{ base: "none", sm: "inline" }}>
           {actionLabel}

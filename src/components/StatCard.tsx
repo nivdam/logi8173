@@ -2,7 +2,7 @@ import { Flex, Heading, Text } from "@chakra-ui/react"
 import type { LucideIcon } from "lucide-react"
 import { animations } from "../theme/animations"
 
-export const StatCard = ({ icon: Icon, value, label, color = "sage.600", bgTint = "sage.50", index = 0 }: Props) => (
+export const StatCard = ({ icon: Icon, value, label, color = "forest.600", bgTint = "forest.50", index = 0 }: Props) => (
   <Flex
     direction="column"
     gap={{ base: "2", md: "3" }}

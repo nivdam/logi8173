@@ -13,6 +13,7 @@ import { OnlineOperatorsBadge } from "./OnlineOperatorsBadge";
 import { OperatorProfileDialog } from "./OperatorProfileDialog";
 import { RefreshDataButton } from "./RefreshDataButton";
 import { SessionExpiryBanner } from "./SessionExpiryBanner";
+import { ThemeToggle } from "./ThemeToggle";
 import { UserAvatar } from "./UserAvatar";
 import { showApiErrorToast } from "../lib/api-error";
 import { useSaveOperatorProfile } from "../features/operator-profile/useSaveOperatorProfile";
@@ -71,6 +72,7 @@ export const AppLayout = () => {
 
         <Flex ms="auto" align="center" gap="2">
           <OnlineOperatorsBadge />
+          <ThemeToggle />
           <RefreshDataButton />
           {operator ? (
             <Menu.Root positioning={{ placement: "bottom-end" }}>
@@ -83,6 +85,7 @@ export const AppLayout = () => {
                     />
                     <Text
                       textStyle="sm"
+                      color="fg"
                       display={{ base: "none", md: "block" }}
                     >
                       {accountDisplayName}

@@ -3,17 +3,25 @@ import { Box, Button, Flex, Text } from "@chakra-ui/react";
 import ReactSignatureCanvas from "react-signature-canvas";
 import { Eraser } from "lucide-react";
 import { t } from "../lib/i18n";
+import { useColorMode } from "../lib/use-color-mode";
+import type { ColorMode } from "../lib/color-mode";
 
 const CANVAS_HEIGHT = 160;
-// Mirrors theme tokens: SIGNATURE_STROKE_COLOR === colors.gray.900, SIGNATURE_BG_COLOR === white.
-// Kept as raw hex because SVG strings and react-signature-canvas props don't accept Chakra tokens.
-const SIGNATURE_STROKE_COLOR = "#1a1a1a";
-const SIGNATURE_BG_COLOR = "#ffffff";
+
+// react-signature-canvas doesn't accept Chakra tokens, so we mirror the mode
+// values as raw hex. Saved SVGs use currentColor (rewritten by SignatureImage),
+// so the stroke value stored here is only for the live canvas preview.
+const CANVAS_COLORS: Record<ColorMode, { stroke: string; bg: string }> = {
+  light: { stroke: "#16171A", bg: "#ffffff" },
+  dark: { stroke: "#eef1f3", bg: "#181b1f" },
+  combat: { stroke: "#ff3838", bg: "#140404" },
+};
 
 const pointGroupsToSvg = (
   pointGroups: Array<Array<{ x: number; y: number }>>,
   width: number,
   height: number,
+  strokeColor: string,
 ): string => {
   const paths = pointGroups
     .map((group) => {
@@ -30,13 +38,15 @@ const pointGroupsToSvg = (
     })
     .filter((path) => path !== "");
 
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><path d="${paths.join(" ")}" stroke="${SIGNATURE_STROKE_COLOR}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><path d="${paths.join(" ")}" stroke="${strokeColor}" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 };
 
 export const SignatureCanvas = ({ onSign, signatureData }: Props) => {
   const canvasRef = useRef<ReactSignatureCanvas>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [canvasWidth, setCanvasWidth] = useState(0);
+  const { colorMode } = useColorMode();
+  const { stroke: strokeColor, bg: bgColor } = CANVAS_COLORS[colorMode];
 
   useEffect(() => {
     const element = containerRef.current;
@@ -52,6 +62,17 @@ export const SignatureCanvas = ({ onSign, signatureData }: Props) => {
     return () => observer.disconnect();
   }, []);
 
+  // `key={colorMode}` below remounts the canvas when mode changes. Keep the
+  // form state in sync so we don't leave a visually-empty canvas while the
+  // parent still thinks there's a saved signature — that would let an empty
+  // transaction get submitted.
+  useEffect(() => {
+    if (signatureData !== "") {
+      onSign("");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- clear only when the canvas remounts on mode change
+  }, [colorMode]);
+
   const handleEnd = () => {
     if (!canvasRef.current) return;
 
@@ -64,7 +85,12 @@ export const SignatureCanvas = ({ onSign, signatureData }: Props) => {
     const pointGroups = canvasRef.current.toData() as Array<
       Array<{ x: number; y: number }>
     >;
-    const svgString = pointGroupsToSvg(pointGroups, canvasWidth, CANVAS_HEIGHT);
+    const svgString = pointGroupsToSvg(
+      pointGroups,
+      canvasWidth,
+      CANVAS_HEIGHT,
+      strokeColor,
+    );
     const svgBase64 = `data:image/svg+xml;base64,${btoa(svgString)}`;
     onSign(svgBase64);
   };
@@ -97,20 +123,21 @@ export const SignatureCanvas = ({ onSign, signatureData }: Props) => {
       <Box
         ref={containerRef}
         borderWidth="2px"
-        borderColor={signatureData ? "sage.300" : "border"}
+        borderColor={signatureData ? "forest.300" : "border"}
         borderStyle="dashed"
         borderRadius="xl"
         overflow="hidden"
-        bg="white"
+        bg="bg.card"
         role="img"
         aria-label={t("issuance.signHere")}
         css={{ transition: "border-color 0.2s ease", touchAction: "none" }}
         height={`${CANVAS_HEIGHT}px`}
       >
         <ReactSignatureCanvas
+          key={colorMode}
           ref={canvasRef}
-          penColor={SIGNATURE_STROKE_COLOR}
-          backgroundColor={SIGNATURE_BG_COLOR}
+          penColor={strokeColor}
+          backgroundColor={bgColor}
           canvasProps={{
             width: canvasWidth || 1,
             height: CANVAS_HEIGHT,

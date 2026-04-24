@@ -193,7 +193,7 @@ export const ImportFromMasterDialog = ({
               <Box flex="1" overflowY="auto" borderWidth="1px" borderColor="border" borderRadius="lg">
                 {isLoading ? (
                   <Flex justify="center" py="10">
-                    <Spinner size="md" color="sage.400" />
+                    <Spinner size="md" color="forest.400" />
                   </Flex>
                 ) : masterError ? (
                   <ApiErrorState
@@ -233,7 +233,7 @@ export const ImportFromMasterDialog = ({
                 {t("common.cancel")}
               </Button>
               <Button
-                colorPalette="sage"
+                colorPalette="primary"
                 onClick={handleSubmit}
                 loading={importMutation.isPending}
                 disabled={!hasSelection}

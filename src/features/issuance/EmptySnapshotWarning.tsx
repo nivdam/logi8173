@@ -20,7 +20,7 @@ export const EmptySnapshotWarning = ({
       </Text>
     </Flex>
     <Flex gap="2" wrap="wrap">
-      <Button size="sm" colorPalette="sage" onClick={onAddInventory}>
+      <Button size="sm" colorPalette="primary" onClick={onAddInventory}>
         {t("activities.addInventoryAction")}
       </Button>
     </Flex>
