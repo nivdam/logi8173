@@ -19,7 +19,7 @@ export const useCreateTransaction = () => {
 
   return useMutation({
     mutationFn: (input: CreateTransactionInput) =>
-      api.post<CreateTransactionResult>("tx.create", input),
+      api.protectedPost<CreateTransactionResult>("tx.create", input),
     onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({
         queryKey: ["transactions", variables.activityId],

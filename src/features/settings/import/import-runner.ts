@@ -24,7 +24,7 @@ export const runImport = async <T extends Record<string, unknown>>(
     onRowUpdate(row.index, "importing")
 
     try {
-      await api.post(endpoint, row.data)
+      await api.protectedPost(endpoint, row.data)
       if (shouldCancel()) break
       onRowUpdate(row.index, "imported")
 

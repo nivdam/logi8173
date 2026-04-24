@@ -16,7 +16,7 @@ export const useUpsertInventoryItem = () => {
 
   return useMutation({
     mutationFn: (item: UpsertInventoryItemInput) =>
-      api.post<{ itemId: string; name: string }>("inventory.upsert", item),
+      api.protectedPost<{ itemId: string; name: string }>("inventory.upsert", item),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })
@@ -29,7 +29,7 @@ export const useBatchUpdateInventory = () => {
 
   return useMutation({
     mutationFn: (payload: BatchUpdateInventoryInput) =>
-      api.post<BatchUpdateInventoryResult>("inventory.batchUpdate", payload),
+      api.protectedPost<BatchUpdateInventoryResult>("inventory.batchUpdate", payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["inventory"] })
       queryClient.invalidateQueries({ queryKey: ["dashboard"] })
@@ -55,7 +55,7 @@ export const useBatchUpdateActivityInventory = () => {
 
   return useMutation({
     mutationFn: (payload: BatchUpdateActivityInventoryInput) =>
-      api.post<BatchUpdateInventoryResult>("activityInventory.batchUpdate", payload),
+      api.protectedPost<BatchUpdateInventoryResult>("activityInventory.batchUpdate", payload),
     onSuccess: (_result, variables) => {
       queryClient.invalidateQueries({ queryKey: ["activityInventory", variables.activityId] })
       queryClient.invalidateQueries({ queryKey: ["activities", variables.activityId] })

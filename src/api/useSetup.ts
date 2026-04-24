@@ -15,7 +15,7 @@ export const useInitializeSystem = () => {
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationFn: () => api.post<SetupResult>("setup.initialize", {}),
+    mutationFn: () => api.protectedPost<SetupResult>("setup.initialize", {}),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["setup"] })
     },
