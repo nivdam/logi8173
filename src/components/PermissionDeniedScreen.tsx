@@ -18,7 +18,7 @@ export const PermissionDeniedScreen = ({ error }: Props) => {
       technicalMessage={`${error.code}: ${error.message}`}
       severity="alert"
     >
-      <Button colorPalette="sage" variant="solid" w="100%" size="lg" onClick={handleLogout}>
+      <Button colorPalette="primary" variant="solid" w="100%" size="lg" onClick={handleLogout}>
         {t("auth.logout")}
       </Button>
     </AuthErrorCard>

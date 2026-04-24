@@ -33,10 +33,10 @@ export const AppNav = () => (
             px="3"
             py="2"
             borderRadius="md"
-            bg={isActive ? "sage.100" : "transparent"}
-            color={isActive ? "sage.700" : "fg.muted"}
+            bg={isActive ? "surface.selected" : "transparent"}
+            color={isActive ? "interactive" : "fg.muted"}
             fontWeight={isActive ? "600" : "400"}
-            _hover={{ bg: isActive ? "sage.100" : "bg.muted" }}
+            _hover={{ bg: isActive ? "surface.selected" : "bg.muted" }}
             cursor="pointer"
             position="relative"
             css={{

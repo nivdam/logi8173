@@ -110,10 +110,10 @@ export const SoldierAutocomplete = ({
         align="center"
         gap="3"
         p="3"
-        bg="sage.50"
+        bg="forest.50"
         borderRadius="lg"
         borderWidth="1px"
-        borderColor="sage.200"
+        borderColor="forest.200"
       >
         <Flex
           align="center"
@@ -121,8 +121,8 @@ export const SoldierAutocomplete = ({
           w="10"
           h="10"
           borderRadius="full"
-          bg="sage.100"
-          color="sage.700"
+          bg="forest.100"
+          color="forest.700"
           flexShrink={0}
         >
           <User size={18} />
@@ -184,8 +184,8 @@ export const SoldierAutocomplete = ({
                             w="7"
                             h="7"
                             borderRadius="full"
-                            bg="sage.50"
-                            color="sage.600"
+                            bg="forest.50"
+                            color="forest.600"
                             flexShrink={0}
                           >
                             <Text textStyle="xs" fontWeight="600">
@@ -205,7 +205,7 @@ export const SoldierAutocomplete = ({
                               {soldier.personalId}
                               {soldier.company && ` · ${soldier.company}`}
                               {activitySoldierIds.has(soldier.personalId) ? (
-                                <Badge size="xs" colorPalette="sage" ms="2">
+                                <Badge size="xs" colorPalette="gray" ms="2">
                                   {t("issuance.activitySoldierBadge")}
                                 </Badge>
                               ) : null}
@@ -232,7 +232,7 @@ export const SoldierAutocomplete = ({
                     </Text>
                     <Button
                       variant="outline"
-                      colorPalette="sage"
+                      colorPalette="primary"
                       size="sm"
                       onClick={handleOpenAddDialog}
                     >

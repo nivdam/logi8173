@@ -140,7 +140,7 @@ export const SoldiersPage = () => {
         {hasActiveFilters ? (
           <Text
             textStyle="xs"
-            color="sage.600"
+            color="forest.600"
             cursor="pointer"
             _hover={{ textDecoration: "underline" }}
             onClick={clearAll}
@@ -152,7 +152,7 @@ export const SoldiersPage = () => {
 
       {isLoading ? (
         <Flex justify="center" py="16">
-          <Spinner size="lg" color="sage.400" />
+          <Spinner size="lg" color="forest.400" />
         </Flex>
       ) : soldiersError || companiesError ? (
         <ApiErrorState

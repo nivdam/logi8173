@@ -86,7 +86,7 @@ export const ActivityInventoryDialog = ({
                   <Stack gap="1">
                     <Badge
                       alignSelf="flex-start"
-                      colorPalette="sage"
+                      colorPalette="primary"
                       variant="subtle"
                     >
                       {t("activities.selectedItemsCount")} {selectedItemIds.length}
@@ -115,7 +115,7 @@ export const ActivityInventoryDialog = ({
                           display="block"
                           mx="auto"
                           size="md"
-                          color="sage.400"
+                          color="forest.400"
                         />
                       </Box>
                     ) : filteredInventory.length > 0 ? (
@@ -154,7 +154,7 @@ export const ActivityInventoryDialog = ({
                 </Dialog.ActionTrigger>
                 <Button
                   type="submit"
-                  colorPalette="sage"
+                  colorPalette="primary"
                   loading={isSubmitting}
                   disabled={selectedItemIds.length === 0}
                 >

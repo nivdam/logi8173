@@ -19,12 +19,12 @@ export const ActivityRadioCard = ({
       textAlign="start"
       p="4"
       borderWidth="2px"
-      borderColor={isSelected ? "sage.400" : "border"}
-      bg={isSelected ? "sage.50" : "bg"}
+      borderColor={isSelected ? "forest.400" : "border"}
+      bg={isSelected ? "forest.50" : "bg"}
       borderRadius="xl"
       cursor="pointer"
       transition="border-color 0.15s ease, background 0.15s ease"
-      _hover={{ borderColor: "sage.300", bg: "sage.50" }}
+      _hover={{ borderColor: "forest.300", bg: "forest.50" }}
       minH="56px"
       onClick={handleClick}
     >
@@ -44,7 +44,7 @@ export const ActivityRadioCard = ({
             w="8"
             h="8"
             borderRadius="full"
-            bg="sage.400"
+            bg="forest.400"
             color="white"
             flexShrink={0}
           >

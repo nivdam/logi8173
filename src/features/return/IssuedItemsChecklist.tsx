@@ -43,7 +43,7 @@ export const IssuedItemsChecklist = ({
           <Text textStyle="xs" color="fg.muted">
             {t("returns.issuedItemsDescription")}
           </Text>
-          <Badge colorPalette="sage" size="sm">
+          <Badge colorPalette="gray" size="sm">
             {issuedItems.length}
           </Badge>
           {selectedCount > 0 && (

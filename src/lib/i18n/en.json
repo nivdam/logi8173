@@ -580,5 +580,18 @@
     "warehouse_operator": "Warehouse Operator",
     "commander": "Commander",
     "viewer": "Viewer"
+  },
+  "theme": {
+    "toggleAriaLabel": "Toggle display mode",
+    "modes": {
+      "light": "Light",
+      "dark": "Dark",
+      "combat": "Combat"
+    }
+  },
+  "draft": {
+    "title": "Saved draft found",
+    "restore": "Restore draft",
+    "discard": "Start fresh"
   }
 }

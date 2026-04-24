@@ -16,7 +16,7 @@ const getCardColors = (
 ): CardColors => {
   if (changeType === "modified") return { bg: "orange.50", borderColor: "orange.300" }
   if (changeType === "added") return { bg: "green.50", borderColor: "green.300" }
-  return { bg: "bg.card", borderColor: isExpanded ? "sage.300" : "border" }
+  return { bg: "bg.card", borderColor: isExpanded ? "forest.300" : "border" }
 }
 
 export const EditableInventoryCard = memo(function EditableInventoryCard({
@@ -140,7 +140,7 @@ export const EditableInventoryCard = memo(function EditableInventoryCard({
             <Input
               size="sm"
               borderRadius="md"
-              bg="white"
+              bg="bg.card"
               type="tel"
               inputMode="numeric"
               pattern="[0-9]*"
@@ -154,7 +154,7 @@ export const EditableInventoryCard = memo(function EditableInventoryCard({
             <Input
               size="sm"
               borderRadius="md"
-              bg="white"
+              bg="bg.card"
               value={row.name}
               onChange={handleNameChange}
               placeholder={t("inventory.name")}
@@ -169,7 +169,7 @@ export const EditableInventoryCard = memo(function EditableInventoryCard({
             <Input
               size="sm"
               borderRadius="md"
-              bg="white"
+              bg="bg.card"
               type="number"
               inputMode="numeric"
               value={row.currentQty}
@@ -182,7 +182,7 @@ export const EditableInventoryCard = memo(function EditableInventoryCard({
             <Input
               size="sm"
               borderRadius="md"
-              bg="white"
+              bg="bg.card"
               type="number"
               inputMode="numeric"
               value={row.minThreshold}
@@ -218,7 +218,7 @@ export const EditableInventoryCard = memo(function EditableInventoryCard({
           <Input
             size="sm"
             borderRadius="md"
-            bg="white"
+            bg="bg.card"
             value={row.notes ?? ""}
             onChange={handleNotesChange}
             placeholder={t("inventory.notesPlaceholder")}

@@ -105,7 +105,7 @@ const CompanyDialogForm = ({
         </Dialog.ActionTrigger>
         <Button
           type="submit"
-          colorPalette="sage"
+          colorPalette="primary"
           loading={isSaving}
           disabled={!isValid}
         >

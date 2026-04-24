@@ -3,16 +3,37 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="copyright" content="גדח״ן 8173" />
+    <meta name="generator" content="Logi8173 Web App" />
+    <link rel="author" href="/humans.txt" />
+
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <title>8173 לוגיסטיקה — ניהול לוגיסטיקה דיגיטלית</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <title>8173 לוגיסטיקה — ניהול לוגיסטיקה</title>
   </head>
   <body>
+    <script>
+      // Apply stored color mode before React hydrates to prevent a flash of the
+      // default theme. Keep in sync with logi8173_color_mode in src/lib/color-mode.ts.
+      (function () {
+        try {
+          var stored = localStorage.getItem("logi8173_color_mode");
+          var mode =
+            stored === "dark" || stored === "combat" ? stored : "light";
+          document.documentElement.dataset.theme = mode;
+        } catch (e) {
+          document.documentElement.dataset.theme = "light";
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

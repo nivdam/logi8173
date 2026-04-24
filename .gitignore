@@ -32,3 +32,6 @@ apps-script/.clasp.json
 /blob-report/
 /playwright/.cache/
 .playwright-mcp/
+
+# Claude Code runtime
+.claude/

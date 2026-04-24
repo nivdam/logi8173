@@ -20,9 +20,9 @@ export const IssuedItemRow = ({ item, isSelected, onToggle }: IssuedItemRowProps
         px="3"
         py="2"
         borderRadius="lg"
-        bg={isSelected ? "sage.50" : "bg.muted"}
+        bg={isSelected ? "forest.50" : "bg.muted"}
         borderWidth="1px"
-        borderColor={isSelected ? "sage.300" : "transparent"}
+        borderColor={isSelected ? "forest.300" : "transparent"}
         cursor="pointer"
         width="100%"
       >
@@ -39,7 +39,7 @@ export const IssuedItemRow = ({ item, isSelected, onToggle }: IssuedItemRowProps
           <Flex gap="3" align="center" flexShrink={0}>
             <Flex direction="column" align="center">
               <Text textStyle="xs" color="fg.muted">{t("returns.remainingQty")}</Text>
-              <Text textStyle="sm" fontWeight="600" color="sage.700">
+              <Text textStyle="sm" fontWeight="600" color="forest.700">
                 {item.remainingQty} {item.unitOfMeasure}
               </Text>
             </Flex>

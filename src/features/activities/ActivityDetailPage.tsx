@@ -126,7 +126,7 @@ export const ActivityDetailPage = ({ activityId }: ActivityDetailPageProps) => {
   if (isPending) {
     return (
       <Flex justify="center" py="20">
-        <Spinner size="lg" color="sage.400" />
+        <Spinner size="lg" color="forest.400" />
       </Flex>
     )
   }

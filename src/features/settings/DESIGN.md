@@ -58,7 +58,7 @@ Each card is a **single horizontal row** on all breakpoints:
 ### Badges
 
 - Inline with the name, same row: `<Flex align="center" gap="2">`
-- Role badge: `colorPalette="sage" variant="subtle"`
+- Role badge: `colorPalette="gray" variant="subtle"` (status indicator — neutral so it stays readable in combat mode)
 - Status badge (active/inactive): `colorPalette="green"` / `"gray"`
 - "Current session" label: hidden on mobile (`display={{ base: "none", md: "block" }}`)
 

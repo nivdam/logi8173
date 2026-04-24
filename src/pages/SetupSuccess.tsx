@@ -58,10 +58,10 @@ export const SetupSuccess = ({ folderUrl, onContinue }: Props) => (
           <Button
             w="100%"
             size="lg"
-            bg="sage.600"
+            bg="interactive"
             color="white"
             borderRadius="xl"
-            _hover={{ bg: "sage.700" }}
+            _hover={{ bg: "interactive.hover" }}
             onClick={onContinue}
           >
             <ArrowLeft size={18} />

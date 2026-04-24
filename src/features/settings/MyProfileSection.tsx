@@ -5,12 +5,12 @@ import {
   Button,
   Flex,
   Heading,
-  Image,
   Text,
   VStack,
 } from "@chakra-ui/react"
 import { Pencil, User } from "lucide-react"
 import { OperatorProfileDialog } from "../../components/OperatorProfileDialog"
+import { SignatureImage } from "../../components/SignatureImage"
 import { useAuth } from "../../lib/use-auth"
 import { t } from "../../lib/i18n"
 import { animations } from "../../theme/animations"
@@ -76,7 +76,7 @@ export const MyProfileSection = () => {
             ms="auto"
             size="sm"
             onClick={handleOpenDialog}
-            colorPalette="sage"
+            colorPalette="primary"
             variant={hasProfile ? "outline" : "solid"}
           >
             <Pencil size={14} />
@@ -101,7 +101,7 @@ export const MyProfileSection = () => {
                   <Text fontWeight="600" textStyle="sm">
                     {operatorProfile.fullName}
                   </Text>
-                  <Badge colorPalette="sage" variant="subtle">
+                  <Badge colorPalette="gray" variant="subtle">
                     {operatorProfile.rank}
                   </Badge>
                 </Flex>
@@ -121,11 +121,11 @@ export const MyProfileSection = () => {
               {operatorProfile.savedSignature !== "" ? (
                 <Flex
                   borderWidth="1px"
-                  borderColor="sage.200"
+                  borderColor="forest.200"
                   borderStyle="dashed"
                   borderRadius="lg"
                   overflow="hidden"
-                  bg="white"
+                  bg="bg.card"
                   p="1"
                   flexShrink={0}
                   w={{ base: "80px", md: "120px" }}
@@ -133,7 +133,7 @@ export const MyProfileSection = () => {
                   justify="center"
                   align="center"
                 >
-                  <Image
+                  <SignatureImage
                     src={operatorProfile.savedSignature}
                     alt={t("issuance.savedSignature")}
                     maxH="100%"
@@ -153,7 +153,7 @@ export const MyProfileSection = () => {
           >
             <User size={32} />
             <Text textStyle="sm">{t("settings.myProfile.notSet")}</Text>
-            <Button size="sm" colorPalette="sage" onClick={handleOpenDialog}>
+            <Button size="sm" colorPalette="primary" onClick={handleOpenDialog}>
               {t("settings.myProfile.editAction")}
             </Button>
           </Flex>

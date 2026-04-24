@@ -161,7 +161,7 @@ const ActivitiesListPage = () => {
         />
         <Button
           alignSelf={{ base: "stretch", md: "flex-start" }}
-          colorPalette="sage"
+          colorPalette="primary"
           onClick={handleOpenDialog}
         >
           <Plus size={16} />
@@ -199,7 +199,7 @@ const ActivitiesListPage = () => {
 
       {isActivitiesPending ? (
         <Flex justify="center" py="16">
-          <Spinner size="lg" color="sage.400" />
+          <Spinner size="lg" color="forest.400" />
         </Flex>
       ) : filteredActivities.length > 0 ? (
         <Stack gap="4">

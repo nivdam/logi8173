@@ -212,7 +212,7 @@ export const AddSoldierDialog = ({
                         value={saveScope}
                         onValueChange={handleSaveScopeChange}
                       >
-                        <SegmentGroup.Indicator bg="sage.600" borderRadius="md" />
+                        <SegmentGroup.Indicator bg="interactive" borderRadius="md" />
                         <SegmentGroup.Item value="activity">
                           <SegmentGroup.ItemText>
                             {t("issuance.addSoldierScopeActivity")}
@@ -342,7 +342,7 @@ export const AddSoldierDialog = ({
                 </Dialog.ActionTrigger>
                 <Button
                   type="submit"
-                  colorPalette="sage"
+                  colorPalette="primary"
                   loading={
                     upsertActivitySoldier.isPending ||
                     upsertGlobalSoldier.isPending ||

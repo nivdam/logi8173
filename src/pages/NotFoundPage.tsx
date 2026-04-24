@@ -18,7 +18,7 @@ export const NotFoundPage = () => (
     <VStack gap="6" align="center">
       <Image src={logo} alt={t("app.battalion")} w="120px" h="auto" opacity={0.6} />
 
-      <Heading size="6xl" fontWeight="800" color="sage.300">
+      <Heading size="6xl" fontWeight="800" color="forest.300">
         404
       </Heading>
 

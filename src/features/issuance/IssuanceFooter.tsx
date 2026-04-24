@@ -5,13 +5,13 @@ import {
   Flex,
   Grid,
   Heading,
-  Image,
   Text,
   Textarea,
 } from "@chakra-ui/react";
 import { RefreshCw } from "lucide-react";
 import { t } from "../../lib/i18n";
 import { SignatureCanvas } from "../../components/SignatureCanvas";
+import { SignatureImage } from "../../components/SignatureImage";
 
 export const IssuanceFooter = ({
   globalNotes,
@@ -76,18 +76,17 @@ export const IssuanceFooter = ({
             <Box>
               <Box
                 borderWidth="2px"
-                borderColor="sage.300"
+                borderColor="forest.300"
                 borderStyle="dashed"
                 borderRadius="xl"
                 overflow="hidden"
-                bg="white"
+                bg="bg.card"
                 p="2"
               >
-                <Image
+                <SignatureImage
                   src={savedSignatureUrl}
                   alt={t("issuance.giverSignature")}
                   maxH="120px"
-                  mx="auto"
                 />
               </Box>
               <Flex justify="space-between" align="center" mt="2">
@@ -138,10 +137,10 @@ export const IssuanceFooter = ({
         <Button
           w="100%"
           size="lg"
-          bg="sage.600"
+          bg="interactive"
           color="white"
           borderRadius="xl"
-          _hover={{ bg: "sage.700" }}
+          _hover={{ bg: "interactive.hover" }}
           onClick={onSubmit}
           loading={isSubmitting}
           loadingText={t("issuance.submitting")}
