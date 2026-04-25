@@ -36,8 +36,8 @@ export const ImportDialog = ({ open, onOpenChange }: ImportDialogProps) => {
   const cancelledRef = useRef(false)
 
   const queryClient = useQueryClient()
-  const { data: existingInventory = [] } = useInventory()
-  const { data: existingSoldiers = [] } = useSoldiers()
+  const { data: existingInventory = [] } = useInventory({ enabled: open })
+  const { data: existingSoldiers = [] } = useSoldiers({ enabled: open })
 
   const handleReset = () => {
     setInventoryRows(null)

@@ -39,8 +39,8 @@ const parseStatus = (value: string | undefined): ItemStatus | undefined =>
 
 export const InventoryPage = () => {
   const { activeActivityId, activeActivity, isResolving, setActiveActivity } = useActiveActivity();
-  const masterInventoryQuery = useInventory();
-  const activityInventoryQuery = useActivityInventory(activeActivityId, { enabled: !isResolving });
+  const masterInventoryQuery = useInventory({ enabled: !isResolving && !activeActivityId });
+  const activityInventoryQuery = useActivityInventory(activeActivityId, { enabled: !isResolving, poll: true });
   const inventoryQuery = activeActivityId ? activityInventoryQuery : masterInventoryQuery;
   const {
     data: inventoryData,

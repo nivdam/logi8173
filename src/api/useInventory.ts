@@ -1,14 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "../lib/api"
-import { ACTIVE_POLL_MS } from "./polling"
+import { ACTIVE_POLL_MS, REFERENCE_STALE_MS } from "./polling"
 import type { InventoryItem } from "../types"
 
-export const useInventory = () =>
+export const useInventory = (options?: { enabled?: boolean }) =>
   useQuery({
     queryKey: ["inventory"],
     queryFn: () => api.get<InventoryItem[]>("inventory.list"),
-    refetchInterval: ACTIVE_POLL_MS,
-    staleTime: ACTIVE_POLL_MS,
+    enabled: options?.enabled ?? true,
+    staleTime: REFERENCE_STALE_MS,
+    refetchOnWindowFocus: false,
   })
 
 export const useUpsertInventoryItem = () => {
@@ -39,15 +40,14 @@ export const useBatchUpdateInventory = () => {
 
 export const useActivityInventory = (
   activityId: string | undefined,
-  options?: { enabled?: boolean },
+  options?: { enabled?: boolean; poll?: boolean },
 ) =>
   useQuery({
     queryKey: ["activityInventory", activityId],
     queryFn: () =>
       api.post<InventoryItem[]>("activityInventory.list", { activityId }),
     enabled: !!activityId && (options?.enabled ?? true),
-    refetchInterval: ACTIVE_POLL_MS,
-    staleTime: ACTIVE_POLL_MS,
+    refetchInterval: options?.poll ? ACTIVE_POLL_MS : false,
   })
 
 export const useBatchUpdateActivityInventory = () => {

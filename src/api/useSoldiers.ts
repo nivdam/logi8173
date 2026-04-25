@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import { api } from "../lib/api"
-import { ADMIN_POLL_MS } from "./polling"
+import { REFERENCE_STALE_MS } from "./polling"
 import type { Soldier } from "../types"
 
 export const useSoldiers = (options?: { enabled?: boolean }) =>
@@ -8,8 +8,8 @@ export const useSoldiers = (options?: { enabled?: boolean }) =>
     queryKey: ["soldiers"],
     queryFn: () => api.get<Soldier[]>("soldiers.list"),
     enabled: options?.enabled ?? true,
-    refetchInterval: ADMIN_POLL_MS,
-    staleTime: ADMIN_POLL_MS,
+    staleTime: REFERENCE_STALE_MS,
+    refetchOnWindowFocus: false,
   })
 
 export const useActivitySoldiers = (
@@ -20,8 +20,8 @@ export const useActivitySoldiers = (
     queryKey: ["activitySoldiers", activityId],
     queryFn: () => api.post<Soldier[]>("activitySoldiers.list", { activityId }),
     enabled: !!activityId && (options?.enabled ?? true),
-    refetchInterval: ADMIN_POLL_MS,
-    staleTime: ADMIN_POLL_MS,
+    staleTime: REFERENCE_STALE_MS,
+    refetchOnWindowFocus: false,
   })
 
 export const useUpsertSoldier = () => {

@@ -149,6 +149,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     return onSessionLost(() => {
       void queryClient.cancelQueries()
+      queryClient.getMutationCache().clear()
       queryClient.clear()
       resetSession()
       toaster.create({
@@ -180,9 +181,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       clearAllDrafts()
     }
     writeStoredActiveActivityId(undefined)
+    void queryClient.cancelQueries()
+    queryClient.getMutationCache().clear()
+    queryClient.clear()
     resetSession()
     googleLogout()
-  }, [resetSession])
+  }, [queryClient, resetSession])
 
   return (
     <AuthContext.Provider

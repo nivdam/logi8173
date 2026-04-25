@@ -3,15 +3,14 @@ import { api } from "../lib/api"
 import { LIVE_POLL_MS } from "./polling"
 import type { Transaction, TransactionType, TransactionLineItem, PublicTransaction } from "../types"
 
-export const useTransactions = (activityId: string) =>
+export const useTransactions = (activityId: string, options?: { poll?: boolean }) =>
   useQuery({
     queryKey: ["transactions", activityId],
     queryFn: () =>
       api.post<Transaction[]>("tx.list", { activityId }),
     enabled: !!activityId,
-    refetchInterval: LIVE_POLL_MS,
+    refetchInterval: options?.poll ? LIVE_POLL_MS : false,
     refetchIntervalInBackground: false,
-    staleTime: LIVE_POLL_MS,
   })
 
 export const useCreateTransaction = () => {
