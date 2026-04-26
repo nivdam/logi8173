@@ -124,7 +124,7 @@ export const ImportReviewStep = <T extends Record<string, unknown>>({
           <Button
             size="sm"
             bg="interactive"
-            color="white"
+            color="fg.onPrimary"
             _hover={{ bg: "interactive.hover" }}
             disabled={isImportDisabled}
             onClick={handleImport}

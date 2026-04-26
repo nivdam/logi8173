@@ -81,7 +81,7 @@ export const DashboardPage = () => {
           <RotateCcw size={16} />
           {t("dashboard.newReturn")}
         </Button>
-        <Button size="sm" borderRadius="lg" bg="interactive" color="white" _hover={{ bg: "interactive.hover" }} css={animations.cardHover} onClick={() => navigate("/issue")}>
+        <Button size="sm" borderRadius="lg" bg="interactive" color="fg.onPrimary" _hover={{ bg: "interactive.hover" }} css={animations.cardHover} onClick={() => navigate("/issue")}>
           <Plus size={16} />
           {t("dashboard.newIssuance")}
         </Button>

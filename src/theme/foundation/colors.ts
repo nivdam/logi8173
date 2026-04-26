@@ -1,8 +1,7 @@
 import { defineTokens, defineSemanticTokens } from "@chakra-ui/react"
 
-// Combat shades for the `primary` semantic palette. Each entry mirrors the
-// corresponding forest.{shade} but swaps to a red scale in combat mode so
-// `colorPalette="primary"` stays readable under red night-vision.
+// Combat shades for the `primary` semantic palette. Light/dark use forest;
+// combat swaps to a red scale for night-vision.
 const PRIMARY_COMBAT_SHADES = {
   50: "#ffb0b0",
   100: "#ff8080",
@@ -104,35 +103,33 @@ export const colors = defineTokens.colors({
 // in src/theme/index.ts, where the `dark` condition matches both
 // [data-theme="dark"] and [data-theme="combat"].
 export const semanticColors = defineSemanticTokens.colors({
-  // Dark values use neutral near-blacks (from the combat/dark design system)
-  // rather than the gray scale, which is tuned for light-mode surfaces and
-  // reads as cool-slate in dark contexts.
+  // Dark values use a charcoal/slate palette with forest accents.
   bg: {
     DEFAULT: {
       value: {
         _light: "{colors.gray.50}",
-        _dark: "#0f1113",
+        _dark: "#20242b",
         _combat: "#0a0000",
       },
     },
     card: {
       value: {
         _light: "white",
-        _dark: "#181b1f",
+        _dark: "#282c34",
         _combat: "#140404",
       },
     },
     muted: {
       value: {
         _light: "{colors.gray.100}",
-        _dark: "#23272c",
+        _dark: "#1b1f25",
         _combat: "#1c0707",
       },
     },
     auth: {
       value: {
         _light: "linear-gradient(180deg, #f8faf8 0%, #eef2ef 100%)",
-        _dark: "#0f1113",
+        _dark: "#20242b",
         _combat: "#0a0000",
       },
     },
@@ -141,14 +138,14 @@ export const semanticColors = defineSemanticTokens.colors({
     DEFAULT: {
       value: {
         _light: "{colors.gray.900}",
-        _dark: "#eef1f3",
+        _dark: "#d7d9de",
         _combat: "#ff3838",
       },
     },
     muted: {
       value: {
         _light: "{colors.gray.500}",
-        _dark: "#98a0ab",
+        _dark: "#9aa1ad",
         _combat: "#a62020",
       },
     },
@@ -158,7 +155,7 @@ export const semanticColors = defineSemanticTokens.colors({
     DEFAULT: {
       value: {
         _light: "{colors.gray.200}",
-        _dark: "#2a2f35",
+        _dark: "#3b414a",
         _combat: "#3a0a0a",
       },
     },
@@ -180,9 +177,9 @@ export const semanticColors = defineSemanticTokens.colors({
       },
     },
     // `solid` and `contrast` drive Chakra's solid button variant when used with
-    // colorPalette="primary". contrast flips to near-black in dark because the
-    // dark primary (forest.400) is light enough that white text has poor
-    // contrast; combat flips to near-black on the red.
+    // colorPalette="primary". contrast flips to near-black in dark/combat
+    // because those accent colors are bright enough that white text loses
+    // contrast.
     solid: {
       value: {
         _light: "{colors.forest.500}",
@@ -212,8 +209,7 @@ export const semanticColors = defineSemanticTokens.colors({
       },
     },
     // Full palette shades so Chakra's `colorPalette="primary"` resolves correctly
-    // in all modes. Light/dark fall through to the forest palette; combat swaps
-    // to a red scale for night-vision safety.
+    // in all modes. Light/dark use forest, combat uses red.
     ...primaryPaletteShades(),
   },
   success: { value: { _light: "{colors.green.600}", _dark: "{colors.green.600}", _combat: "#ff6666" } },
@@ -237,7 +233,7 @@ export const semanticColors = defineSemanticTokens.colors({
     disabled: {
       value: {
         _light: "{colors.gray.300}",
-        _dark: "{colors.gray.600}",
+        _dark: "#4b515b",
         _combat: "#5e1515",
       },
     },
@@ -253,7 +249,7 @@ export const semanticColors = defineSemanticTokens.colors({
     disabled: {
       value: {
         _light: "{colors.gray.100}",
-        _dark: "{colors.gray.800}",
+        _dark: "#242933",
         _combat: "#1c0707",
       },
     },

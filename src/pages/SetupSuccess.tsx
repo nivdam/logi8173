@@ -59,7 +59,7 @@ export const SetupSuccess = ({ folderUrl, onContinue }: Props) => (
             w="100%"
             size="lg"
             bg="interactive"
-            color="white"
+            color="fg.onPrimary"
             borderRadius="xl"
             _hover={{ bg: "interactive.hover" }}
             onClick={onContinue}
