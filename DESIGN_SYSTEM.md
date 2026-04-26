@@ -25,7 +25,7 @@ Source of truth: `src/theme/foundation/colors.ts`
 | `forest.50` | #eaf2ed | Lightest tint |
 | `forest.100` | #d4e5d8 | Active nav background (light), subtle fills |
 | `forest.200` | #a8c9b0 | |
-| `forest.300` | #6fa079 | Primary border, focus ring |
+| `forest.300` | #6fa079 | Primary border, focus ring in light mode |
 | `forest.400` | #4f8659 | **Primary surface in dark mode** |
 | `forest.500` | #3c6e45 | **Primary surface in light mode / main brand** |
 | `forest.600` | #2F6B45 | Pulled directly from the logo |
@@ -33,7 +33,7 @@ Source of truth: `src/theme/foundation/colors.ts`
 | `forest.800` | #173724 | Active nav background (dark) |
 | `forest.900` | #0e2217 | Darkest shade |
 
-Use the semantic `primary` palette (`colorPalette="primary"`) instead of hardcoded forest shades whenever possible — `primary` automatically swaps to a red scale in combat mode.
+Use the semantic `primary` palette (`colorPalette="primary"`) instead of hardcoded forest shades whenever possible. `primary` is forest in light/dark mode and red in combat mode.
 
 ### Danger — Rose (soft red)
 
@@ -51,8 +51,8 @@ Main: `sky.300` (#A0C4FF). Full scale in `colors.ts`.
 | `gray.100` | #F0F4F8 | Muted backgrounds |
 | `gray.200` | #E4E9ED | Borders, dividers |
 | `gray.500` | #747A85 | Secondary text |
-| `gray.800` | #333C4D | Cards (dark mode) |
-| `gray.900` | #16171A | Primary text / background (dark) |
+| `gray.800` | #333C4D | Deep neutral shade |
+| `gray.900` | #16171A | Primary text in light mode |
 
 ### Status Colors
 
@@ -66,13 +66,13 @@ Main: `sky.300` (#A0C4FF). Full scale in `colors.ts`.
 
 | Token | Light | Dark | Combat |
 |-------|-------|------|--------|
-| `bg` | `#F8F9FB` | `#0f1113` | `#0a0000` |
-| `bg.card` | `white` | `#181b1f` | `#140404` |
-| `bg.muted` | `gray.100` | `#23272c` | `#1c0707` |
-| `fg` | `gray.900` | `#eef1f3` | `#ff3838` |
-| `fg.muted` | `gray.500` | `#98a0ab` | `#a62020` |
+| `bg` | `#F8F9FB` | `#20242b` | `#0a0000` |
+| `bg.card` | `white` | `#282c34` | `#140404` |
+| `bg.muted` | `gray.100` | `#1b1f25` | `#1c0707` |
+| `fg` | `gray.900` | `#d7d9de` | `#ff3838` |
+| `fg.muted` | `gray.500` | `#9aa1ad` | `#a62020` |
 | `fg.onPrimary` | `white` | `#0a0d0f` | `#0a0000` |
-| `border` | `gray.200` | `#2a2f35` | `#3a0a0a` |
+| `border` | `gray.200` | `#3b414a` | `#3a0a0a` |
 | `border.focus` | `forest.400` | `forest.300` | `#7a1414` |
 | `primary` | `forest.500` | `forest.400` | `#ff2a2a` |
 | `interactive` | `forest.500` | `forest.400` | `#ff2a2a` |
@@ -324,7 +324,7 @@ Three user-selectable modes controlled by a toggle in the header:
 | Mode | Intent | Primary | Background |
 |------|--------|---------|------------|
 | **Light** | Day / office use | Forest green | Near-white |
-| **Dark** | Evening / battery saver | Forest green (brighter) | Near-black, neutral |
+| **Dark** | Evening / battery saver | Forest green | Charcoal / slate |
 | **Combat** | Night field use, preserves night vision | Red | Pure black |
 
 ### Rules

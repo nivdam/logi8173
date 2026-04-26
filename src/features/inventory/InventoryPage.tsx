@@ -194,7 +194,7 @@ export const InventoryPage = () => {
               size="md"
               borderRadius="lg"
               bg="interactive"
-              color="white"
+              color="fg.onPrimary"
               _hover={{ bg: "interactive.hover" }}
               onClick={editable.addRow}
             >

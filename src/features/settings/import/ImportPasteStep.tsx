@@ -165,7 +165,7 @@ export const ImportPasteStep = ({ entity, onParse, onImportFromUrl }: ImportPast
         <Button
           size="sm"
           bg="interactive"
-          color="white"
+          color="fg.onPrimary"
           _hover={{ bg: "interactive.hover" }}
           disabled={!rawText.trim()}
           onClick={handleParseClick}
