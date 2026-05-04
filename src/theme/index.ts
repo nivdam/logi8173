@@ -16,12 +16,21 @@ const config = defineConfig({
     html: {
       colorPalette: "forest",
       scrollBehavior: "smooth",
+      "@media print": {
+        bg: "white",
+        color: "gray.900",
+      },
     },
     body: {
       color: "fg",
       bg: "bg",
       fontFamily: "'Heebo', sans-serif",
       lineHeight: "1.6",
+      "@media print": {
+        bg: "white",
+        color: "gray.900",
+        printColorAdjust: "exact",
+      },
     },
     "*::selection": {
       bg: "forest.100",

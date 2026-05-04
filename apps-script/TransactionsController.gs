@@ -65,8 +65,214 @@ function buildPublicSoldierDetails_(row) {
     personalId: String(row.personal_id || '').trim(),
     fullName: String(row.full_name || '').trim(),
     rank: String(row.rank || '').trim(),
-    company: String(row.company || '').trim()
+    company: String(row.company || '').trim(),
+    phone: normalizeSoldierPhone_(row.phone)
   };
+}
+
+function readSignatureBase64_(fileId) {
+  if (!fileId) return '';
+
+  try {
+    var file = DriveApp.getFileById(fileId);
+    var blob = file.getBlob();
+    var bytes = blob.getBytes();
+    var base64 = Utilities.base64Encode(bytes);
+    return 'data:' + blob.getContentType() + ';base64,' + base64;
+  } catch (driveError) {
+    return '';
+  }
+}
+
+function lookupPublicSoldierDetails_(activityId, personalId) {
+  var normalizedPersonalId = String(personalId || '').trim();
+  if (!normalizedPersonalId) return null;
+
+  var activitySoldiersSheetId = getActivitySoldiersSheetId_(activityId, false);
+  var activitySoldierRow = activitySoldiersSheetId
+    ? findRow_(activitySoldiersSheetId, 'activity-soldiers', 'personal_id', normalizedPersonalId)
+    : null;
+  if (activitySoldierRow) {
+    return buildPublicSoldierDetails_(activitySoldierRow.row);
+  }
+
+  var soldiersSheetId = getConfigProperty_('SOLDIERS_SHEET_ID');
+  if (!soldiersSheetId) return null;
+
+  var soldierRow = findRow_(soldiersSheetId, 'soldiers', 'personal_id', normalizedPersonalId);
+  return soldierRow ? buildPublicSoldierDetails_(soldierRow.row) : null;
+}
+
+function lookupPublicOperatorDetails_(email) {
+  var normalizedEmail = String(email || '').toLowerCase();
+  if (!normalizedEmail) return null;
+
+  var operatorsSheetId = getConfigProperty_('OPERATORS_SHEET_ID');
+  var operatorRow = operatorsSheetId
+    ? findRow_(operatorsSheetId, 'operators', 'email', normalizedEmail)
+    : null;
+  var binding = readOperatorProfileBinding_(
+    PropertiesService.getScriptProperties(),
+    normalizedEmail
+  ) || {};
+  if (!operatorRow && !binding.fullName && !binding.personalId) return null;
+  var publicSafeRoles = ['admin', 'warehouse_operator', 'commander', 'viewer'];
+  var rawRole = operatorRow ? operatorRow.row.role || '' : '';
+
+  return {
+    fullName: String(binding.fullName || (operatorRow ? operatorRow.row.full_name : '') || '').trim(),
+    personalId: String(binding.personalId || '').trim(),
+    rank: String(binding.rank || '').trim(),
+    company: String(binding.company || '').trim(),
+    phone: normalizeSoldierPhone_(binding.phone),
+    role: publicSafeRoles.indexOf(rawRole) !== -1 ? rawRole : ''
+  };
+}
+
+function buildPublicPartyDetails_(activityId, personalId, fallbackName, operatorEmail) {
+  var operatorDetails = lookupPublicOperatorDetails_(operatorEmail);
+  if (operatorDetails && operatorDetails.personalId && operatorDetails.personalId === String(personalId || '').trim()) {
+    return operatorDetails;
+  }
+
+  var soldierDetails = lookupPublicSoldierDetails_(activityId, personalId);
+  if (soldierDetails) return soldierDetails;
+
+  return {
+    fullName: String(fallbackName || '').trim(),
+    personalId: String(personalId || '').trim(),
+    rank: '',
+    company: '',
+    phone: '',
+    role: ''
+  };
+}
+
+function parseTransactionItems_(row) {
+  try {
+    return JSON.parse(row.items_json || '[]');
+  } catch (parseError) {
+    return [];
+  }
+}
+
+function buildReturnAllocations_(transactions, issueRow) {
+  var issueItems = parseTransactionItems_(issueRow);
+  var targetAllocations = issueItems.map(function(item, index) {
+    return {
+      txId: issueRow.tx_id,
+      index: index,
+      itemId: item.itemId,
+      name: item.name,
+      issuedQty: Number(item.qty) || 0,
+      returnedQty: 0,
+      returnEvents: []
+    };
+  });
+  var receiverPersonalId = String(issueRow.receiver_personal_id || '').trim();
+  var allIssueAllocations = [];
+  var issueRows = transactions
+    .filter(function(row) {
+      return (
+        (row.tx_type === 'issue' || row.tx_type === 'borrow_in') &&
+        String(row.receiver_personal_id || '').trim() === receiverPersonalId
+      );
+    })
+    .sort(function(left, right) {
+      return new Date(left.performed_at || 0).getTime() - new Date(right.performed_at || 0).getTime();
+    });
+
+  for (var i = 0; i < issueRows.length; i++) {
+    var rowItems = parseTransactionItems_(issueRows[i]);
+    for (var itemIndex = 0; itemIndex < rowItems.length; itemIndex++) {
+      var rowItem = rowItems[itemIndex];
+      var targetAllocation = issueRows[i].tx_id === issueRow.tx_id
+        ? targetAllocations[itemIndex]
+        : null;
+      allIssueAllocations.push(targetAllocation || {
+        txId: issueRows[i].tx_id,
+        index: itemIndex,
+        itemId: rowItem.itemId,
+        name: rowItem.name,
+        issuedQty: Number(rowItem.qty) || 0,
+        returnedQty: 0,
+        returnEvents: []
+      });
+    }
+  }
+
+  var sortedReturns = transactions
+    .filter(function(row) {
+      return (
+        (row.tx_type === 'return' || row.tx_type === 'return_borrow') &&
+        String(row.giver_personal_id || '').trim() === receiverPersonalId
+      );
+    })
+    .sort(function(left, right) {
+      return new Date(left.performed_at || 0).getTime() - new Date(right.performed_at || 0).getTime();
+    });
+
+  for (var r = 0; r < sortedReturns.length; r++) {
+    var returnItems = parseTransactionItems_(sortedReturns[r]);
+    for (var ri = 0; ri < returnItems.length; ri++) {
+      var returnItem = returnItems[ri];
+      var returnItemId = returnItem.itemId || returnItem.name;
+      var qtyToApply = Number(returnItem.qty) || 0;
+
+      for (var a = 0; a < allIssueAllocations.length; a++) {
+        if (qtyToApply <= 0) break;
+        var allocation = allIssueAllocations[a];
+        var allocationItemId = allocation.itemId || allocation.name;
+        if (allocationItemId !== returnItemId) continue;
+
+        var openQty = allocation.issuedQty - allocation.returnedQty;
+        var appliedQty = Math.min(openQty, qtyToApply);
+        if (appliedQty <= 0) continue;
+
+        allocation.returnedQty += appliedQty;
+        qtyToApply -= appliedQty;
+        allocation.returnEvents.push({
+          qty: appliedQty,
+          formNumber: sortedReturns[r].form_number || '',
+          performedAt: sortedReturns[r].performed_at || '',
+          txId: sortedReturns[r].tx_id || ''
+        });
+      }
+    }
+  }
+
+  return targetAllocations;
+}
+
+function buildPublicFormItems_(transactions, row) {
+  var items = parseTransactionItems_(row);
+  var isIssuanceType = row.tx_type === 'issue' || row.tx_type === 'borrow_in';
+  var returnAllocations = isIssuanceType ? buildReturnAllocations_(transactions, row) : [];
+
+  return items.map(function(item, index) {
+    var allocation = returnAllocations[index] || {
+      issuedQty: Number(item.qty) || 0,
+      returnedQty: row.tx_type === 'return' || row.tx_type === 'return_borrow' ? Number(item.qty) || 0 : 0,
+      returnEvents: []
+    };
+    var issuedQty = Number(allocation.issuedQty) || Number(item.qty) || 0;
+    var returnedQty = Number(allocation.returnedQty) || 0;
+
+    return {
+      itemId: item.itemId || '',
+      name: item.name || '',
+      qty: Number(item.qty) || 0,
+      issuedQty: issuedQty,
+      returnedQty: returnedQty,
+      remainingQty: Math.max(issuedQty - returnedQty, 0),
+      condition: item.condition || 'used',
+      unitOfMeasure: item.unitOfMeasure || '',
+      notes: item.notes || '',
+      serialNumber: item.serialNumber || '',
+      isCustom: item.isCustom === true,
+      returnEvents: allocation.returnEvents || []
+    };
+  });
 }
 
 var TransactionsController = {
@@ -146,69 +352,36 @@ var TransactionsController = {
       throw createError_('NOT_FOUND', 'Transaction not found');
     }
 
+    ensureSheetHeaders_(transactionsId, 'transactions', SHEET_HEADERS['transactions']);
     var row = existing.row;
-    var items = [];
-    try {
-      items = JSON.parse(row.items_json || '[]');
-    } catch (parseError) {
-      items = [];
-    }
+    var transactions = readAllRows_(transactionsId, 'transactions');
+    var items = buildPublicFormItems_(transactions, row);
 
     // Look up activity name from registry
     var registryId = getConfigProperty_('ACTIVITIES_REGISTRY_ID');
     var activityRow = findRow_(registryId, 'activities-registry', 'activity_id', body.activityId);
     var activityName = activityRow ? activityRow.row.name : '';
 
-    // Determine soldier personal ID based on transaction type
-    var soldiersSheetId = getConfigProperty_('SOLDIERS_SHEET_ID');
     var isIssuanceType = row.tx_type === 'issue' || row.tx_type === 'borrow_in';
     var soldierPersonalId = isIssuanceType
       ? String(row.receiver_personal_id || '').trim()
       : String(row.giver_personal_id || '').trim();
-    var soldierDetails = null;
-    if (soldierPersonalId) {
-      var activitySoldiersSheetId = getActivitySoldiersSheetId_(body.activityId, false);
-      var activitySoldierRow = activitySoldiersSheetId
-        ? findRow_(activitySoldiersSheetId, 'activity-soldiers', 'personal_id', soldierPersonalId)
-        : null;
-      if (activitySoldierRow) {
-        soldierDetails = buildPublicSoldierDetails_(activitySoldierRow.row);
-      } else if (soldiersSheetId) {
-        var soldierRow = findRow_(soldiersSheetId, 'soldiers', 'personal_id', soldierPersonalId);
-        if (soldierRow) {
-          soldierDetails = buildPublicSoldierDetails_(soldierRow.row);
-        }
-      }
-    }
-
-    // Look up operator name from the operators sheet
-    var operatorsSheetId = getConfigProperty_('OPERATORS_SHEET_ID');
-    var operatorDetails = null;
-    if (operatorsSheetId && row.performed_by) {
-      var operatorRow = findRow_(operatorsSheetId, 'operators', 'email', row.performed_by);
-      if (operatorRow) {
-        var publicSafeRoles = ['admin', 'warehouse_operator', 'commander', 'viewer'];
-        var rawRole = operatorRow.row.role || '';
-        operatorDetails = {
-          fullName: operatorRow.row.full_name || '',
-          role: publicSafeRoles.indexOf(rawRole) !== -1 ? rawRole : ''
-        };
-      }
-    }
-
-    // Read signature file as base64 if it exists (files are private in Drive)
-    var signatureBase64 = '';
-    if (row.signature_url) {
-      try {
-        var file = DriveApp.getFileById(row.signature_url);
-        var blob = file.getBlob();
-        var bytes = blob.getBytes();
-        var base64 = Utilities.base64Encode(bytes);
-        signatureBase64 = 'data:' + blob.getContentType() + ';base64,' + base64;
-      } catch (driveError) {
-        // Signature file may have been deleted
-      }
-    }
+    var soldierDetails = lookupPublicSoldierDetails_(body.activityId, soldierPersonalId);
+    var operatorDetails = lookupPublicOperatorDetails_(row.performed_by);
+    var giverDetails = buildPublicPartyDetails_(
+      body.activityId,
+      row.giver_personal_id,
+      row.giver_name,
+      row.performed_by
+    );
+    var receiverDetails = buildPublicPartyDetails_(
+      body.activityId,
+      row.receiver_personal_id,
+      row.receiver_name,
+      row.performed_by
+    );
+    var signatureBase64 = readSignatureBase64_(row.signature_url);
+    var giverSignatureBase64 = readSignatureBase64_(row.giver_signature_url);
 
     return {
       txId: row.tx_id,
@@ -222,9 +395,12 @@ var TransactionsController = {
       items: items,
       notes: row.notes || '',
       signatureBase64: signatureBase64,
+      giverSignatureBase64: giverSignatureBase64,
       activityName: activityName,
       soldier: soldierDetails,
-      operator: operatorDetails
+      operator: operatorDetails,
+      giver: giverDetails,
+      receiver: receiverDetails
     };
   },
 
@@ -305,11 +481,16 @@ var TransactionsController = {
       validateStockSufficiency_(body.activityId, body.items);
     }
 
-    // Upload signature if provided
+    // Upload signatures if provided
     var signatureUrl = '';
     if (body.signatureBase64) {
       var fileName = 'sig_' + generateId_('sig') + '.png';
       signatureUrl = uploadSignature_(body.signatureBase64, fileName);
+    }
+    var giverSignatureUrl = '';
+    if (body.giverSignatureBase64) {
+      var giverFileName = 'sig_' + generateId_('sig') + '.png';
+      giverSignatureUrl = uploadSignature_(body.giverSignatureBase64, giverFileName);
     }
 
     // Generate unique transaction ID
@@ -339,7 +520,8 @@ var TransactionsController = {
       performed_at: now,
       items_json: JSON.stringify(body.items),
       notes: body.notes || '',
-      signature_url: signatureUrl
+      signature_url: signatureUrl,
+      giver_signature_url: giverSignatureUrl
     };
 
     ensureSheetHeaders_(transactionsId, 'transactions', SHEET_HEADERS['transactions']);
