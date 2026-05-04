@@ -11,6 +11,20 @@ type TransactionLineItem = {
   isCustom?: boolean
 }
 
+type PublicTransactionReturnEvent = {
+  qty: number
+  formNumber: string
+  performedAt: string
+  txId: string
+}
+
+type PublicTransactionLineItem = TransactionLineItem & {
+  issuedQty: number
+  returnedQty: number
+  remainingQty: number
+  returnEvents: PublicTransactionReturnEvent[]
+}
+
 type Transaction = {
   txId: string
   formNumber: string
@@ -31,11 +45,25 @@ type PublicTransactionSoldier = {
   fullName: string
   rank: string
   company: string
+  phone?: string
 }
 
 type PublicTransactionOperator = {
   fullName: string
   role: string
+  personalId?: string
+  rank?: string
+  company?: string
+  phone?: string
+}
+
+type PublicTransactionParty = {
+  personalId: string
+  fullName: string
+  rank: string
+  company: string
+  phone: string
+  role?: string
 }
 
 type PublicTransaction = {
@@ -47,12 +75,22 @@ type PublicTransaction = {
   receiverPersonalId: string
   receiverName: string
   performedAt: string
-  items: TransactionLineItem[]
+  items: PublicTransactionLineItem[]
   notes: string
   signatureBase64: string
+  giverSignatureBase64: string
   activityName: string
   soldier: PublicTransactionSoldier | null
   operator: PublicTransactionOperator | null
+  giver: PublicTransactionParty
+  receiver: PublicTransactionParty
 }
 
-export type { Transaction, TransactionType, TransactionLineItem, PublicTransaction }
+export type {
+  Transaction,
+  TransactionType,
+  TransactionLineItem,
+  PublicTransactionLineItem,
+  PublicTransactionReturnEvent,
+  PublicTransaction,
+}

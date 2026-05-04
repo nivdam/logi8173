@@ -2,7 +2,7 @@ import { Box, Button, Flex, Heading, Text, VStack } from "@chakra-ui/react"
 import { CheckCircle2, ArrowLeft, RotateCcw, Package } from "lucide-react"
 import { t } from "../../lib/i18n"
 import { animations } from "../../theme/animations"
-import { CopyFormLinkButton } from "../shared-form/CopyFormLinkButton"
+import { FormLinkActions } from "../shared-form/FormLinkActions"
 import type { Soldier } from "../../types"
 import type { IssuanceLineItem } from "../issuance/issuance.types"
 
@@ -40,7 +40,7 @@ export const ReturnSuccess = ({ formId, activityId, txId, giver, lines, itemCoun
           </Text>
         )}
         {activityId && txId && (
-          <CopyFormLinkButton activityId={activityId} txId={txId} />
+          <FormLinkActions activityId={activityId} txId={txId} />
         )}
       </VStack>
 

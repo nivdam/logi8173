@@ -262,6 +262,22 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
     const soldier = soldiersMock.find((item) => item.personalId === soldierPersonalId) ?? null
     const operator = mockOperators.find((item) => item.email === transaction.performedBy) ?? mockOperators[0] ?? null
     const activity = mockActivities.find((item) => item.activityId === activityId) ?? null
+    const isReturnType = transaction.txType === "return" || transaction.txType === "return_borrow"
+    const items = transaction.items.map((item) => ({
+      ...item,
+      issuedQty: item.qty,
+      returnedQty: isReturnType ? item.qty : 0,
+      remainingQty: isReturnType ? 0 : item.qty,
+      returnEvents: [],
+    }))
+    const fallbackParty = {
+      fullName: "",
+      personalId: "",
+      rank: "",
+      company: "",
+      phone: "",
+      role: "",
+    }
 
     return {
       txId: transaction.txId,
@@ -272,9 +288,10 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
       receiverPersonalId: transaction.receiverPersonalId,
       receiverName: transaction.receiverName,
       performedAt: transaction.performedAt,
-      items: transaction.items,
+      items,
       notes: transaction.notes,
       signatureBase64: "",
+      giverSignatureBase64: "",
       activityName: activity?.name || "",
       soldier: soldier
         ? {
@@ -282,14 +299,39 @@ const mockHandlers: Record<string, (body?: MockBody) => unknown> = {
             fullName: soldier.fullName,
             rank: soldier.rank,
             company: soldier.company,
+            phone: soldier.phone,
           }
         : null,
       operator: operator
         ? {
             fullName: operator.fullName,
             role: operator.role,
+            personalId: "8004001",
+            rank: "רס\"ר",
+            phone: "0522442182",
+            company: "מפקדה",
           }
         : null,
+      giver: {
+        ...fallbackParty,
+        fullName: transaction.giverName,
+        personalId: transaction.giverPersonalId,
+        ...(transaction.giverPersonalId === "8004001"
+          ? { rank: "רס\"ר", phone: "0522442182", company: "מפקדה", role: "warehouse_operator" }
+          : {}),
+      },
+      receiver: {
+        ...fallbackParty,
+        fullName: transaction.receiverName,
+        personalId: transaction.receiverPersonalId,
+        ...(soldier
+          ? {
+              rank: soldier.rank,
+              company: soldier.company,
+              phone: soldier.phone ?? "",
+            }
+          : {}),
+      },
     } satisfies PublicTransaction
   },
   "dashboard.summary": (body) => {

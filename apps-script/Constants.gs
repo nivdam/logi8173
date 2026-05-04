@@ -31,7 +31,7 @@ var SHEET_HEADERS = {
   'transactions': [
     'tx_id', 'form_number', 'tx_type', 'giver_personal_id', 'giver_name',
     'receiver_personal_id', 'receiver_name', 'performed_by',
-    'performed_at', 'items_json', 'notes', 'signature_url'
+    'performed_at', 'items_json', 'notes', 'signature_url', 'giver_signature_url'
   ],
   'incidents': [
     'incident_id', 'item_id', 'item_name', 'soldier_personal_id',
