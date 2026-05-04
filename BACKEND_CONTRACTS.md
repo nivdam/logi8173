@@ -74,6 +74,15 @@ Frontend code already assumes this envelope in `src/lib/api.ts`.
 
 - `tx.list`
 - `tx.create`
+- `tx.getPublic`
+
+`tx.getPublic` powers the printable public form. It returns the base transaction plus printable party details, receiver and giver signatures, and per-line return status:
+
+- `giver` / `receiver`: public-safe full name, personal ID, rank, company, phone, role when available
+- `signatureBase64`: receiver/returning-soldier signature
+- `giverSignatureBase64`: giver/receiving-operator signature
+- `items[].issuedQty`, `items[].returnedQty`, `items[].remainingQty`
+- `items[].returnEvents[]`: return quantity, return `formNumber`, return `performedAt`, return `txId`
 
 ### Dashboard
 

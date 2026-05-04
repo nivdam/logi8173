@@ -2,9 +2,7 @@ import { Button } from "@chakra-ui/react"
 import { Check, Link } from "lucide-react"
 import { useState } from "react"
 import { t } from "../../lib/i18n"
-
-const buildFormUrl = (activityId: string, txId: string): string =>
-  `${window.location.origin}/form/${activityId}/${txId}`
+import { buildFormUrl } from "./form-url"
 
 export const CopyFormLinkButton = ({ activityId, txId }: Props) => {
   const [copied, setCopied] = useState(false)
