@@ -38,7 +38,15 @@ export const SharedFormPage = () => {
       minH="100dvh"
       bg="bg.muted"
       p="4"
-      css={animations.fadeInUp}
+      css={{
+        ...animations.fadeInUp,
+        "@media print": {
+          display: "block",
+          minHeight: "auto",
+          padding: 0,
+          background: "white",
+        },
+      }}
     >
       <Box w="full" py="6" css={{ "@media print": { padding: 0 } }}>
         <Flex justify="center" mb="4" css={{ "@media print": { display: "none" } }}>
