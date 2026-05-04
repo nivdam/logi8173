@@ -1,6 +1,5 @@
-import { Box, Flex, Image, Text } from "@chakra-ui/react"
+import { Box, Flex, Text } from "@chakra-ui/react"
 import { SignatureImage } from "../../components/SignatureImage"
-import logo from "../../assets/logo-with-text.png"
 import type { PublicTransaction, PublicTransactionLineItem } from "../../types"
 
 const formatDateTime = (isoString: string): string => {
@@ -55,8 +54,8 @@ const QuantityCell = ({ item }: { item: PublicTransactionLineItem }) => {
 }
 
 const DetailLine = ({ label, value }: DetailLineProps) => (
-  <Flex borderBottomWidth="1px" borderColor="gray.700" minH="7" align="end">
-    <Text as="span" fontWeight="700" minW="24">
+  <Flex borderBottomWidth="1px" borderColor="gray.700" minH="6" align="end" gap="2">
+    <Text as="span" fontWeight="700" minW="16">
       {label}
     </Text>
     <Text as="span" flex="1">
@@ -66,8 +65,8 @@ const DetailLine = ({ label, value }: DetailLineProps) => (
 )
 
 const SignatureBox = ({ title, party, signatureBase64, date, showPhone }: SignatureBoxProps) => (
-  <Box borderWidth="1px" borderColor="gray.700" minH="52" p="3">
-    <Text fontWeight="700" textAlign="center" mb="3">
+  <Box borderWidth="1.5px" borderColor="gray.800" minH="38" p="3">
+    <Text fontWeight="700" textAlign="center" mb="2">
       {title}
     </Text>
     <DetailLine label="שם ומשפחה" value={party.fullName} />
@@ -84,12 +83,17 @@ const SignatureBox = ({ title, party, signatureBase64, date, showPhone }: Signat
     ) : (
       <DetailLine label="תאריך" value={date} />
     )}
-    <Flex minH="28" align="center" justify="center" py="2" color="gray.900">
+    <Flex minH="18" align="center" justify="center" py="1" color="gray.900">
       {signatureBase64 ? (
-        <SignatureImage src={signatureBase64} alt={`חתימה - ${title}`} maxH="90px" />
+        <SignatureImage
+          src={signatureBase64}
+          alt={`חתימה - ${title}`}
+          maxW="170px"
+          maxH="70px"
+        />
       ) : null}
     </Flex>
-    <Text textAlign="end" fontWeight="700">
+    <Text textAlign="start" fontWeight="700">
       חתימה
     </Text>
   </Box>
@@ -110,92 +114,127 @@ export const LoanPrintForm = ({ transaction }: Props) => (
       "@media print": {
         maxWidth: "none",
         width: "100%",
-        minHeight: "100vh",
-        padding: "10mm",
+        minHeight: "auto",
+        padding: "6mm",
         border: "0",
         boxShadow: "none",
         printColorAdjust: "exact",
         WebkitPrintColorAdjust: "exact",
+        fontSize: "11px",
       },
-      "table": {
+      "& table": {
         borderCollapse: "collapse",
         width: "100%",
+        tableLayout: "fixed",
+        border: "2px solid var(--chakra-colors-gray-900)",
       },
-      "th, td": {
-        border: "1px solid var(--chakra-colors-gray-700)",
-        padding: "6px",
+      "& th, & td": {
+        border: "1.5px solid var(--chakra-colors-gray-800)",
+        padding: "4px 6px",
         textAlign: "center",
         verticalAlign: "middle",
+        lineHeight: "1.25",
       },
-      "th": {
+      "& th": {
         fontWeight: "700",
-        background: "var(--chakra-colors-gray-100)",
+        color: "var(--chakra-colors-gray-900)",
+        background: "var(--chakra-colors-gray-200)",
+      },
+      "& tbody tr": {
+        height: "28px",
+        pageBreakInside: "avoid",
+        breakInside: "avoid",
       },
     }}
   >
-    <Flex align="start" justify="space-between" gap="4" mb="4">
-      <Box minW="170px">
-        <Text fontWeight="700">מאת: {transaction.giver.fullName}</Text>
-        <Text textStyle="sm">{transaction.giver.company || transaction.activityName}</Text>
-      </Box>
-      <Box textAlign="center">
-        <Image src={logo} alt="8173 לוגיסטיקה" w="90px" h="auto" mx="auto" mb="2" />
-        <Text as="h1" textStyle="xl" fontWeight="700" textDecoration="underline">
-          טופס השאלת אפסניה
+    <Box>
+      <Box textAlign="center" mb="2">
+        <Text as="h1" textStyle="xl" fontWeight="700" textDecoration="underline" lineHeight="1.1">
+          טופס השאלת אפסניה - גדח״ן 8173
         </Text>
-        <Text textStyle="sm" fontWeight="700">
+        <Text textStyle="sm" color="gray.600" fontWeight="600">
           מס׳ טופס: {transaction.formNumber || transaction.txId}
         </Text>
       </Box>
-      <Box minW="170px" textAlign="end">
-        <Text fontWeight="700">אל: {transaction.receiver.fullName}</Text>
-        <Text textStyle="sm">{transaction.receiver.company || transaction.activityName}</Text>
-      </Box>
-    </Flex>
 
-    <Box as="table" aria-label="טבלת פריטי אפסניה">
-      <Box as="thead">
-        <Box as="tr">
-          <Box as="th" w="18%">מק״ט/מסט״ב</Box>
-          <Box as="th">שם הפריט</Box>
-          <Box as="th" w="14%">יח׳ לחישוב</Box>
-          <Box as="th" w="14%">כמות</Box>
-          <Box as="th" w="28%">הערות</Box>
+      <Flex align="end" justify="space-between" gap="4" mb="1">
+        <Box minW="170px">
+          <Text fontWeight="700">מאת: {transaction.giver.fullName}</Text>
+          <Text textStyle="md" fontWeight="700" lineHeight="1.1">
+            {transaction.giver.company || transaction.activityName}
+          </Text>
+        </Box>
+        <Box minW="170px" textAlign="end">
+          <Text fontWeight="700">אל: {transaction.receiver.fullName}</Text>
+          <Text textStyle="md" fontWeight="700" lineHeight="1.1">
+            {transaction.receiver.company || transaction.activityName}
+          </Text>
+        </Box>
+      </Flex>
+
+      <Box as="table" aria-label="טבלת פריטי אפסניה">
+        <Box as="thead">
+          <Box as="tr">
+            <Box as="th" w="20%">
+              מק״ט/מסט״ב
+            </Box>
+            <Box as="th" w="30%">
+              שם הפריט
+            </Box>
+            <Box as="th" w="14%">
+              יח׳ לחישוב
+            </Box>
+            <Box as="th" w="10%">
+              כמות
+            </Box>
+            <Box as="th" w="26%">
+              הערות
+            </Box>
+          </Box>
+        </Box>
+        <Box as="tbody">
+          {transaction.items.map((item, index) => (
+            <Box as="tr" key={`${item.itemId || item.name}-${index}`} minH="7">
+              <Box as="td">{item.serialNumber || item.itemId || "\u00a0"}</Box>
+              <Box as="td">{item.name}</Box>
+              <Box as="td">{item.unitOfMeasure || "\u00a0"}</Box>
+              <Box as="td">
+                <QuantityCell item={item} />
+              </Box>
+              <Box as="td">{formatReturnNotes(item) || "\u00a0"}</Box>
+            </Box>
+          ))}
         </Box>
       </Box>
-      <Box as="tbody">
-        {transaction.items.map((item, index) => (
-          <Box as="tr" key={`${item.itemId || item.name}-${index}`}>
-            <Box as="td">{item.serialNumber || item.itemId || "\u00a0"}</Box>
-            <Box as="td">{item.name}</Box>
-            <Box as="td">{item.unitOfMeasure || "\u00a0"}</Box>
-            <Box as="td">
-              <QuantityCell item={item} />
-            </Box>
-            <Box as="td">{formatReturnNotes(item) || "\u00a0"}</Box>
-          </Box>
-        ))}
-      </Box>
-    </Box>
 
-    <Flex gap="4" mt="8" align="stretch" direction={{ base: "column", md: "row" }}>
-      <Box flex="1">
-        <SignatureBox
-          title="פרטי המנפיק"
-          party={transaction.giver}
-          signatureBase64={transaction.giverSignatureBase64}
-          date={formatDateTime(transaction.performedAt)}
-        />
-      </Box>
-      <Box flex="1">
-        <SignatureBox
-          title="פרטי המקבל"
-          party={transaction.receiver}
-          signatureBase64={transaction.signatureBase64}
-          showPhone
-        />
-      </Box>
-    </Flex>
+      {transaction.notes ? (
+        <Box mt="3" borderWidth="1.5px" borderColor="gray.800" p="2" minH="12">
+          <Text fontWeight="700" mb="1">
+            הערות כלליות:
+          </Text>
+          <Text>{transaction.notes}</Text>
+        </Box>
+      ) : null}
+
+      <Flex gap="4" mt="5" align="stretch" direction="row">
+        <Box flex="1">
+          <SignatureBox
+            title="פרטי המנפיק"
+            party={transaction.giver}
+            signatureBase64={transaction.giverSignatureBase64}
+            date={formatDateTime(transaction.performedAt)}
+          />
+        </Box>
+        <Box flex="1">
+          <SignatureBox
+            title="פרטי המקבל"
+            party={transaction.receiver}
+            signatureBase64={transaction.signatureBase64}
+            showPhone
+          />
+        </Box>
+      </Flex>
+    </Box>
   </Box>
 )
 
